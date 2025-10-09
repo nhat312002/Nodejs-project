@@ -1,0 +1,90 @@
+# ====================================
+# 🌐 Node.js + Express + dotenv project
+# ====================================
+
+# --------------------
+# 🔹 Node modules
+# --------------------
+node_modules/
+
+# --------------------
+# 🔹 Logs & Debug files
+# --------------------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --------------------
+# 🔹 Env files (bí mật)
+# --------------------
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# --------------------
+# 🔹 Build & cache folders
+# --------------------
+dist/
+build/
+coverage/
+.cache/
+.tmp/
+out/
+
+# --------------------
+# 🔹 Runtime data
+# --------------------
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# --------------------
+# 🔹 OS files (Windows / macOS)
+# --------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --------------------
+# 🔹 IDE / Editor configs
+# --------------------
+.vscode/
+.idea/
+*.iml
+
+# --------------------
+# 🔹 TypeScript (nếu có)
+# --------------------
+*.tsbuildinfo
+
+# --------------------
+# 🔹 PM2 / Forever logs
+# --------------------
+pids/
+*.pid
+*.log.old
+*.pid.lock
+
+# --------------------
+# 🔹 Optional: lock files
+# --------------------
+package-lock.json
+yarn.lock
+
+# --------------------
+# 🔹 Docker (nếu dùng)
+# --------------------
+docker-compose.override.yml
+.dockerignore
+
+# --------------------
+# 🔹 Miscellaneous
+# --------------------
+*.bak
+*.swp
