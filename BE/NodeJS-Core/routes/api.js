@@ -3,6 +3,7 @@ const express = require("express");
 const middlewares = require("kernels/middlewares");
 const { validate } = require("kernels/validations");
 const exampleController = require("modules/examples/controllers/exampleController");
+// const roleController = require("modules/roles/controllers/roleController");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====
@@ -14,7 +15,14 @@ const router = express.Router({ mergeParams: true });
 // );
 
 router.group("/example", validate([]), (router) => {
-  router.get('/', exampleController.exampleRequest)
-})
+  router.get("/", exampleController.exampleRequest);
+});
 
+// router.group("/roles", middlewares([]), (router) => {
+//   router.get("/", roleController.getAll);
+//   router.get("/:roleId", roleController.getOne);
+//   router.post("/", roleController.create);
+//   router.put("/:roleId", roleController.update);
+//   router.delete("/:roleId", roleController.destroy);
+// });
 module.exports = router;

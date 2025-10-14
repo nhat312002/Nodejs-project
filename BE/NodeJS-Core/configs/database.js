@@ -4,8 +4,8 @@ module.exports = {
   environment: process.env.DATABASE_ENV || "development",
   development: {
     username: process.env.DATABASE_USERNAME || "root",
-    password: process.env.DATABASE_PASSWORD || "root",
-    database: process.env.DATABASE_NAME || "core",
+    password: process.env.DATABASE_PASSWORD || null,
+    database: process.env.DATABASE_NAME || "blogdb",
     host: process.env.DATABASE_HOST || "localhost",
     port: process.env.DATABASE_PORT || 3306,
     dialect: "mysql",
@@ -24,7 +24,7 @@ module.exports = {
     dialectOptions: {
       bigNumberStrings: true,
       socketPath: process.env.DATABASE_TEST_SOCKET || "",
-      charset: "utf8mb4"
+      charset: "utf8mb4",
     },
   },
   production: {

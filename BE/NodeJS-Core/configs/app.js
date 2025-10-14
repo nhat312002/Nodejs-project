@@ -1,3 +1,3 @@
 module.exports = {
-    locale: process.env.APP_LOCALE || 'en'
-}
+  locale: process.env.APP_LOCALE || "en",
+};
