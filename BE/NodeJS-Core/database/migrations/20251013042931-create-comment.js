@@ -2,49 +2,39 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Posts", {
+    await queryInterface.createTable("Comment", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      title: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      body: {
-        type: Sequelize.STRING,
+      post_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Post",
+          key: "id",
+        },
         allowNull: false,
       },
       user_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
         references: {
-          model: "Users",
+          model: "User",
           key: "id",
         },
+        allowNull: false,
       },
-      original_id: {
+      parent_id: {
         type: Sequelize.INTEGER,
         references: {
-          model: "Posts",
+          model: "Comment",
           key: "id",
         },
       },
-      language_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Languages",
-          key: "id",
-        },
+      content: {
+        type: Sequelize.STRING,
         allowNull: false,
-      },
-      status: {
-        type: Sequelize.ENUM,
-        values: ["pending", "approved", "rejected", "deleted"],
-        allowNull: false,
-        defaultValue: "pending",
       },
       createdAt: {
         allowNull: false,
@@ -59,6 +49,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Posts");
+    await queryInterface.dropTable("Comment");
   },
 };

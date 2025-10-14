@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Roles extends Model {
+  class Language extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,15 +9,24 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Roles.hasMany(models.Users, { foreignKey: "role_id" });
+      Language.hasMany(models.Post, { foreignKey: "language_id" });
     }
   }
-  Roles.init(
+  Language.init(
     {
+      locale: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+      },
+      url_flag: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
       status: {
         type: DataTypes.ENUM("active", "disabled"),
@@ -27,8 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Roles",
+      modelName: "Language",
     }
   );
-  return Roles;
+  return Language;
 };

@@ -2,39 +2,22 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Comments", {
+    await queryInterface.createTable("Role", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      post_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Posts",
-          key: "id",
-        },
-        allowNull: false,
-      },
-      user_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Users",
-          key: "id",
-        },
-        allowNull: false,
-      },
-      parent_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Comments",
-          key: "id",
-        },
-      },
-      content: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
+      },
+      status: {
+        type: Sequelize.ENUM("active", "disabled"),
+        allowNull: false,
+        defaultValue: "active",
       },
       createdAt: {
         allowNull: false,
@@ -49,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Comments");
+    await queryInterface.dropTable("Role");
   },
 };

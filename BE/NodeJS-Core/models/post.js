@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class Posts extends Model {
+  class Post extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,35 +9,35 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Posts.belongsTo(models.Users, { foreignKey: "user_id" });
-      Posts.belongsTo(models.Languages, { foreignKey: "language_id" });
-      Posts.belongsTo(models.Posts, {
+      Post.belongsTo(models.User, { foreignKey: "user_id" });
+      Post.belongsTo(models.Language, { foreignKey: "language_id" });
+      Post.belongsTo(models.Post, {
         foreignKey: "original_id",
         as: "originalPost",
       });
-      Posts.hasMany(models.Posts, {
+      Post.hasMany(models.Post, {
         foreignKey: "original_id",
         as: "translations",
       }); // Self-referential association for translations
     }
   }
-  Posts.init(
+  Post.init(
     {
       title: { type: DataTypes.STRING, allowNull: false },
       body: { type: DataTypes.STRING, allowNull: false },
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Users", key: "id" },
+        references: { model: "User", key: "id" },
       },
       original_id: {
         type: DataTypes.INTEGER,
-        references: { model: "Posts", key: "id" },
+        references: { model: "Post", key: "id" },
       },
       language_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Languages", key: "id" },
+        references: { model: "Language", key: "id" },
       },
       status: {
         type: DataTypes.ENUM,
@@ -48,8 +48,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Posts",
+      modelName: "Post",
     }
   );
-  return Posts;
+  return Post;
 };
