@@ -33,16 +33,16 @@ module.exports = (sequelize, DataTypes) => {
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "User", key: "id" },
+        references: { model: "Users", key: "id" },
       },
       original_id: {
         type: DataTypes.INTEGER,
-        references: { model: "Post", key: "id" },
+        references: { model: "Posts", key: "id" },
       },
       language_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "Language", key: "id" },
+        references: { model: "Languages", key: "id" },
       },
       status: {
         type: DataTypes.ENUM,
