@@ -2,12 +2,12 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Post_Category", {
+    await queryInterface.createTable("Posts_Categories", {
       post_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Post",
+          model: "Posts",
           key: "id",
         },
       },
@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Category",
+          model: "Categories",
           key: "id",
         },
       },
@@ -30,12 +30,12 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
     });
-    await queryInterface.addConstraint("Post_Category", {
+    await queryInterface.addConstraint("Posts_Categories", {
       fields: ["post_id", "category_id"],
       type: "primary key",
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Post_Category");
+    await queryInterface.dropTable("Posts_Categories");
   },
 };
