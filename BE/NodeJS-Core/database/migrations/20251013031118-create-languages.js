@@ -2,49 +2,31 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Post", {
+    await queryInterface.createTable("Languages", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      title: {
+      locale: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
-      body: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
-      user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "User",
-          key: "id",
-        },
-      },
-      original_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Post",
-          key: "id",
-        },
-      },
-      language_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Language",
-          key: "id",
-        },
+      url_flag: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
       status: {
-        type: Sequelize.ENUM,
-        values: ["pending", "approved", "rejected", "deleted"],
+        type: Sequelize.ENUM("active", "disabled"),
         allowNull: false,
-        defaultValue: "pending",
+        defaultValue: "active",
       },
       createdAt: {
         allowNull: false,
@@ -59,6 +41,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Post");
+    await queryInterface.dropTable("Languages");
   },
 };
