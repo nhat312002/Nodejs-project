@@ -5,8 +5,8 @@ const { validate } = require("kernels/validations");
 const exampleController = require("modules/examples/controllers/exampleController");
 const roleController = require("modules/roles/controllers/roleController");
 const userController = require("modules/users/controllers/userController");
-const categoryController = require("modules/categories/controllers/categoryControllers");
-const languageController = require("modules/languages/controllers/languageControllers");
+const categoryController = require("modules/categories/controllers/categoryController");
+const languageController = require("modules/languages/controllers/languageController");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====

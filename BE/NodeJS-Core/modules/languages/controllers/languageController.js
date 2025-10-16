@@ -1,4 +1,4 @@
-const languageService = require("modules/language/services/languageService.js");
+const languageService = require("modules/languages/services/languageService.js");
 const responseUtils = require("utils/responseUtils");
 
 const languageController = {

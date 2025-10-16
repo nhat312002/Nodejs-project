@@ -1,7 +1,7 @@
 const db = require("models");
 const { Op } = require("sequelize");
 const { Category } = db;
-const categoryValidation = require("modules/category/validations/categoryValidation");
+const categoryValidation = require("modules/categories/validations/categoryValidation");
 
 const categoryService = {
     getAllCategories: async () => {

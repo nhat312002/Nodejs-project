@@ -1,6 +1,5 @@
 const Joi = require("joi");
 const { createLanguage, updateLanguage } = require("../services/languageService");
-const { createLanguage } = require("../controllers/languageController");
 
 const languageValidation = {
     createLanguage: (data) => {

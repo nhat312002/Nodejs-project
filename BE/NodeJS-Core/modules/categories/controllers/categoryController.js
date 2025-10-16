@@ -8,7 +8,7 @@ const responseUtils = require("utils/responseUtils")
 const categoryController = {
     getAllCategories: async (req, res) => {
         try {
-            const categories = await categoryService.getAllCategory();
+            const categories = await categoryService.getAllCategories();
             return responseUtils.ok(res, categories);
         } catch (error) {
             return responseUtils.error(res, error.message);

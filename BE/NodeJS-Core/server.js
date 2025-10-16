@@ -1,7 +1,5 @@
 const app = require("./index");
 
-const { Sequelize } = require("sequelize");
-
 const { db } = require("models");
 
 const port = 3000;
