@@ -5,6 +5,8 @@ const { validate } = require("kernels/validations");
 const exampleController = require("modules/examples/controllers/exampleController");
 const roleController = require("modules/roles/controllers/roleController");
 const userController = require("modules/users/controllers/userController");
+const categoryController = require("modules/categories/controllers/categoryControllers");
+const languageController = require("modules/languages/controllers/languageControllers");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====
@@ -32,4 +34,21 @@ router.group("/users", null, (router) => {
   router.post("/create", userController.createUser);
   router.put("/:userId", userController.updateUser);
 });
+
+router.group("/categories", null, (router) => {
+  router.get("/", categoryController.getAllCategories);
+  router.get("/:categoryId", categoryController.getCategoryById);
+  router.post("/", categoryController.createCategory);
+  router.put("/:categoryId", categoryController.updateCategory);
+  router.patch("/:categoryId/toggle", categoryController.toggleCategoryStatus);
+});
+
+router.group("/languages", null, (router) => {
+  router.get("/", languageController.getAllLanguages);
+  router.get("/:languageId", languageController.getLanguageById);
+  router.post("/", languageController.createLanguage);
+  router.put("/:languageId", languageController.updateLanguage);
+  router.patch("/:languageId/toggle", languageController.toggleLanguageStatus);
+});
+
 module.exports = router;
