@@ -2,6 +2,7 @@ const db = require("models");
 const { Op } = require("sequelize");
 const { User } = db;
 const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const userValidation = require("modules/users/validations/userValidation.js");
 
 const userService = {
