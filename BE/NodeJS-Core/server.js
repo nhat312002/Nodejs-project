@@ -1,6 +1,5 @@
 const app = require("./index");
 
-<<<<<<< HEAD
 const { Sequelize } = require("sequelize");
 const { database } = require("./configs");
 // Khởi tạo kết nối
@@ -9,8 +8,6 @@ const { database } = require("./configs");
 //   dialect: "mysql",
 // });
 
-=======
->>>>>>> origin/master
 const { db } = require("models");
 
 const port = 3000;
