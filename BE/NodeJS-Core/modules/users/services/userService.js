@@ -1,6 +1,7 @@
 const db = require("models");
 const { Op } = require("sequelize");
 const { User } = db;
+const bcrypt = require("bcrypt");
 const userValidation = require("modules/users/validations/userValidation.js");
 
 const userService = {
@@ -25,6 +26,10 @@ const userService = {
     if (existingEmail) {
       throw new Error("User with this email already exists");
     }
+    if (data.password) {
+      const salt = await bcrypt.genSalt(10);
+      data.password = await bcrypt.hash(data.password, salt);
+    }
     return await User.create(data);
   },
   updateUser: async (id, data) => {
@@ -41,6 +46,10 @@ const userService = {
     });
     if (existingEmail) {
       throw new Error("User email must be unique");
+    }
+    if (data.password) {
+      const salt = await bcrypt.genSalt(10);
+      data.password = await bcrypt.hash(data.password, salt);
     }
     return await user.update(data);
   },

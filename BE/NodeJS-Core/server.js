@@ -1,12 +1,12 @@
 const app = require("./index");
 
 const { Sequelize } = require("sequelize");
-
+const { database } = require("./configs");
 // Khởi tạo kết nối
-const sequelize = new Sequelize("blogdb", "root", "", {
-  host: "localhost",
-  dialect: "mysql",
-});
+// const sequelize = new Sequelize("blogdb", "root", "", {
+//   host: "localhost",
+//   dialect: "mysql",
+// });
 
 const port = 3000;
 
