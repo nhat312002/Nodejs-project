@@ -1,13 +1,11 @@
 const responseUtils = require("utils/responseUtils");
-const commentServices = require("modules/comments/services/commentServices");
+const commentService = require("modules/comments/services/commentService");
 
 const commentController = {
     getCommentById: async (req, res) => {
         try {
-            const commentId = req.query.commentId || req.params.commentId;
-            if (!commentId)
-                return responseUtils.error(res, "commentId is required");
-            const comment = await commentServices.getCommentById(commentId);
+            const {commentId} = req.params;
+            const comment = await commentService.getCommentById(commentId);
             return responseUtils.ok(res, {data: comment});
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -16,12 +14,13 @@ const commentController = {
 
     getCommentsByPost: async (req, res) => {
         try {
-            const postId = req.query.postId || req.params.postId;
-            if (!postId)
-                return responseUtils.error(res, "postId is required");
-            const comments = await commentServices.getCommentsByPost(postId);
+            const {postId} = req.query;
+            const comments = await commentService.getCommentsByPost(postId);
             return responseUtils.ok(res, {data: comments});
         } catch (error) {
+            if (error.message === "Post not found") {
+                return responseUtils.notFound(res, error.message);
+            }
             return responseUtils.error(res, error.message);
         }
 
@@ -29,11 +28,11 @@ const commentController = {
 
     createComment: async (req, res) => {
         try {
-            const postId = req.query.postId || req.params.postId;
-            const userId = req.user?.id || req.query.userId;
+            const postId = req.query.postId;
+            const userId = req.user?.id;
             const parentId = req.query.parentId || null;
             const content = req.body.content;
-            const comment = await commentServices.createComment(postId, userId, parentId, content);
+            const comment = await commentService.createComment(postId, userId, parentId, content);
             return responseUtils.ok(res, {data: comment});
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -42,9 +41,9 @@ const commentController = {
 
     updateComment: async (req, res) => {
         try {
-            const commentId = req.params.id;
+            const commentId = req.params.commentId;
             const content = req.body.content;
-            const comment = await commentServices.updateComment(commentId, content);
+            const comment = await commentService.updateComment(commentId, content);
             return responseUtils.ok(res, {data: comment});
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -53,8 +52,8 @@ const commentController = {
 
     deleteComment: async (req, res) => {
         try {
-            const commentId = req.params.id;
-            const deleted = await commentServices.deleteComment(commentId);
+            const commentId = req.params.commentId;
+            const deleted = await commentService.deleteComment(commentId);
             if (!deleted)
                 return responseUtils.notFound(res, 'Comment not found');
             return responseUtils.ok(res, {data: deleted});
@@ -63,7 +62,7 @@ const commentController = {
         }
     },
 
-    
+
 }
 
 module.exports = commentController;

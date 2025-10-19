@@ -62,14 +62,19 @@ class WithLocale
         return this;
     }
 
-    isNumberic() {
+    isNumeric() {
         this.withLocale = this.withLocale.isNumeric().withMessage(stringUtils.capitalize(this.field)+" must be number").bail()
         return this;
     }
 
-    isIn(check, against) {
-        this.withLocale = this.withLocale.isIn(check, against).withMessage(this.field + " must be in allowable range").bail();
-        return this
+    // isIn(check, against) {
+    //     this.withLocale = this.withLocale.isIn(check, against).withMessage(this.field + " must be in allowable range").bail();
+    //     return this
+    // }
+
+    isIn(values) {
+        this.withLocale = this.withLocale.isIn(values).withMessage(this.field + " must be in allowable range").bail();
+        return this;
     }
 
     get() {
