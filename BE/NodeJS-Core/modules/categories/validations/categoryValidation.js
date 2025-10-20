@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { createCategory, updateCategory } = require("../services/categoryService");
+
 
 const categoryValidation = {
     createCategory: (data) => {
