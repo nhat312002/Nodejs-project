@@ -1,6 +1,4 @@
-const { locale } = require("configs/app");
 const Joi = require("joi");
-
 
 const languageValidation = {
     createLanguage: (data) => {

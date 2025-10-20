@@ -1,4 +1,3 @@
-const { get } = require("index");
 const category = require("models/category");
 const categoryService = require("modules/categories/services/categoryService.js");
 const { getApiName } = require("utils/apiUtils");
