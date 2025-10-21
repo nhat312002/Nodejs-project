@@ -61,7 +61,7 @@ router.group("/posts", null, (router) => {
   router.post("/", validate([createPost]), postController.createPost);
   router.get("/:postId", validate([getPostById]), postController.getPostById);
   router.put("/:postId", validate([updatePost]), postController.updatePost);
-  router.delete("/:postId", validate([disablePost]), postController.disablePost);
+  router.put("/:postId/disable", validate([disablePost]), postController.disablePost);
   router.put("/:postId/status", validate([setPostStatus]), postController.setPostStatus);
 });
 

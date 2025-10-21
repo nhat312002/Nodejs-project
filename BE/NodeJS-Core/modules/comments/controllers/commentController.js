@@ -29,7 +29,7 @@ const commentController = {
     createComment: async (req, res) => {
         try {
             const postId = req.query.postId;
-            const userId = req.user?.id;
+            const userId = req.user?.id || req.body.userId;
             const parentId = req.query.parentId || null;
             const content = req.body.content;
             const comment = await commentService.createComment(postId, userId, parentId, content);
