@@ -1,32 +1,32 @@
 const {BodyWithLocale, ParamWithLocale, QueryWithLocale} = require("kernels/rules");
 
-const getPostById = [ParamWithLocale("postId").notEmpty().isNumeric()];
+const getPostById = [new ParamWithLocale("postId").notEmpty().isNumeric()];
 
 const getPosts = [
-    QueryWithLocale("userId").optional().isNumeric(),
-    QueryWithLocale("languageId").optional().isNumeric(),
-    QueryWithLocale("categoryIds")
+    new QueryWithLocale("userId").optional().isNumeric(),
+    new QueryWithLocale("languageId").optional().isNumeric(),
+    new QueryWithLocale("categoryIds")
         .optional()
         .customSanitizer((value) => {
             // allow either array or comma-separated string
             if (typeof value === "string") return value.split(",").map((id) => Number(id.trim()));
             return value;
         }),
-    QueryWithLocale("originalId").optional().isNumeric(),
-    QueryWithLocale("status").optional().isIn(["pending", "approved", "rejected"]),
+    new QueryWithLocale("originalId").optional().isNumeric(),
+    new QueryWithLocale("status").optional().isIn(["pending", "approved", "rejected"]),
 ];
 
 const createPost = [
-    BodyWithLocale("title")
+    new BodyWithLocale("title")
         .notEmpty()
         .isLength({min: 3, max: 150}),
-    BodyWithLocale("body")
+    new BodyWithLocale("body")
         .notEmpty()
         .isLength({min: 10}),
-    BodyWithLocale("languageId")
+    new BodyWithLocale("languageId")
         .notEmpty()
         .isNumeric(),
-    BodyWithLocale("categoryIds")
+    new BodyWithLocale("categoryIds")
         .optional()
         .custom((value) => {
             if (!Array.isArray(value))
@@ -38,14 +38,14 @@ const createPost = [
 ];
 
 const updatePost = [
-    ParamWithLocale("postId").notEmpty().isNumeric(),
-    BodyWithLocale("title")
+    new ParamWithLocale("postId").notEmpty().isNumeric(),
+    new BodyWithLocale("title")
         .optional()
         .isLength({min: 3, max: 100}),
-    BodyWithLocale("body")
+    new BodyWithLocale("body")
         .optional()
         .isLength({min: 10}),
-    BodyWithLocale("categoryIds")
+    new BodyWithLocale("categoryIds")
         .optional()
         .custom((value) => {
             if (!Array.isArray(value))
@@ -56,11 +56,11 @@ const updatePost = [
         }),
 ];
 
-const disablePost = [ParamWithLocale("postId").notEmpty().isNumeric()];
+const disablePost = [new ParamWithLocale("postId").notEmpty().isNumeric()];
 
 const setPostStatus = [
-    ParamWithLocale("postId").notEmpty().isNumeric(),
-    BodyWithLocale("status")
+    new ParamWithLocale("postId").notEmpty().isNumeric(),
+    new BodyWithLocale("status")
         .notEmpty()
         .isIn(["approved", "rejected"]),
 ];
