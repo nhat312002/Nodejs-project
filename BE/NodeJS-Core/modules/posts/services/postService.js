@@ -28,19 +28,19 @@ const postService = {
         if (status) where.status = status;
 
         const include = [];
-        
+
         include.push({
             model: User,
-            where: {status: "active"},
+            where: { status: "active" },
             attributes: ["full_name"]
         })
 
         include.push({
             model: Language,
-            where: {status: "active"},
+            where: { status: "active" },
             attributes: ["name"]
         })
-        
+
         const whereCategory = {
             status: 'active',
         };
@@ -89,12 +89,12 @@ const postService = {
         return post;
     },
 
-    updatePost: async (id, userId, title, body, categoryIds ) => {
+    updatePost: async (id, userId, title, body, categoryIds) => {
         const post = await postService.getPostById(id);
         if (!post) {
             throw new Error("Post not found");
         }
-        
+
         if (post.user_id != userId) {
             throw new Error("Unauthorized");
         }
@@ -111,10 +111,13 @@ const postService = {
         return post;
     },
 
-    disablePost: async (postId) => {
+    disablePost: async (postId, userId) => {
         const post = await postService.getPostById(postId);
         if (!post) {
             throw new Error("Post not found");
+        }
+        if (post.user_id != userId) {
+            throw new Error("Unauthorized");
         }
         post.status = "deleted";
         await post.save();

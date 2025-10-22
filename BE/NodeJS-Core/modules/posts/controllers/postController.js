@@ -46,11 +46,12 @@ const postController = {
     updatePost: async (req, res) => {
         try {
             const { title, body, categoryIds } = req.body;
-            const {postId} = req.params;
+            const { postId } = req.params;
             const userId = req.user?.id || req.body.userId;
             const post = await postService.updatePost(postId, userId, title, body, categoryIds);
             return responseUtils.ok(res, { data: post });
         } catch (error) {
+            if (error.message === "Unauthorized") return responseUtils.unauthorized(res);
             if (error.message === "Post not found") return responseUtils.notFound(res);
             return responseUtils.error(res, error.message);
         }
@@ -59,10 +60,12 @@ const postController = {
 
     disablePost: async (req, res) => {
         try {
-            const { postId } = req.params
-            const post = await postService.disablePost(postId);
+            const { postId } = req.params;
+            const userId = req.user?.id || req.body.userId;
+            const post = await postService.disablePost(postId, userId);
             return responseUtils.ok(res, { data: post });
         } catch (error) {
+            if (error.message === "Unauthorized") return responseUtils.unauthorized(res);
             if (error.message === "Post not found") return responseUtils.notFound(res);
             return responseUtils.error(res, error.message);
         }

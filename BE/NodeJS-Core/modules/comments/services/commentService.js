@@ -54,22 +54,24 @@ const commentServices = {
         return comment;
     },
 
-    updateComment: async (id, content) => {
+    updateComment: async (id, content, userId) => {
         const comment = await Comment.findByPk(id);
         if (comment == null)
             throw new Error("Comment not found");
-        
+        if (comment.user_id != userId)
+            throw new Error("Unauthorized");
         if(content !== undefined) comment.content = content;
         await comment.save();
 
         return comment;
     },
 
-    deleteComment: async (id) => {
+    deleteComment: async (id, userId) => {
         const comment = await Comment.findByPk(id);
         if (comment == null)
             throw new Error("Comment not found");
-
+        if (comment.user_id != userId)
+            throw new Error("Unauthorized");
         deleted = comment.toJSON();
         await comment.destroy();
 
