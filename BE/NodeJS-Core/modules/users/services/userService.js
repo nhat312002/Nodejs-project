@@ -6,10 +6,28 @@ const userValidation = require("modules/users/validations/userValidation.js");
 
 const userService = {
   getAllUsers: async () => {
-    return await User.findAll();
+    return await User.findAll({
+      attributes: {},
+      include: [
+        {
+          model: db.Role,
+          as: "role",
+          attributes: ["id", "name", "status"],
+        },
+      ],
+    });
   },
   getUserById: async (id) => {
-    return await User.findByPk(id);
+    return await User.findByPk(id, {
+      attributes: {},
+      include: [
+        {
+          model: db.Role,
+          as: "role",
+          attributes: ["id", "name", "status"],
+        },
+      ],
+    });
   },
   createUser: async (data) => {
     const { error } = userValidation.createUser(data);
@@ -47,6 +65,14 @@ const userService = {
     if (existingEmail) {
       throw new Error("User email must be unique");
     }
+    // const disallowedFields = [
+    //   "id",
+    //   "username",
+    //   "role_id",
+    //   "status",
+    //   "created_at",
+    // ];
+    // disallowedFields.forEach((field) => delete data[field]);
     if (data.password) {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
