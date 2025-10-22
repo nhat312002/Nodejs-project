@@ -27,9 +27,9 @@ module.exports = (sequelize, DataTypes) => {
         references: { model: "Roles", key: "id" },
       },
       status: {
-        type: DataTypes.ENUM("active", "disabled"),
+        type: DataTypes.ENUM("1", "0"),
         allowNull: false,
-        defaultValue: "active",
+        defaultValue: "1",
       },
     },
     {
