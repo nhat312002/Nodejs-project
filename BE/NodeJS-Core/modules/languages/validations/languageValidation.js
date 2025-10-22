@@ -5,6 +5,7 @@ const languageValidation = {
         const schema = Joi.object({
             locale: Joi.string().min(2).max(5).required(),
             name: Joi.string().min(3).max(255).required(),
+            url_flag: Joi.string().uri().required(),
             status: Joi.string().valid("active", "disabled").required(),
             url_flag: Joi.string().required()
         });
@@ -14,6 +15,7 @@ const languageValidation = {
         const schema = Joi.object({
             locale: Joi.string().min(2).max(5),
             name: Joi.string().min(3).max(255),
+            url_flag: Joi.string().uri(),
             status: Joi.string().valid("active", "disabled"),
             url_flag: Joi.string()
         });
