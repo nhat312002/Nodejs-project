@@ -57,19 +57,39 @@ class WithLocale
         return this;
     }
 
+    optional() {
+        this.withLocale = this.withLocale.optional();
+        return this;
+    }
+
+    customSanitizer(sanitizer) {
+        this.withLocale = this.withLocale.customSanitizer(sanitizer);
+        return this;
+    }
+
+    custom(validator){
+        this.withLocale = this.withLocale.custom(validator).bail();
+        return this;
+    }
+
     isString() {
         this.withLocale = this.withLocale.isString().withMessage(stringUtils.capitalize(this.field)+" must be text").bail()
         return this;
     }
 
-    isNumberic() {
+    isNumeric() {
         this.withLocale = this.withLocale.isNumeric().withMessage(stringUtils.capitalize(this.field)+" must be number").bail()
         return this;
     }
 
-    isIn(check, against) {
-        this.withLocale = this.withLocale.isIn(check, against).withMessage(this.field + " must be in allowable range").bail();
-        return this
+    // isIn(check, against) {
+    //     this.withLocale = this.withLocale.isIn(check, against).withMessage(this.field + " must be in allowable range").bail();
+    //     return this
+    // }
+
+    isIn(values) {
+        this.withLocale = this.withLocale.isIn(values).withMessage(this.field + " must be in allowable range").bail();
+        return this;
     }
 
     get() {

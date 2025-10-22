@@ -7,6 +7,7 @@ const languageValidation = {
             name: Joi.string().min(3).max(255).required(),
             url_flag: Joi.string().uri().required(),
             status: Joi.string().valid("active", "disabled").required(),
+            url_flag: Joi.string().required()
         });
         return schema.validate(data);
     },
@@ -16,6 +17,7 @@ const languageValidation = {
             name: Joi.string().min(3).max(255),
             url_flag: Joi.string().uri(),
             status: Joi.string().valid("active", "disabled"),
+            url_flag: Joi.string()
         });
         return schema.validate(data);
     },

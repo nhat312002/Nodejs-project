@@ -2,11 +2,16 @@ require("express-router-group");
 const express = require("express");
 const middlewares = require("kernels/middlewares");
 const { validate } = require("kernels/validations");
+const commentController = require("modules/comments/controllers/commentController");
+const { getCommentsByPost, createComment, updateComment, deleteComment } = require("modules/comments/validations/commentValidation");
 const exampleController = require("modules/examples/controllers/exampleController");
+const postController = require("modules/posts/controllers/postController");
+const { getPostById, getPosts, createPost, updatePost, disablePost, setPostStatus } = require("modules/posts/validations/postValidation")
 const roleController = require("modules/roles/controllers/roleController");
 const userController = require("modules/users/controllers/userController");
 const categoryController = require("modules/categories/controllers/categoryController");
 const languageController = require("modules/languages/controllers/languageController");
+const { set } = require("index");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====
@@ -49,6 +54,22 @@ router.group("/languages", null, (router) => {
   router.post("/", languageController.createLanguage);
   router.put("/:languageId", languageController.updateLanguage);
   router.patch("/:languageId/toggle", languageController.toggleLanguageStatus);
+});
+
+router.group("/posts", null, (router) => {
+  router.get("/", validate([getPosts]), postController.getPosts);
+  router.post("/", validate([createPost]), postController.createPost);
+  router.get("/:postId", validate([getPostById]), postController.getPostById);
+  router.put("/:postId", validate([updatePost]), postController.updatePost);
+  router.put("/:postId/disable", validate([disablePost]), postController.disablePost);
+  router.put("/:postId/status", validate([setPostStatus]), postController.setPostStatus);
+});
+
+router.group("/comments", null, (router) => {
+  router.get("/", validate([getCommentsByPost]), commentController.getCommentsByPost);
+  router.post("/", validate([createComment]), commentController.createComment);
+  router.put("/:commentId", validate([updateComment]), commentController.updateComment);
+  router.delete("/:commentId", validate([deleteComment]), commentController.deleteComment);
 });
 
 module.exports = router;

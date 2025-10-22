@@ -1,14 +1,12 @@
 const responseUtils = require("utils/responseUtils");
-const commentServices = require("modules/comments/services/commentServices");
+const commentService = require("modules/comments/services/commentService");
 
 const commentController = {
     getCommentById: async (req, res) => {
         try {
-            const commentId = req.query.commentId || req.params.commentId;
-            if (!commentId)
-                return responseUtils.error(res, "commentId is required");
-            const comment = await commentServices.getCommentById(commentId);
-            return responseUtils.ok(res, {data: comment});
+            const { commentId } = req.params;
+            const comment = await commentService.getCommentById(commentId);
+            return responseUtils.ok(res, { data: comment });
         } catch (error) {
             return responseUtils.error(res, error.message);
         }
@@ -16,12 +14,13 @@ const commentController = {
 
     getCommentsByPost: async (req, res) => {
         try {
-            const postId = req.query.postId || req.params.postId;
-            if (!postId)
-                return responseUtils.error(res, "postId is required");
-            const comments = await commentServices.getCommentsByPost(postId);
-            return responseUtils.ok(res, {data: comments});
+            const { postId } = req.query;
+            const comments = await commentService.getCommentsByPost(postId);
+            return responseUtils.ok(res, { data: comments });
         } catch (error) {
+            if (error.message === "Post not found") {
+                return responseUtils.notFound(res, error.message);
+            }
             return responseUtils.error(res, error.message);
         }
 
@@ -29,12 +28,12 @@ const commentController = {
 
     createComment: async (req, res) => {
         try {
-            const postId = req.query.postId || req.params.postId;
-            const userId = req.user?.id || req.query.userId;
+            const postId = req.query.postId;
+            const userId = req.user?.id || req.body.userId;
             const parentId = req.query.parentId || null;
             const content = req.body.content;
-            const comment = await commentServices.createComment(postId, userId, parentId, content);
-            return responseUtils.ok(res, {data: comment});
+            const comment = await commentService.createComment(postId, userId, parentId, content);
+            return responseUtils.ok(res, { data: comment });
         } catch (error) {
             return responseUtils.error(res, error.message);
         }
@@ -42,10 +41,11 @@ const commentController = {
 
     updateComment: async (req, res) => {
         try {
-            const commentId = req.params.id;
-            const content = req.body.content;
-            const comment = await commentServices.updateComment(commentId, content);
-            return responseUtils.ok(res, {data: comment});
+            const commentId = req.params.commentId;
+            const { content } = req.body;
+            const userId = req.user.id || req.body.userId;
+            const comment = await commentService.updateComment(commentId, content, userId);
+            return responseUtils.ok(res, { data: comment });
         } catch (error) {
             return responseUtils.error(res, error.message);
         }
@@ -53,17 +53,19 @@ const commentController = {
 
     deleteComment: async (req, res) => {
         try {
-            const commentId = req.params.id;
-            const deleted = await commentServices.deleteComment(commentId);
-            if (!deleted)
-                return responseUtils.notFound(res, 'Comment not found');
-            return responseUtils.ok(res, {data: deleted});
+            const commentId = req.params.commentId;
+            const userId = req.user.id || req.body.userId;
+            const deleted = await commentService.deleteComment(commentId, userId);
+            
+            return responseUtils.ok(res, { data: deleted });
         } catch (error) {
+            if (error.message === "Unauthorized") responseUtils.unauthorized(res);
+            if (error.message === "Comment not found") responseUtils.notFound(res);
             return responseUtils.error(res, error.message);
         }
     },
 
-    
+
 }
 
 module.exports = commentController;

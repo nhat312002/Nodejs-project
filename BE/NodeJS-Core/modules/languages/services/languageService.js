@@ -3,7 +3,6 @@ const { Op } = require("sequelize");
 const { Language } = db;
 const languageValidation = require("modules/languages/validations/languageValidation.js");
 
-
 const languageService = {
     getAllLanguages: async () => {
         return await Language.findAll();
