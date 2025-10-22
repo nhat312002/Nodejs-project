@@ -7,9 +7,7 @@ const userValidation = require("modules/users/validations/userValidation.js");
 const userService = {
   getAllUsers: async () => {
     return await User.findAll({
-      attributes: {
-        exclude: ["password", "role_id", "status", "createdAt", "updatedAt"],
-      },
+      attributes: {},
       include: [
         {
           model: db.Role,
@@ -21,9 +19,7 @@ const userService = {
   },
   getUserById: async (id) => {
     return await User.findByPk(id, {
-      attributes: {
-        exclude: ["password", "role_id", "status", "createdAt", "updatedAt"],
-      },
+      attributes: {},
       include: [
         {
           model: db.Role,
