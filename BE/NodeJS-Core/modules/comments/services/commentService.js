@@ -19,7 +19,7 @@ const commentServices = {
             throw new Error("Post not found");
         }
 
-        return await Comment.findAll({
+        const {count, rows} = await Comment.findAndCountAll({
             where: {
                 post_id: postId,
                 parent_id: null,
@@ -34,7 +34,15 @@ const commentServices = {
             order: [
                 ['createdAt', 'DESC']
             ]
-        })
+        });
+
+        const totalPages = Math.ceil(count / limit);
+        return {
+            totalItems: count,
+            totalPages: totalPages,
+            currentPage: page,
+            comments: rows
+        }
     },
 
     createComment: async (data) => {
