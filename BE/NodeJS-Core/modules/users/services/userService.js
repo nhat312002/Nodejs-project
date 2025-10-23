@@ -1,13 +1,33 @@
 const db = require("models");
-const { Op } = require("sequelize");
+const { Op, or } = require("sequelize");
 const { User } = db;
 const bcrypt = require("bcrypt");
 const userValidation = require("modules/users/validations/userValidation.js");
+const e = require("express");
 
 const userService = {
-  getAllUsers: async () => {
-    return await User.findAll({
-      attributes: {},
+  getAllUsers: async (page = 1, limit = 10, filters = {}) => {
+    const offset = (page - 1) * limit;
+    const where = {};
+
+    if (filters.role_id) {
+      where.role_id = filters.role_id;
+    }
+    if (filters.status) {
+      where.status = filters.status;
+    }
+    if (filters.search) {
+      where[Op.or] = [
+        { full_name: { [Op.iLike]: `%${filters.search}%` } },
+        { email: { [Op.iLike]: `%${filters.search}%` } },
+      ];
+    }
+
+    const { count, rows } = await User.findAndCountAll({
+      where,
+      attributes: {
+        exclude: ["password"],
+      },
       include: [
         {
           model: db.Role,
@@ -15,11 +35,22 @@ const userService = {
           attributes: ["id", "name", "status"],
         },
       ],
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
     });
+    return {
+      totalRecords: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      users: rows,
+    };
   },
   getUserById: async (id) => {
     return await User.findByPk(id, {
-      attributes: {},
+      attributes: {
+        exclude: ["password"],
+      },
       include: [
         {
           model: db.Role,

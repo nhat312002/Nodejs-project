@@ -5,10 +5,28 @@ const responseUtils = require("utils/responseUtils");
 const userController = {
   getAllUsers: async (req, res) => {
     try {
-      const users = await userService.getAllUsers();
-      responseUtils.ok(res, users);
+      const page = Number.parseInt(req.query.page) || 1;
+      const limit = Number.parseInt(req.query.limit) || 10;
+
+      const filters = {
+        role_id: req.query.role_id,
+        status: req.query.status,
+        search: req.query.search,
+      };
+
+      const result = await userService.getAllUsers(page, limit, filters);
+
+      return responseUtils.ok(res, {
+        message: "Lấy danh sách người dùng thành công",
+        pagination: {
+          totalRecords: result.totalRecords,
+          totalPages: result.totalPages,
+          currentPage: result.currentPage,
+        },
+        users: result.users,
+      });
     } catch (error) {
-      responseUtils.error(res, error.message);
+      return responseUtils.error(res, error.message);
     }
   },
   getUserById: async (req, res) => {
