@@ -4,9 +4,8 @@ const postService = require("modules/posts/services/postService");
 const postController = {
     getPosts: async (req, res) => {
         try {
-            const { userId, languageId, categoryIds, originalId, status } = req.query;
-            const posts = await postService.getPosts({ userId, languageId, categoryIds, originalId, status });
-            return responseUtils.ok(res, { data: posts });
+            const results = await postService.getPosts(req.query);
+            return responseUtils.ok(res, { data: results });
         } catch (error) {
             return responseUtils.error(res, error.message);
         }
@@ -14,8 +13,7 @@ const postController = {
 
     getPostById: async (req, res) => {
         try {
-            const { postId } = req.params
-            const post = await postService.getPostById(postId);
+            const post = await postService.getPostById(req.params);
             return responseUtils.ok(res, { data: post });
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -45,10 +43,10 @@ const postController = {
 
     updatePost: async (req, res) => {
         try {
-            const { title, body, categoryIds } = req.body;
+            const body = req.body;
             const { postId } = req.params;
             const userId = req.user?.id || req.body.userId;
-            const post = await postService.updatePost(postId, userId, title, body, categoryIds);
+            const post = await postService.updatePost(postId, userId, body);
             return responseUtils.ok(res, { data: post });
         } catch (error) {
             if (error.message === "Unauthorized") return responseUtils.unauthorized(res);

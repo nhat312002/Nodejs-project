@@ -7,7 +7,12 @@ const commentServices = {
         return await Comment.findByPk(id);
     },
 
-    getCommentsByPost: async (postId) => {
+    getCommentsByPost: async (data) => {
+        const limit = 10;
+        const {postId} = data;
+        const page = Number(data.page) || 1;
+        const offset = (page - 1)*limit;
+        
         const post = await postService.getPostById(postId);
 
         if (!post) {
@@ -22,13 +27,18 @@ const commentServices = {
             include: [
                 {
                     model: Comment,
-
                 }
+            ],
+            limit,
+            offset,
+            order: [
+                ['createdAt', 'DESC']
             ]
         })
     },
 
-    createComment: async (postId, userId, parentId, content) => {
+    createComment: async (data) => {
+        const {postId, userId, parentId, content} = data;
         const post = await postService.getPostById(postId);
         if (!post) throw new Error("Post not found");
 
@@ -40,7 +50,7 @@ const commentServices = {
                 throw new Error("Parent comment does not belong to this post");
             }
             if (parentComment.parent_id != null) {
-                parentId = parentComment.parent_id;
+                throw new Error("Parent comment already had a parent")
             }
         }
 
@@ -60,7 +70,7 @@ const commentServices = {
             throw new Error("Comment not found");
         if (comment.user_id != userId)
             throw new Error("Unauthorized");
-        if(content !== undefined) comment.content = content;
+        comment.content = content;
         await comment.save();
 
         return comment;
@@ -70,8 +80,6 @@ const commentServices = {
         const comment = await Comment.findByPk(id);
         if (comment == null)
             throw new Error("Comment not found");
-        if (comment.user_id != userId)
-            throw new Error("Unauthorized");
         deleted = comment.toJSON();
         await comment.destroy();
 

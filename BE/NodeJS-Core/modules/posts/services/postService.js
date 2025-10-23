@@ -8,70 +8,102 @@ const postService = {
             where: {
                 id: postId,
                 status: {
-                    [Op.not]: 'deleted'
+                    [Op.not]: '0'
                 }
             }
         });
     },
 
-    getPosts: async (filters = {}) => {
-        const { userId, languageId, categoryIds, originalId, status } = filters;
+    getPosts: async (filters) => {
+        const DEFAULT_LIMIT = 10;
+        const MAX_LIMIT = 100;
+
+        let limit = Number(filters.limit) || DEFAULT_LIMIT;
+        limit = Math.min(limit, MAX_LIMIT);
+
+        const page = Number(filters.page) || 1;
+
+        const offset = (page - 1) * limit;
+
+        const { userId, userFullName, title, languageId, categoryIds, originalId, status } = filters;
+
         const where = {
             status: {
-                [Op.not]: 'deleted'
+                [Op.not]: '0'
             }
         };
 
         if (userId) where.user_id = userId;
-        if (languageId) where.language_id = languageId;
+        if (languageId) where.language_id = languageId
         if (originalId) where.original_id = originalId;
         if (status) where.status = status;
-
-        const include = [];
-
-        include.push({
-            model: User,
-            where: { status: "active" },
-            attributes: ["full_name"]
-        })
-
-        include.push({
-            model: Language,
-            where: { status: "active" },
-            attributes: ["name"]
-        })
+        if (title) where.title = {
+            [Op.like]: `%${title}%`
+        };
+        const whereUser = { status: '1' };
+        if (userFullName) whereUser.full_name = {
+            [Op.like]: `%${userFullName}%`
+        };
 
         const whereCategory = {
-            status: 'active',
+            status: '1',
         };
-        if (categoryIds && categoryIds.length > 0) {
+
+        if (Array.isArray(categoryIds) && categoryIds.length > 0) {
             whereCategory.id = {
                 [Op.in]: categoryIds
-            }
+            };
         }
 
-        include.push({
-            model: Category,
-            where: whereCategory,
-            through: { attributes: [] },
-            attributes: ["name"]
+        const include = [
+            {
+                model: User,
+                where: whereUser,
+                attributes: ["full_name"]
+            },
+            {
+                model: Language,
+                where: { status: "1" },
+                attributes: ["name"]
+            },
+            {
+                model: Category,
+                where: whereCategory,
+                attributes: ["name"],
+                through: { attributes: [] }
+            }
+        ];
+
+        const { count, rows } = await Post.findAndCountAll({
+            where,
+            include,
+            limit,
+            offset,
+            distinct: true,
+            order: [
+                ['createdAt', 'DESC']
+            ]
         });
 
-        return await Post.findAll({
-            where,
-            include
-        }
-        );
+        const totalPages = Math.ceil(count / limit);
+
+        return {
+            totalItems: count,
+            totalPages: totalPages,
+            currentPage: page,
+            posts: rows
+        };
     },
 
-    createPost: async ({ title, body, userId, languageId, categoryIds, originalId }) => {
+    createPost: async (data) => {
+        const { title, body, userId, languageId, categoryIds, originalId } = data;
         if (originalId != null) {
-            let originalPost = await postService.getPostById(originalId);
+            const originalPost = await postService.getPostById(originalId);
             if (originalPost == null) {
                 throw new Error("Original post not found");
             }
             if (originalPost.original_id != null) {
-                originalPost = postService.getPostById(originalPost.originalId);
+                throw new Error("original_id belongs to a child post");
             }
             if (originalPost.language_id === languageId)
                 throw new Error("Original post is already in this language.");
@@ -89,7 +121,8 @@ const postService = {
         return post;
     },
 
-    updatePost: async (id, userId, title, body, categoryIds) => {
+    updatePost: async (id, userId, _body) => {
+        const { title, body, categoryIds } = _body;
         const post = await postService.getPostById(id);
         if (!post) {
             throw new Error("Post not found");
@@ -101,7 +134,7 @@ const postService = {
 
         if (title !== undefined) post.title = title;
         if (body !== undefined) post.body = body;
-        post.status = 'pending';
+        post.status = '1';
         await post.save();
 
         if (Array.isArray(categoryIds)) {
@@ -119,7 +152,7 @@ const postService = {
         if (post.user_id != userId) {
             throw new Error("Unauthorized");
         }
-        post.status = "deleted";
+        post.status = "0";
         await post.save();
         return post;
     },

@@ -2,20 +2,9 @@ const responseUtils = require("utils/responseUtils");
 const commentService = require("modules/comments/services/commentService");
 
 const commentController = {
-    getCommentById: async (req, res) => {
-        try {
-            const { commentId } = req.params;
-            const comment = await commentService.getCommentById(commentId);
-            return responseUtils.ok(res, { data: comment });
-        } catch (error) {
-            return responseUtils.error(res, error.message);
-        }
-    },
-
     getCommentsByPost: async (req, res) => {
         try {
-            const { postId } = req.query;
-            const comments = await commentService.getCommentsByPost(postId);
+            const comments = await commentService.getCommentsByPost(req.query);
             return responseUtils.ok(res, { data: comments });
         } catch (error) {
             if (error.message === "Post not found") {
@@ -28,11 +17,13 @@ const commentController = {
 
     createComment: async (req, res) => {
         try {
-            const postId = req.query.postId;
-            const userId = req.user?.id || req.body.userId;
-            const parentId = req.query.parentId || null;
-            const content = req.body.content;
-            const comment = await commentService.createComment(postId, userId, parentId, content);
+            const commentData = {
+                postId: req.query.postId,
+                userId: req.user?.id || req.body.userId,
+                parentId: req.query.parentId || null,
+                content: req.body.content
+            };
+            const comment = await commentService.createComment(commentData);
             return responseUtils.ok(res, { data: comment });
         } catch (error) {
             return responseUtils.error(res, error.message);
