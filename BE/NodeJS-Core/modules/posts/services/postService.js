@@ -1,6 +1,6 @@
 const db = require("models");
-const { Post, Category, Language, User } = db;
-const { Op } = db.Sequelize;
+const { Post, Category, Language, User, sequelize } = db;
+const { Op, literal } = db.Sequelize;
 
 const postService = {
     getPostById: async (postId) => {
@@ -22,10 +22,22 @@ const postService = {
         limit = Math.min(limit, MAX_LIMIT);
 
         const page = Number(filters.page) || 1;
-
         const offset = (page - 1) * limit;
 
         const { userId, userFullName, title, languageId, categoryIds, originalId, status } = filters;
+
+        // We start with all attributes from the Post model
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            'user_id',
+            'original_id',
+            'language_id',
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
 
         const where = {
             status: {
@@ -34,21 +46,35 @@ const postService = {
         };
 
         if (userId) where.user_id = userId;
-        if (languageId) where.language_id = languageId
+        if (languageId) where.language_id = languageId;
         if (originalId) where.original_id = originalId;
         if (status) where.status = status;
-        if (title) where.title = {
-            [Op.like]: `%${title}%`
-        };
+
+        let titleRelevanceExpr = null;
+
+        if (title) {
+            const escapedTitle = sequelize.escape(title);
+            titleRelevanceExpr = `MATCH(\`Post\`.\`title\`) AGAINST (${escapedTitle} IN NATURAL LANGUAGE MODE)`;
+            where[Op.and] = literal(titleRelevanceExpr);
+            // Add the relevance score to the SELECT attributes
+            attributes.push([literal(titleRelevanceExpr), 'relevance']);
+        }
+
         const whereUser = { status: '1' };
-        if (userFullName) whereUser.full_name = {
-            [Op.like]: `%${userFullName}%`
-        };
+        let userRelevanceExpr = null;
+
+        if (userFullName) {
+            const escapedName = sequelize.escape(userFullName);
+            userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN NATURAL LANGUAGE MODE)`;
+            whereUser[Op.and] = literal(userRelevanceExpr);
+            // If you also want to sort by user relevance, you'd add it to attributes as well:
+            attributes.push([literal(userRelevanceExpr), 'user_relevance']);
+        }
+
 
         const whereCategory = {
             status: '1',
         };
-
         if (Array.isArray(categoryIds) && categoryIds.length > 0) {
             whereCategory.id = {
                 [Op.in]: categoryIds
@@ -59,30 +85,38 @@ const postService = {
             {
                 model: User,
                 where: whereUser,
-                attributes: ["full_name"]
+                attributes: ["id", "full_name"]
             },
             {
                 model: Language,
                 where: { status: "1" },
-                attributes: ["name"]
+                attributes: ["id", "name"]
             },
             {
                 model: Category,
                 where: whereCategory,
-                attributes: ["name"],
+                attributes: ["id", "name"],
                 through: { attributes: [] }
             }
         ];
 
+        const order = [];
+        if (title) {
+            order.push([literal('relevance'), 'DESC']);
+        }
+        if (userFullName) {
+            order.push([literal('user_relevance'), 'DESC']);
+        }
+        order.push(['createdAt', 'DESC']);
+
         const { count, rows } = await Post.findAndCountAll({
             where,
+            attributes,
             include,
             limit,
             offset,
             distinct: true,
-            order: [
-                ['createdAt', 'DESC']
-            ]
+            order,
         });
 
         const totalPages = Math.ceil(count / limit);
