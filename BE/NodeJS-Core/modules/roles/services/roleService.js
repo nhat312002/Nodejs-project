@@ -4,8 +4,31 @@ const { Role } = db;
 const roleValidation = require("modules/roles/validations/roleValidation.js");
 
 const roleService = {
-  getAllRoles: async () => {
-    return await Role.findAll();
+  getAllRoles: async (page = 1, limit = 10, filter = {}) => {
+    const offset = (page - 1) * limit;
+    const where = {};
+
+    if (filter.status) {
+      where.status = filter.status;
+    }
+    if (filter.search) {
+      where.name = { [Op.like]: `%${filter.search}%` };
+    }
+
+    const { count, rows } = await Role.findAndCountAll({
+      where,
+      attributes: {},
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return {
+      totalRecords: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      roles: rows,
+    };
   },
   getRoleById: async (id) => {
     return await Role.findByPk(id);
