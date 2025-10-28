@@ -38,6 +38,7 @@ router.group("/users", null, (router) => {
   router.get("/:userId", userController.getUserById);
   router.post("/create", userController.createUser);
   router.put("/:userId", userController.updateUser);
+  router.post("/:userId/avatar", userController.uploadAvatar);
 });
 
 router.group("/categories", null, (router) => {

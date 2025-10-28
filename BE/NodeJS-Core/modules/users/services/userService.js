@@ -4,8 +4,43 @@ const { User } = db;
 const bcrypt = require("bcrypt");
 const userValidation = require("modules/users/validations/userValidation.js");
 const e = require("express");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const userService = {
+  updateAvatar: async (userId, file) => {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const uploadDir = path.join(__dirname, "../../../uploads/avatars");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    if (user.url_avatar) {
+      const oldAvatarPath = path.join(__dirname, "../../../", user.url_avatar);
+      await fs.promises.access(oldAvatarPath);
+      await fs.promises.unlink(oldAvatarPath);
+    }
+
+    const fileExt = path.extname(file.originalname);
+    const fileName = `${Date.now()}-${Math.round(
+      Math.random() * 1e9
+    )}${fileExt}`;
+    const filePath = path.join(uploadDir, fileName);
+
+    await fs.promises.writeFile(filePath, file.buffer);
+
+    const avatarUrl = `/uploads/avatars/${fileName}`;
+    user.url_avatar = avatarUrl;
+    await user.save();
+    return {
+      message: "Avatar updated successfully",
+      url_avatar: avatarUrl,
+    };
+  },
   getAllUsers: async (page = 1, limit = 10, filters = {}) => {
     const offset = (page - 1) * limit;
     const where = {};
@@ -96,14 +131,6 @@ const userService = {
     if (existingEmail) {
       throw new Error("User email must be unique");
     }
-    // const disallowedFields = [
-    //   "id",
-    //   "username",
-    //   "role_id",
-    //   "status",
-    //   "created_at",
-    // ];
-    // disallowedFields.forEach((field) => delete data[field]);
     if (data.password) {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
