@@ -1,4 +1,4 @@
-const {BodyWithLocale, ParamWithLocale, QueryWithLocale} = require("kernels/rules");
+const { BodyWithLocale, ParamWithLocale, QueryWithLocale } = require("kernels/rules");
 
 const getPostById = [new ParamWithLocale("postId").notEmpty().isNumeric()];
 
@@ -7,10 +7,15 @@ const getPosts = [
     new QueryWithLocale("languageId").optional().isNumeric(),
     new QueryWithLocale("categoryIds")
         .optional()
-        .customSanitizer((value) => {
-            // allow either array or comma-separated string
-            if (typeof value === "string") return value.split(",").map((id) => Number(id.trim()));
-            return value;
+        .custom((value, helpers) => {
+            if (typeof value === "string") {
+                return value
+                    .split(",")
+                    .map((id) => Number(id.trim()))
+                    .filter((v) => !Number.isNaN(v));
+            }
+            if (Array.isArray(value)) return value;
+            throw new Error("categoryIds must be an array or a comma-separated string");
         }),
     new QueryWithLocale("originalId").optional().isNumeric(),
     new QueryWithLocale("status").optional().isIn(["pending", "approved", "rejected"]),
@@ -19,21 +24,21 @@ const getPosts = [
 const createPost = [
     new BodyWithLocale("title")
         .notEmpty()
-        .isLength({min: 3, max: 150}),
+        .isLength({ min: 3, max: 150 }),
     new BodyWithLocale("body")
         .notEmpty()
-        .isLength({min: 10}),
+        .isLength({ min: 10 }),
     new BodyWithLocale("languageId")
         .notEmpty()
         .isNumeric(),
     new BodyWithLocale("categoryIds")
         .optional()
-        .custom((value) => {
+        .custom((value, helpers) => {
             if (!Array.isArray(value))
                 throw new Error("categoryIds must be an array");
             if (!value.every((v) => typeof v === "number"))
                 throw new Error("Each category ID must be a number");
-            return true;
+            return value;
         }),
 ];
 
@@ -41,18 +46,18 @@ const updatePost = [
     new ParamWithLocale("postId").notEmpty().isNumeric(),
     new BodyWithLocale("title")
         .optional()
-        .isLength({min: 3, max: 100}),
+        .isLength({ min: 3, max: 100 }),
     new BodyWithLocale("body")
         .optional()
-        .isLength({min: 10}),
+        .isLength({ min: 10 }),
     new BodyWithLocale("categoryIds")
         .optional()
-        .custom((value) => {
+        .custom((value, helpers) => {
             if (!Array.isArray(value))
                 throw new Error("categoryIds must be an array");
             if (!value.every((v) => typeof v === "number"))
                 throw new Error("Each category ID must be a number");
-            return true;
+            return value;
         }),
 ];
 
@@ -62,7 +67,7 @@ const setPostStatus = [
     new ParamWithLocale("postId").notEmpty().isNumeric(),
     new BodyWithLocale("status")
         .notEmpty()
-        .isIn(["approved", "rejected"]),
+        .isIn(["2", "3"]),
 ];
 
 module.exports = {

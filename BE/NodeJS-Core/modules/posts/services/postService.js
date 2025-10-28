@@ -26,7 +26,6 @@ const postService = {
 
         const { userId, userFullName, title, languageId, categoryIds, originalId, status } = filters;
 
-        // We start with all attributes from the Post model
         const attributes = [
             'id',
             'title',
@@ -56,7 +55,6 @@ const postService = {
             const escapedTitle = sequelize.escape(title);
             titleRelevanceExpr = `MATCH(\`Post\`.\`title\`) AGAINST (${escapedTitle} IN NATURAL LANGUAGE MODE)`;
             where[Op.and] = literal(titleRelevanceExpr);
-            // Add the relevance score to the SELECT attributes
             attributes.push([literal(titleRelevanceExpr), 'relevance']);
         }
 
@@ -67,7 +65,6 @@ const postService = {
             const escapedName = sequelize.escape(userFullName);
             userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN NATURAL LANGUAGE MODE)`;
             whereUser[Op.and] = literal(userRelevanceExpr);
-            // If you also want to sort by user relevance, you'd add it to attributes as well:
             attributes.push([literal(userRelevanceExpr), 'user_relevance']);
         }
 
