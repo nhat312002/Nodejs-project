@@ -5,10 +5,27 @@ const responseUtils = require("utils/responseUtils");
 const roleController = {
   getAllRoles: async (req, res) => {
     try {
-      const roles = await roleService.getAllRoles();
-      responseUtils.ok(res, roles);
+      const page = Number.parseInt(req.query.page) || 1;
+      const limit = Number.parseInt(req.query.limit) || 10;
+
+      const filter = {
+        status: req.query.status,
+        search: req.query.search,
+      };
+
+      const result = await roleService.getAllRoles(page, limit, filter);
+
+      return responseUtils.ok(res, {
+        message: "Lấy danh sách vai trò thành công",
+        pagination: {
+          totalRecords: result.totalRecords,
+          totalPages: result.totalPages,
+          currentPage: result.currentPage,
+        },
+        roles: result.roles,
+      });
     } catch (error) {
-      responseUtils.error(res, error.message);
+      return responseUtils.error(res, error.message);
     }
   },
   getRoleById: async (req, res) => {
