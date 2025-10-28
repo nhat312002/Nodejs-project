@@ -1,4 +1,3 @@
-// const { get } = require("index");
 const roleService = require("modules/roles/services/roleService.js");
 const responseUtils = require("utils/responseUtils");
 
