@@ -20,12 +20,16 @@ const getPosts = [
         }),
     new QueryWithLocale("originalId").optional().isNumeric(),
     new QueryWithLocale("status").optional().isIn(["1", "2", "3"]),
+    new QueryWithLocale("categoryMatchAll").optional().custom((value, helpers) => {
+        if (value === "true") return true;
+        throw new Error("categoryMatchAll is not true or redundant");
+    })
 ];
 
 const createPost = [
     new BodyWithLocale("title")
         .notEmpty()
-        .isLength({ min: 3, max: 150 }),
+        .isLength({ min: 3, max: 225 }),
     new BodyWithLocale("body")
         .notEmpty()
         .isLength({ min: 10 }),
@@ -47,7 +51,7 @@ const updatePost = [
     new ParamWithLocale("postId").notEmpty().isNumeric(),
     new BodyWithLocale("title")
         .optional()
-        .isLength({ min: 3, max: 100 }),
+        .isLength({ min: 3, max: 225 }),
     new BodyWithLocale("body")
         .optional()
         .isLength({ min: 10 }),

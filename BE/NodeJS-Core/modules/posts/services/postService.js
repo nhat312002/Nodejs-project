@@ -24,7 +24,7 @@ const postService = {
         const page = Number(filters.page) || 1;
         const offset = (page - 1) * limit;
 
-        const { userId, userFullName, title, languageId, categoryIds, originalId, status } = filters;
+        const { userId, userFullName, title, languageId, categoryIds, originalId, status, categoryMatchAll } = filters;
 
         console.log(filters);
 
@@ -84,6 +84,18 @@ const postService = {
         )`)
         }
         else if (Array.isArray(categoryIds) && categoryIds.length > 0) {
+            if (categoryMatchAll === true){
+                idsList = categoryIds.join(',');
+                where.id = {
+                    [Op.in]: sequelize.literal(`(
+                        SELECT pc.post_id from Posts_Categories pc
+                        JOIN Categories c ON pc.category_id = c.id
+                        WHERE pc.category_id IN (${idsList}) AND c.status = '1'
+                        GROUP BY pc.post_id
+                        HAVING COUNT(DISTINCT pc.category_id) = ${categoryIds.length}
+                        )`)
+                };
+            } else 
             whereCategory.id = {
                 [Op.in]: categoryIds
             };

@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       post_id: { type: DataTypes.INTEGER, allowNull: false },
       user_id: { type: DataTypes.INTEGER, allowNull: false },
       parent_id: { type: DataTypes.INTEGER, allowNull: true },
-      content: { type: DataTypes.STRING, allowNull: false },
+      content: { type: DataTypes.TEXT, allowNull: false },
     },
     {
       sequelize,
