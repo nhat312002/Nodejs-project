@@ -8,6 +8,7 @@ const getPosts = [
     new QueryWithLocale("categoryIds")
         .optional()
         .custom((value, helpers) => {
+            if (value === "other") return "other";
             if (typeof value === "string") {
                 return value
                     .split(",")
@@ -18,7 +19,7 @@ const getPosts = [
             throw new Error("categoryIds must be an array or a comma-separated string");
         }),
     new QueryWithLocale("originalId").optional().isNumeric(),
-    new QueryWithLocale("status").optional().isIn(["pending", "approved", "rejected"]),
+    new QueryWithLocale("status").optional().isIn(["1", "2", "3"]),
 ];
 
 const createPost = [

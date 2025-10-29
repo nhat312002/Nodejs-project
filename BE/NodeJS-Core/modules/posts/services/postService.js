@@ -26,6 +26,8 @@ const postService = {
 
         const { userId, userFullName, title, languageId, categoryIds, originalId, status } = filters;
 
+        console.log(filters);
+
         const attributes = [
             'id',
             'title',
@@ -72,7 +74,15 @@ const postService = {
         const whereCategory = {
             status: '1',
         };
-        if (Array.isArray(categoryIds) && categoryIds.length > 0) {
+        if (categoryIds === "other") {
+            where.id = {
+                [Op.notIn]: sequelize.literal(`(
+            SELECT DISTINCT post_id 
+            FROM Posts_Categories
+        )`)
+            };
+        }
+        else if (Array.isArray(categoryIds) && categoryIds.length > 0) {
             whereCategory.id = {
                 [Op.in]: categoryIds
             };
@@ -91,6 +101,7 @@ const postService = {
             },
             {
                 model: Category,
+                required: false,
                 where: whereCategory,
                 attributes: ["id", "name"],
                 through: { attributes: [] }
