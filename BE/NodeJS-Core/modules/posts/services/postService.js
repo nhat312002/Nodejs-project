@@ -84,8 +84,8 @@ const postService = {
         )`)
         }
         else if (Array.isArray(categoryIds) && categoryIds.length > 0) {
-            if (categoryMatchAll === true){
-                idsList = categoryIds.join(',');
+            idsList = categoryIds.join(',');
+            if (categoryMatchAll === true) {
                 where.id = {
                     [Op.in]: sequelize.literal(`(
                         SELECT pc.post_id from Posts_Categories pc
@@ -96,9 +96,16 @@ const postService = {
                         )`)
                 };
             } else 
-            whereCategory.id = {
-                [Op.in]: categoryIds
-            };
+                where.id = {
+                    [Op.in]: sequelize.literal(`(
+                            SELECT DISTINCT pc.post_id FROM Posts_Categories pc
+                            JOIN Categories c ON pc.category_id = c.id
+                            WHERE pc.category_id IN (${idsList}) AND c.status = '1'
+                        )`)
+                };
+            // whereCategory.id = {
+            //     [Op.in]: categoryIds
+            // };
         }
 
         const include = [

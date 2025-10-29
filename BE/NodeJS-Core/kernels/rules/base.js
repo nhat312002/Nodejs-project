@@ -200,20 +200,6 @@ class WithLocale {
       "number.base": `${stringUtils.capitalize(this.field)} must be a number`,
     });
     return this;
-    // Convert string to number for query params
-    // this.schema = Joi.alternatives().try(
-    //     Joi.number(),
-    //     Joi.string().custom((value, helpers) => {
-    //         const num = Number(value);
-    //         if (Number.isNaN(num)) {
-    //             return helpers.error('number.base');
-    //         }
-    //         return num;
-    //     })
-    // ).messages({
-    //     "number.base": `${stringUtils.capitalize(this.field)} must be a number`,
-    // });
-    return this;
   }
 
   isIn(values) {
