@@ -44,7 +44,7 @@ const categoryService = {
     const category = await Category.findByPk(id);
     if (!category) throw new Error("Category not found");
 
-    category.status = category.status === "active" ? "disabled" : "active";
+    category.status = category.status === "1" ? "0" : "1";
     await category.save();
     return category;
   },

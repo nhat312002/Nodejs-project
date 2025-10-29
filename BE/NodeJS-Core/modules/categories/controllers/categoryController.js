@@ -47,13 +47,13 @@ const categoryController = {
             responseUtils.error(res, error.message);
         }
     },
-    toggleCategoryStatus: async (id) => {
-        const category = await Category.findByPk(id);
-        if (!category) throw new Error("Category not found");
-
-        category.status = category.status === "active" ? "disabled" : "active";
-        await category.save();
-        return category;
+    toggleCategoryStatus: async (req, res) => {
+        try {
+            const result = await categoryService.toggleCategoryStatus(req.params.categoryId);
+            responseUtils.ok(res, result);
+        } catch (error) {
+            responseUtils.error(res, error.message);
+        }
     },
 
 };

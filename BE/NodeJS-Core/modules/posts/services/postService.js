@@ -75,12 +75,13 @@ const postService = {
             status: '1',
         };
         if (categoryIds === "other") {
-            where.id = {
-                [Op.notIn]: sequelize.literal(`(
-            SELECT DISTINCT post_id 
-            FROM Posts_Categories
+            where[Op.and] = sequelize.literal(`(
+            NOT EXISTS (
+            SELECT 1 FROM Posts_Categories pc 
+            JOIN Categories c ON pc.category_id = c.id 
+            WHERE pc.post_id = Post.id AND c.status = '1'
+        )
         )`)
-            };
         }
         else if (Array.isArray(categoryIds) && categoryIds.length > 0) {
             whereCategory.id = {
