@@ -102,7 +102,7 @@ const postService = {
             },
             {
                 model: Category,
-                required: false,
+                required: (Array.isArray(categoryIds) && categoryIds.length > 0) ? true : false,
                 where: whereCategory,
                 attributes: ["id", "name"],
                 through: { attributes: [] }

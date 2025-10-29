@@ -42,7 +42,7 @@ const languageService = {
         const language = await Language.findByPk(languageId);
         if (!language) return null;
 
-        language.status = language.status === "active" ? "disabled" : "active";
+        language.status = language.status === "1" ? "0" : "1";
         await language.save();
         return language;
     },
