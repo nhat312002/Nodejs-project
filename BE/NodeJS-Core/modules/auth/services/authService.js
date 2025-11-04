@@ -1,6 +1,7 @@
 const db = require("../../../models");
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const jwt = require("configs/jwt");
+const jwtUtils = require('utils/jwtUtils');
 const User = db.User;
 
 exports.register = async (data) => {
@@ -35,25 +36,31 @@ exports.register = async (data) => {
 exports.login = async (data) => {
   const { email, password } = data;
 
-  const user = await User.findOne({ where: { email } });
+  console.log(email, password);
+  const user = await User.findOne({ where: { email : email } });
   if (!user) throw new Error('Email does not exist');
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error('Incorrect password');
 
-  const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role_id: user.role_id,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '1h' }
-  );
+  const token = jwtUtils.sign(user.id, user.role_id);
+
+  const refresh_token = jwtUtils.signRefreshToken(user.id, user.role_id);
+
+  // const token = jwt.sign(
+  //   {
+  //     id: user.id,
+  //     email: user.email,
+  //     role_id: user.role_id,
+  //   },
+  //   process.env.JWT_SECRET,
+  //   { expiresIn: '1h' }
+  // );
 
   return {
     message: 'Login successful',
     token,
+    refresh_token,
     user: {
       id: user.id,
       full_name: user.full_name,
@@ -63,3 +70,32 @@ exports.login = async (data) => {
     },
   };
 };
+
+exports.refresh = async (data) => {
+  const { refresh_token } = data;
+  console.log(refresh_token);
+  const { userId, role } = jwtUtils.verify(refresh_token);
+
+  // find user in db
+  const user = await User.findByPk(userId);
+  if (!user) throw new Error("User not found");
+  if (user.role_id != role) throw new Error("User role does not match");
+
+  const newToken = jwtUtils.sign(userId, role);
+  const newRefreshToken = jwtUtils.signRefreshToken(userId, role);
+
+  // revoke or process old refresh token -- to be added
+   
+  return {
+    message: 'Refresh successful',
+    token: newToken,
+    refresh_token: newRefreshToken,
+    user: {
+      id: user.id,
+      full_name: user.full_name,
+      email: user.email,
+      username: user.username,
+      role_id: user.role_id,
+    }
+  }
+}
