@@ -3,11 +3,15 @@ const categoryService = require("modules/categories/services/categoryService.js"
 const { getApiName } = require("utils/apiUtils");
 const { error } = require("utils/responseUtils");
 const responseUtils = require("utils/responseUtils")
+const categoryValidation = require("modules/categories/validations/categoryValidation");
 
 const categoryController = {
     getAllCategories: async (req, res) => {
         try {
-            const categories = await categoryService.getAllCategories();
+            const { error, value } = categoryValidation.getAllCategories(req.query);
+            if (error) return responseUtils.error(res, error.details[0].message);
+
+            const categories = await categoryService.getAllCategories(req.query);
             return responseUtils.ok(res, categories);
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -15,6 +19,9 @@ const categoryController = {
     },
     getCategoryById: async (req, res) => {
         try {
+            const { error, value } = categoryValidation.getCategoryById(req.params);
+            if (error) return responseUtils.error(res, error.details[0].message);
+
             const categoryId = req.params.categoryId;
             const category = await categoryService.getCategoryById(categoryId);
             if (!category) {
@@ -27,6 +34,9 @@ const categoryController = {
     },
     createCategory: async (req, res) => {
         try {
+            const { error, value } = categoryValidation.createCategory(req.params);
+            if (error) return responseUtils.error(res, error.details[0].message);
+
             const data = req.body;
             const newCategory = await categoryService.createCategory(data);
             res.status(201).json(newCategory);
@@ -36,6 +46,9 @@ const categoryController = {
     },
     updateCategory: async (req, res) => {
         try {
+            const { error, value } = categoryValidation.updateCategory(req.params);
+            if (error) return responseUtils.error(res, error.details[0].message);
+            
             const categoryId = req.params.categoryId;
             const data = req.body;
             const updateCategory = await categoryService.updateCategory(categoryId, data);
@@ -49,13 +62,15 @@ const categoryController = {
     },
     toggleCategoryStatus: async (req, res) => {
         try {
-            const result = await categoryService.toggleCategoryStatus(req.params.categoryId);
-            responseUtils.ok(res, result);
+            const categoryId = req.params.categoryId;
+            const updated = await categoryService.toggleCategoryStatus(categoryId);
+            responseUtils.ok(res, updated);
         } catch (error) {
+            if (error.message === "Category not found")
+                return responseUtils.notFound(res, "Category not found");
             responseUtils.error(res, error.message);
         }
     },
-
 };
 
 module.exports = categoryController;

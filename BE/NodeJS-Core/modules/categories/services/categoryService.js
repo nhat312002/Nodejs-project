@@ -4,8 +4,33 @@ const { Category } = db;
 const categoryValidation = require("modules/categories/validations/categoryValidation");
 
 const categoryService = {
-  getAllCategories: async () => {
-    return await Category.findAll();
+  getAllCategories: async (query) => {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const where = {};
+
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    if (query.name) {
+      where.name = { [Op.like]: `%${query.name}%` };
+    }
+
+    const { count, rows } = await Category.findAll({
+      where,
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return {
+      total: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      data: rows,
+    };
   },
   getCategoryById: async (id) => {
     return await Category.findByPk(id);
