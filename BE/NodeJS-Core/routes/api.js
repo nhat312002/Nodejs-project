@@ -11,6 +11,7 @@ const roleController = require("modules/roles/controllers/roleController");
 const userController = require("modules/users/controllers/userController");
 const categoryController = require("modules/categories/controllers/categoryController");
 const languageController = require("modules/languages/controllers/languageController");
+const authController = require("modules/auth/controllers/authController");
 const { set } = require("index");
 const router = express.Router({ mergeParams: true });
 
@@ -71,6 +72,11 @@ router.group("/comments", null, (router) => {
   router.post("/", validate([createComment]), commentController.createComment);
   router.put("/:commentId", validate([updateComment]), commentController.updateComment);
   router.delete("/:commentId", validate([deleteComment]), commentController.deleteComment);
+});
+
+router.group("/auth", null, (router) => {
+  router.post('/register', authController.register);
+  router.post('/login', authController.login);
 });
 
 module.exports = router;
