@@ -24,10 +24,13 @@ module.exports = {
       },
       config.jwt.secret,
       {
-        expiresIn: "1y",
+        expiresIn: "30d",
       }
     );
 
     return refresh_token;
   },
+  verify: (token) => {
+    return jwt.verify(token, config.jwt.secret)
+  }
 };
