@@ -11,7 +11,6 @@ const roleController = require("modules/roles/controllers/roleController");
 const userController = require("modules/users/controllers/userController");
 const categoryController = require("modules/categories/controllers/categoryController");
 const languageController = require("modules/languages/controllers/languageController");
-const { set } = require("index");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====

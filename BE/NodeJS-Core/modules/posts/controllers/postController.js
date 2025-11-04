@@ -13,7 +13,7 @@ const postController = {
 
     getPostById: async (req, res) => {
         try {
-            const post = await postService.getPostById(req.params);
+            const post = await postService.getPostById(req.params.postId);
             return responseUtils.ok(res, { data: post });
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -22,17 +22,10 @@ const postController = {
 
     createPost: async (req, res) => {
         try {
-            const { title, body, languageId, categoryIds, originalId } = req.body;
-
             const userId = req.user?.id || req.body.userId;
 
             const post = await postService.createPost({
-                title,
-                body,
-                userId,
-                languageId,
-                categoryIds,
-                originalId
+                userId, ...req.body
             });
 
             return responseUtils.ok(res, { data: post });

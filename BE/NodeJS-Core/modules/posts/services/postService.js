@@ -1,9 +1,11 @@
 const db = require("models");
 const { Post, Category, Language, User, sequelize } = db;
 const { Op, literal } = db.Sequelize;
+// const { htmlToText } = require("html-to-text");
 
 const postService = {
     getPostById: async (postId) => {
+        // console.log(postId);
         return await Post.findOne({
             where: {
                 id: postId,
@@ -24,7 +26,7 @@ const postService = {
         const page = Number(filters.page) || 1;
         const offset = (page - 1) * limit;
 
-        const { userId, userFullName, title, languageId, categoryIds, originalId, status, categoryMatchAll } = filters;
+        const { userId, userFullName, title, text, languageId, categoryIds, originalId, status, categoryMatchAll } = filters;
 
         console.log(filters);
 
@@ -58,6 +60,15 @@ const postService = {
             titleRelevanceExpr = `MATCH(\`Post\`.\`title\`) AGAINST (${escapedTitle} IN NATURAL LANGUAGE MODE)`;
             where[Op.and] = literal(titleRelevanceExpr);
             attributes.push([literal(titleRelevanceExpr), 'relevance']);
+        }
+
+        let textRelevanceExpr = null;
+
+        if (text) {
+            const escapedText = sequelize.escape(text);
+            textRelevanceExpr = `MATCH(\`Post\`.\`title\`, \`Post\`.\`body\`) AGAINST (${escapedText} IN NATURAL LANGUAGE MODE)`;
+            where[Op.and] = literal(textRelevanceExpr);
+            attributes.push([literal(textRelevanceExpr), 'text_relevance']);
         }
 
         const whereUser = { status: '1' };
@@ -176,6 +187,7 @@ const postService = {
             user_id: userId,
             language_id: languageId,
             original_id: originalId,
+            // body_text: htmlToText(body)
         });
         if (Array.isArray(categoryIds) && categoryIds.length > 0) {
             await post.setCategories(categoryIds);
@@ -195,7 +207,10 @@ const postService = {
         }
 
         if (title !== undefined) post.title = title;
-        if (body !== undefined) post.body = body;
+        if (body !== undefined) {
+            post.body = body;
+            post.body_text = htmlToText(body);
+        }
         post.status = '1';
         await post.save();
 

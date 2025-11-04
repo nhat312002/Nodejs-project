@@ -29,9 +29,11 @@ const getPosts = [
 const createPost = [
     new BodyWithLocale("title")
         .notEmpty()
+        .isString()
         .isLength({ min: 3, max: 225 }),
     new BodyWithLocale("body")
         .notEmpty()
+        .isString()
         .isLength({ min: 10 }),
     new BodyWithLocale("languageId")
         .notEmpty()
@@ -51,9 +53,11 @@ const updatePost = [
     new ParamWithLocale("postId").notEmpty().isNumeric(),
     new BodyWithLocale("title")
         .optional()
+        .isString()
         .isLength({ min: 3, max: 225 }),
     new BodyWithLocale("body")
         .optional()
+        .isString()
         .isLength({ min: 10 }),
     new BodyWithLocale("categoryIds")
         .optional()
