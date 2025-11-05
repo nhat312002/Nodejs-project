@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: "Roles", key: "id" },
+        defaultValue: "1",
       },
       status: {
         type: DataTypes.ENUM("1", "0"),

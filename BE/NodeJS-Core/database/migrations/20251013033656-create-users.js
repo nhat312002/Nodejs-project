@@ -40,6 +40,7 @@ module.exports = {
           model: "Roles",
           key: "id",
         },
+        defaultValue: "1",
       },
       status: {
         type: Sequelize.ENUM("1", "0"),
