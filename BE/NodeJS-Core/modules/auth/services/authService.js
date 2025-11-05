@@ -5,7 +5,7 @@ const jwtUtils = require('utils/jwtUtils');
 const User = db.User;
 
 exports.register = async (data) => {
-  const { full_name, username, email, password, role_id } = data;
+  const { full_name, username, email, password } = data;
 
   const existingUser = await User.findOne({
     where: { email },
@@ -19,7 +19,7 @@ exports.register = async (data) => {
     username,
     email,
     password: hashed,
-    role_id: role_id || 1, 
+    role_id: 1, 
   });
 
   return {
@@ -37,7 +37,12 @@ exports.login = async (data) => {
   const { email, password } = data;
 
   console.log(email, password);
-  const user = await User.findOne({ where: { email : email } });
+  const user = await User.findOne({ 
+    where: { 
+      email : email, 
+      status: "1"
+    } 
+  });
   if (!user) throw new Error('Email does not exist');
 
   const isMatch = await bcrypt.compare(password, user.password);
@@ -46,17 +51,7 @@ exports.login = async (data) => {
   const token = jwtUtils.sign(user.id, user.role_id);
 
   const refresh_token = jwtUtils.signRefreshToken(user.id, user.role_id);
-
-  // const token = jwt.sign(
-  //   {
-  //     id: user.id,
-  //     email: user.email,
-  //     role_id: user.role_id,
-  //   },
-  //   process.env.JWT_SECRET,
-  //   { expiresIn: '1h' }
-  // );
-
+  
   return {
     message: 'Login successful',
     token,
@@ -80,6 +75,7 @@ exports.refresh = async (data) => {
   const user = await User.findByPk(userId);
   if (!user) throw new Error("User not found");
   if (user.role_id != role) throw new Error("User role does not match");
+  // require signing in if user role changes
 
   const newToken = jwtUtils.sign(userId, role);
   const newRefreshToken = jwtUtils.signRefreshToken(userId, role);
