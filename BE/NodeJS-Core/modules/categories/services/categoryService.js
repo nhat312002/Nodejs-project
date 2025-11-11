@@ -18,7 +18,7 @@ const categoryService = {
       where.name = { [Op.like]: `%${query.name}%` };
     }
 
-    const { count, rows } = await Category.findAll({
+    const { count, rows } = await Category.findAndCountAll({
       where,
       limit,
       offset,

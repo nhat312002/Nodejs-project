@@ -3,7 +3,10 @@ const db = require("models");
 
 /**
  * role(required) -> middleware
+ * 
  * required can be a string (role name) or array of names/ids
+ * 
+ * example: middleware([authenticated, role([1, 2, 3])])
  */
 module.exports = (required) => {
   const requiredList = Array.isArray(required) ? required : [required];
@@ -14,10 +17,16 @@ module.exports = (required) => {
       const user = await db.User.findByPk(req.user.id, {
         include: [{ model: db.Role, as: "role", attributes: ["id", "name"] }],
       });
-      if (!user) return responseUtils.unauthorized(res);
-
+      // checks if user exists and is active
+      if (!user || user.status == '0') return responseUtils.unauthorized(res);
+      
       const userRoleName = (user.role && user.role.name) ? user.role.name.toLowerCase() : null;
       const userRoleId = user.role_id;
+      
+      // checks if user role changed
+      if (req.user.role_id !== userRoleId) {
+          return responseUtils.unauthorized(res, "User's role has changed");
+      }
 
       const ok = requiredList.some((r) => {
         if (typeof r === "number") return r === userRoleId;

@@ -16,6 +16,16 @@ const postService = {
         });
     },
 
+    getApprovedPostById: async (postId) => {
+        // console.log(postId);
+        return await Post.findOne({
+            where: {
+                id: postId,
+                status: '2'
+            }
+        });
+    },
+
     getPosts: async (filters) => {
         const DEFAULT_LIMIT = 10;
         const MAX_LIMIT = 100;
@@ -168,6 +178,11 @@ const postService = {
         };
     },
 
+    getApprovedPosts: async (filters) => {
+        const merged = Object.assign({}, filters, {status: '2'});
+        return await postService.getPosts(merged);
+    },
+
     createPost: async (data) => {
         const { title, body, userId, languageId, categoryIds, originalId } = data;
         if (originalId != null) {
@@ -195,8 +210,8 @@ const postService = {
         return post;
     },
 
-    updatePost: async (id, userId, _body) => {
-        const { title, body, categoryIds } = _body;
+    updatePost: async (id, userId, data) => {
+        const { title, body, categoryIds } = data;
         const post = await postService.getPostById(id);
         if (!post) {
             throw new Error("Post not found");

@@ -1,18 +1,18 @@
 module.exports = {
-  ok: (res, data) => {
+  ok: (res, data, message) => {
     return res.status(200).send({
       success: true,
       data,
       status: 200,
-      message: "ok"
+      message: message || "ok"
     });
   },
 
-  notFound: (res) => {
+  notFound: (res, message) => {
     return res.status(404).send({
       success: false,
       status: 404,
-      message: "Cannot find resouces",
+      message: message || "Cannot find resouces",
     });
   },
 

@@ -3,7 +3,6 @@ const responseUtils = require("utils/responseUtils");
 const languageValidation = require("modules/languages/validations/languageValidation")
 const multer = require("multer");
 const path = require("path");
-
 const uploadDir = path.join(process.cwd(), "uploads/flags");
 
 const storage = multer.diskStorage({
@@ -30,6 +29,21 @@ const upload = multer({
 });
 
 const languageController = {
+    getActiveLanguages: async (req, res) => {
+        try {
+            const { error, value } = languageValidation.getAllLanguages(req.query);
+            if (error) return responseUtils.error(res, error.details[0].message);
+            
+            const merge = Object.assign({}, req.query, {status: "1"});
+            console.log(merge);
+            const languages = await languageService.getAllLanguages(merge);
+            responseUtils.ok(res, languages);
+            
+        } catch (error) {
+            responseUtils.error(res, error.message);
+        }
+    },
+
     getAllLanguages: async (req, res) => {
         try {
             const { error, value } = languageValidation.getAllLanguages(req.query);

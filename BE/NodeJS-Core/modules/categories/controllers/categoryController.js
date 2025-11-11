@@ -6,6 +6,18 @@ const responseUtils = require("utils/responseUtils")
 const categoryValidation = require("modules/categories/validations/categoryValidation");
 
 const categoryController = {
+    getActiveCategories: async (req, res) => {
+        try {
+            const { error, value } = categoryValidation.getAllCategories(req.query);
+            if (error) return responseUtils.error(res, error.details[0].message);
+            
+            const merge = Object.assign({}, req.query, {status: '1'});
+            const categories = await categoryService.getAllCategories(merge);
+            return responseUtils.ok(res, categories);
+        } catch (error) {
+            return responseUtils.error(res, error.message);
+        }
+    },
     getAllCategories: async (req, res) => {
         try {
             const { error, value } = categoryValidation.getAllCategories(req.query);
@@ -48,7 +60,7 @@ const categoryController = {
         try {
             const { error, value } = categoryValidation.updateCategory(req.params);
             if (error) return responseUtils.error(res, error.details[0].message);
-            
+
             const categoryId = req.params.categoryId;
             const data = req.body;
             const updateCategory = await categoryService.updateCategory(categoryId, data);

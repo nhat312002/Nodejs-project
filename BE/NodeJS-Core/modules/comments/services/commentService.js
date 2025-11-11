@@ -1,5 +1,5 @@
 const db = require("models");
-const { Comment, Post } = db;
+const { Comment, Post, User } = db;
 const postService = require("modules/posts/services/postService");
 
 const commentServices = {
@@ -9,13 +9,15 @@ const commentServices = {
 
     getCommentsByPost: async (data) => {
         const limit = 10;
-        const {postId} = data;
+        const {postId, approvedOnly} = data;
         const page = Number(data.page) || 1;
         const offset = (page - 1)*limit;
-        
         const post = await postService.getPostById(postId);
 
         if (!post) {
+            throw new Error("Post not found");
+        }
+        if (approvedOnly && post.status != '2') {
             throw new Error("Post not found");
         }
 
@@ -27,7 +29,14 @@ const commentServices = {
             include: [
                 {
                     model: Comment,
-                }
+                },
+                {
+                    model: User,
+                    where: {
+                        status: '1'
+                    },
+                    attributes: ['id', 'full_name']
+                },
             ],
             limit,
             offset,
@@ -72,8 +81,9 @@ const commentServices = {
         return comment;
     },
 
-    updateComment: async (id, content, userId) => {
-        const comment = await Comment.findByPk(id);
+    updateComment: async (data) => {
+        const {commentId, content, userId} = data;
+        const comment = await Comment.findByPk(commentId);
         if (comment == null)
             throw new Error("Comment not found");
         if (comment.user_id != userId)
@@ -84,10 +94,16 @@ const commentServices = {
         return comment;
     },
 
-    deleteComment: async (id, userId) => {
-        const comment = await Comment.findByPk(id);
+    deleteComment: async (data) => {
+        const {commentId, userId, userRoleId} = data;
+        const comment = await Comment.findByPk(commentId);
         if (comment == null)
             throw new Error("Comment not found");
+        if (comment.user_id != userId){
+            if (userRoleId != '3') 
+                throw new Error("Insufficient permissions");
+            else throw new Error("Unauthorized");
+        }
         deleted = comment.toJSON();
         await comment.destroy();
 

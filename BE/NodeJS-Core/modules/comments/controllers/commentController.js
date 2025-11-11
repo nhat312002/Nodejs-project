@@ -2,6 +2,18 @@ const responseUtils = require("utils/responseUtils");
 const commentService = require("modules/comments/services/commentService");
 
 const commentController = {
+    getCommentsByApprovedPost: async (req, res) => {
+        try {
+            const comments = await commentService.getCommentsByPost({approvedOnly: true, ...req.query});
+            return responseUtils.ok(res, { data: comments });
+        } catch (error) {
+            if (error.message === "Post not found") {
+                return responseUtils.notFound(res, error.message);
+            }
+            return responseUtils.error(res, error.message);
+        }
+    },
+
     getCommentsByPost: async (req, res) => {
         try {
             const comments = await commentService.getCommentsByPost(req.query);
@@ -34,8 +46,9 @@ const commentController = {
         try {
             const commentId = req.params.commentId;
             const { content } = req.body;
-            const userId = req.user.id || req.body.userId;
-            const comment = await commentService.updateComment(commentId, content, userId);
+            const userId = req.user.id;
+            
+            const comment = await commentService.updateComment({commentId, content, userId});
             return responseUtils.ok(res, { data: comment });
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -45,8 +58,9 @@ const commentController = {
     deleteComment: async (req, res) => {
         try {
             const commentId = req.params.commentId;
-            const userId = req.user.id || req.body.userId;
-            const deleted = await commentService.deleteComment(commentId, userId);
+            const userId = req.user.id;
+            const userRoleId = req.user.role_id;
+            const deleted = await commentService.deleteComment({commentId, userId, userRoleId});
             
             return responseUtils.ok(res, { data: deleted });
         } catch (error) {
