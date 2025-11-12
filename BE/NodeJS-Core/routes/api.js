@@ -66,6 +66,7 @@ router.group("/", middlewares([authenticated, role([1, 2, 3])]), (router) => {
   });
 
   router.group("/posts", null, (router) => {
+    // router.post("/", validate([getPosts]), postController.getOwnPosts);
     router.post("/", validate([createPost]), postController.createPost);
     router.put("/:postId", validate([updatePost]), postController.updatePost);
     router.put("/:postId/disable", validate([disablePost]), postController.disablePost);

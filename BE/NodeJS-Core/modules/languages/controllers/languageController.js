@@ -46,9 +46,6 @@ const languageController = {
 
     getAllLanguages: async (req, res) => {
         try {
-            const { error, value } = languageValidation.getAllLanguages(req.query);
-            if (error) return responseUtils.error(res, error.details[0].message);
-
             const languages = await languageService.getAllLanguages(req.query);
             responseUtils.ok(res, languages);
         } catch (error) {
@@ -57,9 +54,6 @@ const languageController = {
     },
     getLanguageById: async (req, res) => {
         try {
-            const { error, value } = languageValidation.getLanguageById(req.params);
-            if (error) return responseUtils.error(res, error.details[0].message);
-
             const languageId = req.params.languageId;
             const language = await languageService.getLanguageById(languageId);
             if (!language) {

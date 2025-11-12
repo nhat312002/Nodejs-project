@@ -30,7 +30,11 @@ const categoryValidation = {
         })
     },
 
-    toggleCategoryStatus : this.getCategoryById
+    toggleCategoryStatus : {
+        params: Joi.object({
+            categoryId: Joi.number().integer().positive().required(),
+        })
+    },
 }
 
 module.exports = categoryValidation;

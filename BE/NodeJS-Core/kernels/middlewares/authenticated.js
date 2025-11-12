@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
         // attach minimal user info
         req.user = {
             id: payload.userId,
-            role_id: payload.role ?? payload.role,
+            role_id: payload.role,
         };
         return next();
     } catch (err) {

@@ -34,7 +34,11 @@ const languageValidation = {
         })
     },
 
-    toggleLanguageStatus: this.getLanguageById
+    toggleLanguageStatus: {
+        params: Joi.object({
+            languageId: Joi.number().integer().positive().required(),
+        })
+    },
 }
 
 module.exports = languageValidation;

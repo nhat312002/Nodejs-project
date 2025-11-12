@@ -11,6 +11,15 @@ const postController = {
         }
     },
 
+    getOwnPosts: async (req, res) => {
+        try {
+            const results = await postService.getPosts(req.query);
+            return responseUtils.ok(res, results);
+        } catch (error) {
+            return responseUtils.error(res, error.message);
+        }
+    },
+
     getApprovedPosts: async (req, res) => {
         try {
             const results = await postService.getApprovedPosts(req.query);
