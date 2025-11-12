@@ -1,0 +1,28 @@
+<div>
+  <div class="role-header">
+    <div><h2>List of Roles</h2></div>
+    <div>
+      <button routerLink="/admin/role-page/create" class="btn-add">
+        <div><i class="fa fa-plus"></i> Add</div>
+      </button>
+    </div>
+  </div>
+  <div class="role-list">
+    <div *ngIf="loading">Đang tải dữ liệu...</div>
+
+    <table *ngIf="!loading" class="role-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tên role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles">
+          <td>{{ role.id }}</td>
+          <td>{{ role.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
