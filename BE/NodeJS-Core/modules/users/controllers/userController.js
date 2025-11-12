@@ -70,7 +70,7 @@ const userController = {
           currentPage: result.currentPage,
         },
         users: result.users,
-      }, "Lấy danh sách người dùng thành công",
+      }, "User list retrieved successfully",
       );
     } catch (error) {
       return responseUtils.error(res, error.message);
@@ -96,7 +96,7 @@ const userController = {
           currentPage: result.currentPage,
         },
         users: result.users,
-      }, "Lấy danh sách người dùng thành công",
+      }, "User list retrieved successfully",
       );
     } catch (error) {
       return responseUtils.error(res, error.message);

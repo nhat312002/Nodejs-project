@@ -43,10 +43,10 @@ exports.login = async (data) => {
       status: "1"
     } 
   });
-  if (!user) throw new Error('Email does not exist');
+  if (!user) throw new Error('Incorrect password or email');
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error('Incorrect password');
+  if (!isMatch) throw new Error('Incorrect password or email');
 
   const token = jwtUtils.sign(user.id, user.role_id);
 

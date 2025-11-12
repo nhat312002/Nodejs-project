@@ -96,10 +96,10 @@ const userService = {
     });
   },
   createUser: async (data) => {
-    const { error } = userValidation.createUser(data);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
+    // const { error } = userValidation.createUser(data);
+    // if (error) {
+    //   throw new Error(error.details[0].message);
+    // }
     const existingUsername = await User.findOne({
       where: { username: data.username },
     });
@@ -117,10 +117,10 @@ const userService = {
     return await User.create(data);
   },
   updateUser: async (id, data) => {
-    const { error } = userValidation.updateUser(data);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
+    // const { error } = userValidation.updateUser(data);
+    // if (error) {
+    //   throw new Error(error.details[0].message);
+    // }
     const user = await User.findByPk(id);
     if (!user) {
       throw new Error("User not found");

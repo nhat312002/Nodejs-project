@@ -8,10 +8,15 @@ const exampleController = require("modules/examples/controllers/exampleControlle
 const postController = require("modules/posts/controllers/postController");
 const { getPostById, getPosts, createPost, updatePost, disablePost, setPostStatus } = require("modules/posts/validations/postValidation")
 const roleController = require("modules/roles/controllers/roleController");
+const { createRole, getAllRoles, getRoleById, updateRole } = require("modules/roles/validations/roleValidation");
 const userController = require("modules/users/controllers/userController");
+const { createUser, getAllUsers, getUserById, updateUser } = require("modules/users/validations/userValidation");
 const categoryController = require("modules/categories/controllers/categoryController");
+const { createCategory, getAllCategories, getCategoryById, updateCategory, toggleCategoryStatus} = require("modules/categories/validations/categoryValidation");
 const languageController = require("modules/languages/controllers/languageController");
+const { createLanguage, getAllLanguages, getLanguageById, updateLanguage, toggleLanguageStatus } = require("modules/languages/validations/languageValidation");
 const authController = require("modules/auth/controllers/authController");
+const { register, login, refresh } = require("modules/auth/validations/authValidation");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====
@@ -28,13 +33,13 @@ router.group("/example", validate([]), (router) => {
 
 // Guest routes
 router.group("/auth", null, (router) => {
-  router.post('/register', authController.register);
-  router.post('/login', authController.login);
-  router.post('/refresh', authController.refresh);
+  router.post("/register", validate([register]), authController.register);
+  router.post("/login", validate([login]), authController.login);
+  router.post("/refresh", validate([refresh]), authController.refresh);
 });
 
-router.get("/languages", languageController.getActiveLanguages);
-router.get("/categories", categoryController.getActiveCategories);
+router.get("/languages", validate([getAllLanguages]), languageController.getActiveLanguages);
+router.get("/categories", validate([getAllCategories]), categoryController.getActiveCategories);
 
 router.group("/posts", null, (router) => {
   router.get("/", validate([getPosts]), postController.getApprovedPosts);
@@ -46,8 +51,8 @@ router.group("/comments", null, (router) => {
 });
 
 router.group("/users", null, (router) => {
-  router.get("/", userController.getAllActiveUsers);
-  router.get("/:userId", userController.getActiveUserById);
+  router.get("/", validate([getAllUsers]), userController.getAllActiveUsers);
+  router.get("/:userId", validate([getUserById]), userController.getActiveUserById);
 });
 
 
@@ -56,7 +61,7 @@ router.group("/", middlewares([authenticated, role([1, 2, 3])]), (router) => {
 
   router.group("/profile", null, (router) => {
     router.get("/", userController.getProfile);
-    router.put("/", userController.updateProfile);
+    router.put("/", validate([updateUser]), userController.updateProfile);
     router.post("/avatar", userController.uploadOwnAvatar);
   });
 
@@ -91,34 +96,34 @@ router.group("/manage", middlewares([authenticated, role([2, 3])]), (router) => 
 // Admin routes
 router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
   router.group("/roles", null, (router) => {
-    router.get("/", roleController.getAllRoles);
-    router.get("/:roleId", roleController.getRoleById);
-    router.post("/create", roleController.createRole);
-    router.put("/:roleId", roleController.updateRole);
+    router.get("/", validate([getAllRoles]), roleController.getAllRoles);
+    router.get("/:roleId", validate([getRoleById]), roleController.getRoleById);
+    router.post("/create", validate([createRole]), roleController.createRole);
+    router.put("/:roleId", validate([updateRole]), roleController.updateRole);
   });
 
   router.group("/users", null, (router) => {
-    router.get("/", userController.getAllUsers);
-    router.get("/:userId", userController.getUserById);
-    router.post("/create", userController.createUser);
-    router.put("/:userId", userController.updateUser);
+    router.get("/", validate([getAllUsers]), userController.getAllUsers);
+    router.get("/:userId", validate([getUserById]), userController.getUserById);
+    router.post("/create", validate([createUser]), userController.createUser);
+    router.put("/:userId", validate([updateUser]), userController.updateUser);
     router.post("/:userId/avatar", userController.uploadAvatar);
   });
 
   router.group("/categories", null, (router) => {
-    router.get("/", categoryController.getAllCategories);
-    router.get("/:categoryId", categoryController.getCategoryById);
-    router.post("/", categoryController.createCategory);
-    router.put("/:categoryId", categoryController.updateCategory);
-    router.patch("/:categoryId/toggle", categoryController.toggleCategoryStatus);
+    router.get("/", validate([getAllCategories]), categoryController.getAllCategories);
+    router.get("/:categoryId", validate([getCategoryById]), categoryController.getCategoryById);
+    router.post("/", validate([createCategory]), categoryController.createCategory);
+    router.put("/:categoryId", validate([updateCategory]), categoryController.updateCategory);
+    router.patch("/:categoryId/toggle", validate([toggleCategoryStatus]), categoryController.toggleCategoryStatus);
   });
 
   router.group("/languages", null, (router) => {
-    router.get("/", languageController.getAllLanguages);
-    router.get("/:languageId", languageController.getLanguageById);
-    router.post("/", languageController.createLanguage);
-    router.put("/:languageId", languageController.updateLanguage);
-    router.patch("/:languageId/toggle", languageController.toggleLanguageStatus);
+    router.get("/", validate([getAllLanguages]), languageController.getAllLanguages);
+    router.get("/:languageId", validate([getLanguageById]), languageController.getLanguageById);
+    router.post("/", validate([createLanguage]), languageController.createLanguage);
+    router.put("/:languageId", validate([updateLanguage]), languageController.updateLanguage);
+    router.patch("/:languageId/toggle", validate([toggleLanguageStatus]), languageController.toggleLanguageStatus);
   });
 });
 

@@ -56,7 +56,7 @@ const commentServices = {
 
     createComment: async (data) => {
         const {postId, userId, parentId, content} = data;
-        const post = await postService.getPostById(postId);
+        const post = await postService.getApprovedPostById(postId);
         if (!post) throw new Error("Post not found");
 
         let parentComment = null;

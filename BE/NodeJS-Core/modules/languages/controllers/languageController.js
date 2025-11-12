@@ -103,10 +103,10 @@ const languageController = {
             const updatedLanguage = await languageService.toggleLanguageStatus(languageId);
             if (!updatedLanguage) return responseUtils.notFound(res, "Language not found");
 
-            responseUtils.ok(res, {
-                message: `Language status updated to ${updatedLanguage.status}`,
-                data: updatedLanguage,
-            });
+            responseUtils.ok(res,
+                updatedLanguage,
+                `Language status updated to ${updatedLanguage.status}`
+            );
         } catch (error) {
             responseUtils.error(res, error.message);
         }
