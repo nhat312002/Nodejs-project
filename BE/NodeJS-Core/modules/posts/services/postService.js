@@ -6,7 +6,7 @@ const { Op, literal } = db.Sequelize;
 const postService = {
     getPostById: async (postId) => {
         // console.log(postId);
-        return await Post.findOne({
+        const post = await Post.findOne({
             where: {
                 id: postId,
                 status: {
@@ -14,26 +14,32 @@ const postService = {
                 }
             }
         });
+
+        if (!post) throw new Error("Post not found");
+        return post;
     },
 
     getApprovedPostById: async (postId) => {
         // console.log(postId);
-        return await Post.findOne({
+        const post = await Post.findOne({
             where: {
                 id: postId,
                 status: '2'
             }
         });
+        if (!post) throw new Error("Post not found");
+        return post;
     },
 
     getOwnPostById: async (postId, userId) => {
-        return await Post.findOne({
+        const post = await Post.findOne({
             where: {
                 id: postId,
                 user_id: userId
             }
         });
-
+        if (!post) throw new Error("Post not found");
+        return post;
     },
 
     getPosts: async (filters) => {

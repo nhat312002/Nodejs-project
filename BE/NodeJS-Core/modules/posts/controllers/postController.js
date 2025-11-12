@@ -36,6 +36,8 @@ const postController = {
             );
             return responseUtils.ok(res, { post: post });
         } catch (error) {
+            if (error.message === "Post not found")
+                return responseUtils.notFound(res, error.message);
             return responseUtils.error(res, error.message);
         }
     },
@@ -47,6 +49,8 @@ const postController = {
             );
             return responseUtils.ok(res, { post: post });
         } catch (error) {
+            if (error.message === "Post not found")
+                return responseUtils.notFound(res, error.message);
             return responseUtils.error(res, error.message);
         }
     },
@@ -56,6 +60,8 @@ const postController = {
             const post = await postService.getPostById(req.params.postId);
             return responseUtils.ok(res, post);
         } catch (error) {
+            if (error.message === "Post not found")
+                return responseUtils.notFound(res, error.message);
             return responseUtils.error(res, error.message);
         }
     },
