@@ -14,6 +14,19 @@ const commentController = {
         }
     },
 
+    getCommentsByOwnPost: async (req, res) => {
+        try {
+            const comments = await commentService.getCommentsByPost({userId: req.user.id, ...req.query});
+            return responseUtils.ok(res, { data: comments });
+        } catch (error) {
+            if (error.message === "Post not found") {
+                return responseUtils.notFound(res, error.message);
+            }
+            return responseUtils.error(res, error.message);
+        }
+
+    },
+
     getCommentsByPost: async (req, res) => {
         try {
             const comments = await commentService.getCommentsByPost(req.query);

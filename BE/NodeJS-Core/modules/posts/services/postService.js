@@ -26,6 +26,16 @@ const postService = {
         });
     },
 
+    getOwnPostById: async (postId, userId) => {
+        return await Post.findOne({
+            where: {
+                id: postId,
+                user_id: userId
+            }
+        });
+
+    },
+
     getPosts: async (filters) => {
         const DEFAULT_LIMIT = 10;
         const MAX_LIMIT = 100;
@@ -180,6 +190,11 @@ const postService = {
 
     getApprovedPosts: async (filters) => {
         const merged = Object.assign({}, filters, {status: '2'});
+        return await postService.getPosts(merged);
+    },
+
+    getOwnPosts: async (filters, userId) => {
+        const merged = Object.assign({}, filters, {userId: userId});
         return await postService.getPosts(merged);
     },
 

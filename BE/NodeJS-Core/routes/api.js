@@ -57,7 +57,7 @@ router.group("/users", null, (router) => {
 
 
 // Authenticated user routes
-router.group("/", middlewares([authenticated, role([1, 2, 3])]), (router) => {
+router.group("/me", middlewares([authenticated, role([1, 2, 3])]), (router) => {
 
   router.group("/profile", null, (router) => {
     router.get("/", userController.getProfile);
@@ -66,13 +66,15 @@ router.group("/", middlewares([authenticated, role([1, 2, 3])]), (router) => {
   });
 
   router.group("/posts", null, (router) => {
-    // router.post("/", validate([getPosts]), postController.getOwnPosts);
+    router.get("/", validate([getPosts]), postController.getOwnPosts);
+    router.get("/:postId", validate([getPostById]), postController.getOwnPostById);
     router.post("/", validate([createPost]), postController.createPost);
     router.put("/:postId", validate([updatePost]), postController.updatePost);
     router.put("/:postId/disable", validate([disablePost]), postController.disablePost);
   });
 
   router.group("/comments", null, (router) => {
+    router.get("/", validate([getCommentsByPost]), commentController.getCommentsByOwnPost);
     router.post("/", validate([createComment]), commentController.createComment);
     router.put("/:commentId", validate([updateComment]), commentController.updateComment);
     router.delete("/:commentId", validate([deleteComment]), commentController.deleteComment);

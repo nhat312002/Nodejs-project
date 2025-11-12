@@ -13,7 +13,7 @@ const postController = {
 
     getOwnPosts: async (req, res) => {
         try {
-            const results = await postService.getPosts(req.query);
+            const results = await postService.getOwnPosts(req.query, req.user.id);
             return responseUtils.ok(res, results);
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -33,6 +33,17 @@ const postController = {
         try {
             const post = await postService.getApprovedPostById(
                 req.params.postId
+            );
+            return responseUtils.ok(res, { post: post });
+        } catch (error) {
+            return responseUtils.error(res, error.message);
+        }
+    },
+
+    getOwnPostById: async (req, res) => {
+        try {
+            const post = await postService.getOwnPostById(
+                req.params.postId, req.user.id
             );
             return responseUtils.ok(res, { post: post });
         } catch (error) {

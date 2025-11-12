@@ -9,7 +9,7 @@ const commentServices = {
 
     getCommentsByPost: async (data) => {
         const limit = 10;
-        const {postId, approvedOnly} = data;
+        const {postId, approvedOnly, userId} = data;
         const page = Number(data.page) || 1;
         const offset = (page - 1)*limit;
         const post = await postService.getPostById(postId);
@@ -20,6 +20,8 @@ const commentServices = {
         if (approvedOnly && post.status != '2') {
             throw new Error("Post not found");
         }
+        if (userId && post.user_id != userId)
+            throw new Error("Post not found");
 
         const {count, rows} = await Comment.findAndCountAll({
             where: {
