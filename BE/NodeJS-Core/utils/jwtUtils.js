@@ -10,7 +10,9 @@ module.exports = {
       },
       config.jwt.secret,
       {
+        algorithm: config.jwt.algorithm,
         expiresIn: config.jwt.ttl,
+        issuer: config.jwt.issuer
       }
     );
 
@@ -24,13 +26,18 @@ module.exports = {
       },
       config.jwt.secret,
       {
-        expiresIn: "30d",
+        algorithm: config.jwt.algorithm,
+        expiresIn: config.jwt.refresh_ttl,
+        issuer: config.jwt.issuer
       }
     );
 
     return refresh_token;
   },
   verify: (token) => {
-    return jwt.verify(token, config.jwt.secret)
+    return jwt.verify(token, config.jwt.secret, {
+      issuer: config.jwt.issuer,
+
+    });
   }
 };

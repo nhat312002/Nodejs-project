@@ -18,7 +18,7 @@ const categoryService = {
       where.name = { [Op.like]: `%${query.name}%` };
     }
 
-    const { count, rows } = await Category.findAll({
+    const { count, rows } = await Category.findAndCountAll({
       where,
       limit,
       offset,
@@ -36,10 +36,10 @@ const categoryService = {
     return await Category.findByPk(id);
   },
   createCategory: async (data) => {
-    const { error } = categoryValidation.createCategory(data);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
+    // const { error } = categoryValidation.createCategory(data);
+    // if (error) {
+    //   throw new Error(error.details[0].message);
+    // }
     const existingCategory = await Category.findOne({
       where: { name: data.name },
     });
@@ -49,10 +49,10 @@ const categoryService = {
     return await Category.create(data);
   },
   updateCategory: async (id, data) => {
-    const { error } = categoryValidation.updateCategory(data);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
+    // const { error } = categoryValidation.updateCategory(data);
+    // if (error) {
+    //   throw new Error(error.details[0].message);
+    // }
     const category = await Category.findByPk(id);
     if (!category) {
       throw new Error("Category not found");

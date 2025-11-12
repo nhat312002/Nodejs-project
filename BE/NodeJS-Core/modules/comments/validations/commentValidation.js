@@ -1,22 +1,40 @@
-const {BodyWithLocale, ParamWithLocale, QueryWithLocale} = require("kernels/rules");
+const { BodyWithLocale, ParamWithLocale, QueryWithLocale } = require("kernels/rules");
+const { Joi } = require("kernels/validations");
 
-const getCommentById = [new ParamWithLocale("commentId").notEmpty().isNumeric()];
+const getCommentById = {
+    params: Joi.object({
+        "commentId": Joi.number().integer().required()
+    })
+};
+const getCommentsByPost = {
+    query: Joi.object({
+        "postId": Joi.number().integer().required()
+    })
+};
+const createComment = {
+    query: Joi.object({
+        "postId": Joi.number().integer().required(),
+        "parentId": Joi.number().integer().optional()
+    }),
+    body: Joi.object({
+        "content": Joi.string().trim().max(2000).required()
+    })
+};
 
-const getCommentsByPost = [new QueryWithLocale("postId").notEmpty().isNumeric()];
+const updateComment = {
+    params: Joi.object({
+        "commentId": Joi.number().integer().required(),
+    }),
+    body: Joi.object({
+        "content": Joi.string().trim().max(2000).required()
+    })
+};
 
-const createComment = [
-    new QueryWithLocale("postId").notEmpty().isNumeric(),
-    new BodyWithLocale("content").notEmpty().isLength({max: 1000}),
-    new QueryWithLocale("parentId").optional().isNumeric(),
-];
-
-const updateComment = [
-    new ParamWithLocale("commentId").notEmpty().isNumeric(),
-    new BodyWithLocale("content").notEmpty().isLength({max: 1000}),
-];
-
-const deleteComment = [ new ParamWithLocale("commentId").notEmpty().isNumeric()];
-
+const deleteComment = {
+    params: Joi.object({
+        "commentId": Joi.number().integer().required()
+    })
+};
 module.exports = {
     getCommentById,
     getCommentsByPost,

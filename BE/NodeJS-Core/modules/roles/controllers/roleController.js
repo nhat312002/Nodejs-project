@@ -15,14 +15,14 @@ const roleController = {
       const result = await roleService.getAllRoles(page, limit, filter);
 
       return responseUtils.ok(res, {
-        message: "Lấy danh sách vai trò thành công",
         pagination: {
           totalRecords: result.totalRecords,
           totalPages: result.totalPages,
           currentPage: result.currentPage,
         },
         roles: result.roles,
-      });
+      },
+        "Lấy danh sách vai trò thành công");
     } catch (error) {
       return responseUtils.error(res, error.message);
     }

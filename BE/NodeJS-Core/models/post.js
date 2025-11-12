@@ -29,7 +29,8 @@ module.exports = (sequelize, DataTypes) => {
   Post.init(
     {
       title: { type: DataTypes.STRING, allowNull: false },
-      body: { type: DataTypes.STRING, allowNull: false },
+      body: { type: DataTypes.TEXT('long'), allowNull: false },
+      // body_text: {type: DataTypes.TEXT('long'), allowNull: false},
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -54,6 +55,18 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Post",
+      indexes: [
+        {
+          name: 'posts_fulltext_index',
+          type: 'FULLTEXT',
+          fields: ['title'],
+        },
+        {
+          name: 'posts_title_body_fulltext_index',
+          type: 'FULLTEXT',
+          fields: ['title'],
+        },
+      ],
     }
   );
   return Post;

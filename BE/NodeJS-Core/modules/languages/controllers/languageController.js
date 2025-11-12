@@ -3,7 +3,6 @@ const responseUtils = require("utils/responseUtils");
 const languageValidation = require("modules/languages/validations/languageValidation")
 const multer = require("multer");
 const path = require("path");
-
 const uploadDir = path.join(process.cwd(), "uploads/flags");
 
 const storage = multer.diskStorage({
@@ -30,11 +29,20 @@ const upload = multer({
 });
 
 const languageController = {
+    getActiveLanguages: async (req, res) => {
+        try {
+            const merge = Object.assign({}, req.query, {status: "1"});
+            console.log(merge);
+            const languages = await languageService.getAllLanguages(merge);
+            responseUtils.ok(res, languages);
+            
+        } catch (error) {
+            responseUtils.error(res, error.message);
+        }
+    },
+
     getAllLanguages: async (req, res) => {
         try {
-            const { error, value } = languageValidation.getAllLanguages(req.query);
-            if (error) return responseUtils.error(res, error.details[0].message);
-
             const languages = await languageService.getAllLanguages(req.query);
             responseUtils.ok(res, languages);
         } catch (error) {
@@ -43,9 +51,6 @@ const languageController = {
     },
     getLanguageById: async (req, res) => {
         try {
-            const { error, value } = languageValidation.getLanguageById(req.params);
-            if (error) return responseUtils.error(res, error.details[0].message);
-
             const languageId = req.params.languageId;
             const language = await languageService.getLanguageById(languageId);
             if (!language) {
@@ -89,10 +94,10 @@ const languageController = {
             const updatedLanguage = await languageService.toggleLanguageStatus(languageId);
             if (!updatedLanguage) return responseUtils.notFound(res, "Language not found");
 
-            responseUtils.ok(res, {
-                message: `Language status updated to ${updatedLanguage.status}`,
-                data: updatedLanguage,
-            });
+            responseUtils.ok(res,
+                updatedLanguage,
+                `Language status updated to ${updatedLanguage.status}`
+            );
         } catch (error) {
             responseUtils.error(res, error.message);
         }

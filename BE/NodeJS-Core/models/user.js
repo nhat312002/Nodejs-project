@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: "Roles", key: "id" },
+        defaultValue: "1",
       },
       status: {
         type: DataTypes.ENUM("1", "0"),
@@ -35,6 +36,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "User",
+      indexes: [
+        {
+          name: 'users_fulltext_index',
+          type: 'FULLTEXT',
+          fields: ['full_name'],
+        },
+      ],
     }
   );
   return User;

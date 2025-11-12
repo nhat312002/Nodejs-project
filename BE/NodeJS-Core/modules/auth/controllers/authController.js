@@ -25,7 +25,7 @@ exports.login = async (req, res) => {
 exports.refresh = async (req, res) => {
   try {
     const result = await authService.refresh(req.body);
-    return responseUtils.ok(res, result);
+    res.status(200).json(result);
   } catch (error) {
     responseUtils.error(res, error.message);
   }

@@ -1,69 +1,85 @@
-const {BodyWithLocale, ParamWithLocale, QueryWithLocale} = require("kernels/rules");
+const { BodyWithLocale, ParamWithLocale, QueryWithLocale } = require("kernels/rules");
+const { Joi } = require("kernels/validations");
 
-const getPostById = [new ParamWithLocale("postId").notEmpty().isNumeric()];
+const getPostById = {
+    params: Joi.object({
+        "postId": Joi.number().integer().required()
+    })
+};
 
-const getPosts = [
-    new QueryWithLocale("userId").optional().isNumeric(),
-    new QueryWithLocale("languageId").optional().isNumeric(),
-    new QueryWithLocale("categoryIds")
-        .optional()
-        .customSanitizer((value) => {
-            // allow either array or comma-separated string
-            if (typeof value === "string") return value.split(",").map((id) => Number(id.trim()));
+const disablePost = {
+    params: Joi.object({
+        "postId": Joi.number().integer().required()
+    })
+};
+
+const getPosts = {
+    query: Joi.object({
+        "userId": Joi.number().integer().optional(),
+        "languageId": Joi.number().integer().optional(),
+        "categoryIds": Joi.optional().custom((value, helpers) => {
+            if (value === "other") return "other";
+            if (typeof value === "string") {
+                return value
+                    .split(",")
+                    .map((id) => Number(id.trim()))
+                    .filter((v) => !Number.isNaN(v));
+            }
+            if (Array.isArray(value)) return value;
+            return helpers.message("categoryIds must be an array or a comma-separated string");
+        }),
+        "originalId": Joi.number().integer().optional(),
+        "status": Joi.optional().valid("1", "2", "3"),
+        "categoryMatchAll": Joi.optional().custom((value, helpers) => {
+            if (value === "true") return true;
+            return helpers.message("categoryMatchAll is not true or redundant");
+        }),
+        "title": Joi.string().trim().optional(),
+        "text": Joi.string().trim().optional(),
+        "userFullName": Joi.string().trim().optional(),
+    })
+};
+
+const createPost = {
+    body: Joi.object({
+        "title": Joi.string().trim().min(3).max(255).required(),
+        "body": Joi.string().trim().min(10).max(60000).required(),
+        "languageId": Joi.number().integer().required(),
+        "categoryIds": Joi.optional().custom((value, helpers) => {
+            if (!Array.isArray(value))
+                return helpers.message("categoryIds must be an array");
+            if (!value.every((v) => typeof v === "number"))
+                return helpers.error("any.invalid", {message: "Each category ID must be a number"});
             return value;
-        }),
-    new QueryWithLocale("originalId").optional().isNumeric(),
-    new QueryWithLocale("status").optional().isIn(["pending", "approved", "rejected"]),
-];
+        })
+    })
+};
 
-const createPost = [
-    new BodyWithLocale("title")
-        .notEmpty()
-        .isLength({min: 3, max: 150}),
-    new BodyWithLocale("body")
-        .notEmpty()
-        .isLength({min: 10}),
-    new BodyWithLocale("languageId")
-        .notEmpty()
-        .isNumeric(),
-    new BodyWithLocale("categoryIds")
-        .optional()
-        .custom((value) => {
+const updatePost = {
+    params: Joi.object({
+        "postId": Joi.number().integer().required()
+    }),
+    body: Joi.object({
+        "title": Joi.string().trim().min(3).max(225).optional(),
+        "body": Joi.string().trim().min(10).max(60000).optional(),
+        "categoryIds": Joi.optional().custom((value, helpers) => {
             if (!Array.isArray(value))
                 throw new Error("categoryIds must be an array");
             if (!value.every((v) => typeof v === "number"))
                 throw new Error("Each category ID must be a number");
-            return true;
-        }),
-];
+            return value;
+        })
+    })
+};
 
-const updatePost = [
-    new ParamWithLocale("postId").notEmpty().isNumeric(),
-    new BodyWithLocale("title")
-        .optional()
-        .isLength({min: 3, max: 100}),
-    new BodyWithLocale("body")
-        .optional()
-        .isLength({min: 10}),
-    new BodyWithLocale("categoryIds")
-        .optional()
-        .custom((value) => {
-            if (!Array.isArray(value))
-                throw new Error("categoryIds must be an array");
-            if (!value.every((v) => typeof v === "number"))
-                throw new Error("Each category ID must be a number");
-            return true;
-        }),
-];
-
-const disablePost = [new ParamWithLocale("postId").notEmpty().isNumeric()];
-
-const setPostStatus = [
-    new ParamWithLocale("postId").notEmpty().isNumeric(),
-    new BodyWithLocale("status")
-        .notEmpty()
-        .isIn(["approved", "rejected"]),
-];
+const setPostStatus = {
+    params: Joi.object({
+        "postId": Joi.number().integer().required()
+    }),
+    body: Joi.object({
+        "status": Joi.valid("2", "3").required()
+    })
+};
 
 module.exports = {
     getPostById,
