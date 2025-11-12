@@ -31,9 +31,6 @@ const upload = multer({
 const languageController = {
     getActiveLanguages: async (req, res) => {
         try {
-            const { error, value } = languageValidation.getAllLanguages(req.query);
-            if (error) return responseUtils.error(res, error.details[0].message);
-            
             const merge = Object.assign({}, req.query, {status: "1"});
             console.log(merge);
             const languages = await languageService.getAllLanguages(merge);
