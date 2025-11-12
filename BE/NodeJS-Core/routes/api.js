@@ -10,7 +10,7 @@ const { getPostById, getPosts, createPost, updatePost, disablePost, setPostStatu
 const roleController = require("modules/roles/controllers/roleController");
 const { createRole, getAllRoles, getRoleById, updateRole } = require("modules/roles/validations/roleValidation");
 const userController = require("modules/users/controllers/userController");
-const { createUser, getAllUsers, getUserById, updateUser } = require("modules/users/validations/userValidation");
+const { createUser, getAllUsers, getUserById, updateUser, updateProfile, changePassword } = require("modules/users/validations/userValidation");
 const categoryController = require("modules/categories/controllers/categoryController");
 const { createCategory, getAllCategories, getCategoryById, updateCategory, toggleCategoryStatus} = require("modules/categories/validations/categoryValidation");
 const languageController = require("modules/languages/controllers/languageController");
@@ -61,8 +61,9 @@ router.group("/me", middlewares([authenticated, role([1, 2, 3])]), (router) => {
 
   router.group("/profile", null, (router) => {
     router.get("/", userController.getProfile);
-    router.put("/", validate([updateUser]), userController.updateProfile);
+    router.put("/", validate([updateProfile]), userController.updateProfile);
     router.post("/avatar", userController.uploadOwnAvatar);
+    router.post("/password", validate([changePassword]), userController.changePassword);
   });
 
   router.group("/posts", null, (router) => {

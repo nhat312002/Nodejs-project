@@ -137,6 +137,43 @@ const userService = {
     }
     return await user.update(data);
   },
+  updateProfile: async (id, data) => {
+    console.log("update profile");
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const existingEmail = await User.findOne({
+      where: { email: data.email, id: { [Op.ne]: id } },
+    });
+    if (existingEmail) {
+      throw new Error("User email must be unique");
+    }
+    const existingUsername = await User.findOne({
+      where: { username: data.username, id: { [Op.ne]: id } },
+    });
+    if (existingUsername) {
+      throw new Error("Username must be unique");
+    }
+    const updatedUser = await user.update(data);
+    delete updatedUser.dataValues.password;
+    return updatedUser;
+  },
+  changePassword: async (id, data) => {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const valid = await bcrypt.compare(data.oldPassword, user.password);
+    if (!valid) throw new Error("Incorrect password");
+
+    const salt = await bcrypt.genSalt(10);
+    data.password = await bcrypt.hash(data.password, salt);
+
+    const updatedUser = await user.update(data);
+    delete updatedUser.dataValues.password;
+    return updatedUser;
+  }
 };
 
 module.exports = userService;

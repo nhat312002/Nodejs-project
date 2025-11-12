@@ -164,7 +164,20 @@ const userController = {
     try {
       const userId = req.user.id;
       const data = req.body;
-      const updatedUser = await userService.updateUser(userId, data);
+      const updatedUser = await userService.updateProfile(userId, data);
+      responseUtils.ok(res, updatedUser);
+    } catch (error) {
+      if (error.message === "User not found") {
+        return responseUtils.notFound(res);
+      }
+      responseUtils.error(res, error.message);
+    }
+  },
+  changePassword: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const data = req.body;
+      const updatedUser = await userService.changePassword(userId, data);
       responseUtils.ok(res, updatedUser);
     } catch (error) {
       if (error.message === "User not found") {

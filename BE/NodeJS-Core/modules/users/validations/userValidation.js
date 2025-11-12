@@ -175,7 +175,7 @@ const userValidation = {
         .pattern(
           /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=(?:[^!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?][^!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]*){1}$).{8,255}$/
         )
-        .required()
+        .optional()
         .messages({
           'string.pattern.base': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
           'string.empty': 'Password is required.',
@@ -220,6 +220,80 @@ const userValidation = {
         }),
     }),
   },
+
+  updateProfile: {
+    body: Joi.object({
+      full_name: Joi.string()
+        .trim()
+        .max(255)
+        .optional()
+        .messages({
+          'string.base': 'Full name must be a string.',
+          'string.empty': 'Full name is required.',
+          'string.max': 'Full name must not exceed 255 characters.',
+          'any.required': 'Full name is required.',
+        }),
+      email: Joi.string()
+        .trim()
+        .email()
+        .max(255)
+        .optional()
+        .messages({
+          'string.base': 'Email must be a string.',
+          'string.email': 'Email must be a valid email address.',
+          'string.empty': 'Email is required.',
+          'string.max': 'Email must not exceed 255 characters.',
+          'any.required': 'Email is required.',
+        }),
+      phone: Joi.string()
+        .trim()
+        .pattern(/^[0-9]{10,11}$/)
+        .optional()
+        .allow(null, '')
+        .messages({
+          'string.pattern.base': 'Phone number must be 10 or 11 digits.',
+          'string.base': 'Phone number must be a string.',
+        }),
+      url_avatar: Joi.string()
+        .trim()
+        .uri()
+        .max(255)
+        .optional()
+        .allow(null, '')
+        .messages({
+          'string.uri': 'Avatar URL must be a valid URI.',
+          'string.max': 'Avatar URL must not exceed 255 characters.',
+          'string.base': 'Avatar URL must be a string.',
+        }),
+    }),
+  },
+
+  changePassword: {
+    body: Joi.object({
+      oldPassword: Joi.string()
+        .trim()
+        .pattern(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=(?:[^!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?][^!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]*){1}$).{8,255}$/
+        )
+        .optional()
+        .messages({
+          'string.pattern.base': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+          'string.empty': 'Password is required.',
+          'any.required': 'Password is required.',
+        }),
+      password: Joi.string()
+        .trim()
+        .pattern(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=(?:[^!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?][^!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]*){1}$).{8,255}$/
+        )
+        .optional()
+        .messages({
+          'string.pattern.base': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+          'string.empty': 'Password is required.',
+          'any.required': 'Password is required.',
+        }),
+    })
+  }
 };
 
 module.exports = userValidation;
