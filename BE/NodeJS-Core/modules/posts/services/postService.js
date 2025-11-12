@@ -245,7 +245,7 @@ const postService = {
         if (title !== undefined) post.title = title;
         if (body !== undefined) {
             post.body = body;
-            post.body_text = htmlToText(body);
+            // post.body_text = htmlToText(body);
         }
         post.status = '1';
         await post.save();
