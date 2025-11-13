@@ -37,6 +37,7 @@ const getPosts = {
         "title": Joi.string().trim().optional(),
         "text": Joi.string().trim().optional(),
         "userFullName": Joi.string().trim().optional(),
+        "sort": Joi.string().trim().valid("date_asc", "date_desc", "title_asc", "title_desc").optional(),
     })
 };
 

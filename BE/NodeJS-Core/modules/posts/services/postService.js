@@ -52,7 +52,7 @@ const postService = {
         const page = Number(filters.page) || 1;
         const offset = (page - 1) * limit;
 
-        const { userId, userFullName, title, text, languageId, categoryIds, originalId, status, categoryMatchAll } = filters;
+        const { userId, userFullName, title, text, languageId, categoryIds, originalId, status, categoryMatchAll, sort } = filters;
 
         console.log(filters);
 
@@ -101,8 +101,13 @@ const postService = {
         let userRelevanceExpr = null;
 
         if (userFullName) {
-            const escapedName = sequelize.escape(userFullName);
-            userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN NATURAL LANGUAGE MODE)`;
+            const booleanSearchString = userFullName
+                .trim()
+                .split(/\s+/)
+                .map(word => `+${word}*`)
+                .join(' ');
+            const escapedName = sequelize.escape(booleanSearchString);
+            userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN BOOLEAN MODE)`;
             whereUser[Op.and] = literal(userRelevanceExpr);
             attributes.push([literal(userRelevanceExpr), 'user_relevance']);
         }
@@ -132,7 +137,7 @@ const postService = {
                         HAVING COUNT(DISTINCT pc.category_id) = ${categoryIds.length}
                         )`)
                 };
-            } else 
+            } else
                 where.id = {
                     [Op.in]: sequelize.literal(`(
                             SELECT DISTINCT pc.post_id FROM Posts_Categories pc
@@ -172,7 +177,15 @@ const postService = {
         if (userFullName) {
             order.push([literal('user_relevance'), 'DESC']);
         }
-        order.push(['createdAt', 'DESC']);
+        const sortOptions = {
+            date_asc: ['createdAt', 'ASC'],
+            date_desc: ['createdAt', 'DESC'],
+            title_asc: ['title', 'ASC'],
+            title_desc: ['title', 'DESC'],
+        };
+        if (sort)
+            order.push(sortOptions[sort]);
+        else order.push(['createdAt', 'DESC']);
 
         const { count, rows } = await Post.findAndCountAll({
             where,
@@ -195,12 +208,12 @@ const postService = {
     },
 
     getApprovedPosts: async (filters) => {
-        const merged = Object.assign({}, filters, {status: '2'});
+        const merged = Object.assign({}, filters, { status: '2' });
         return await postService.getPosts(merged);
     },
 
     getOwnPosts: async (filters, userId) => {
-        const merged = Object.assign({}, filters, {userId: userId});
+        const merged = Object.assign({}, filters, { userId: userId });
         return await postService.getPosts(merged);
     },
 
