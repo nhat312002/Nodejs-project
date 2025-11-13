@@ -1,5 +1,5 @@
-const authenticated = require("./authenticated");
-const role = require("./role");
+const authenticated = require("./authMiddleware");
+const role = require("./roleMiddleware");
 
 const middlewares = (middlewareArray) => {
     return [

@@ -151,7 +151,7 @@ const userValidation = {
       full_name: Joi.string()
         .trim()
         .max(255)
-        .required()
+        .optional()
         .messages({
           'string.base': 'Full name must be a string.',
           'string.empty': 'Full name is required.',
@@ -162,7 +162,7 @@ const userValidation = {
         .trim()
         .email()
         .max(255)
-        .required()
+        .optional()
         .messages({
           'string.base': 'Email must be a string.',
           'string.email': 'Email must be a valid email address.',
@@ -203,7 +203,7 @@ const userValidation = {
         }),
       role_id: Joi.number()
         .integer()
-        .required()
+        .optional()
         .messages({
           'number.base': 'Role ID must be a valid number.',
           'number.integer': 'Role ID must be an integer.',
@@ -212,7 +212,7 @@ const userValidation = {
       status: Joi.string()
         .trim()
         .valid("1", "0")
-        .required()
+        .optional()
         .messages({
           'any.only': 'Invalid status value.',
           'string.base': 'Status must be a string.',

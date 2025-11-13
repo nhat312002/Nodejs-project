@@ -135,7 +135,9 @@ const userService = {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
     }
-    return await user.update(data);
+    const updatedUser = await user.update(data);
+    delete updatedUser.dataValues.password;
+    return updatedUser;
   },
   updateProfile: async (id, data) => {
     console.log("update profile");
