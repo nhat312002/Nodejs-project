@@ -31,9 +31,9 @@ module.exports = {
         updatedAt: new Date()
       },
       {
-        name: "Chinese",
-        locale: "cn",
-        url_flag: "flags/cn.jpg",
+        name: "Chinese (Simplified)",
+        locale: "zh",
+        url_flag: "flags/zh.jpg",
         createdAt: new Date(),
         updatedAt: new Date()
       }

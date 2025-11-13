@@ -1,6 +1,6 @@
 require("express-router-group");
 const express = require("express");
-const { middlewares, authenticated, role } = require("kernels/middlewares");
+const { middlewares, authenticated, role , avatarUpload, flagUpload} = require("kernels/middlewares");
 const { validate } = require("kernels/validations");
 const commentController = require("modules/comments/controllers/commentController");
 const { getCommentsByPost, createComment, updateComment, deleteComment } = require("modules/comments/validations/commentValidation");
@@ -62,7 +62,7 @@ router.group("/me", middlewares([authenticated, role([1, 2, 3])]), (router) => {
   router.group("/profile", null, (router) => {
     router.get("/", userController.getProfile);
     router.put("/", validate([updateProfile]), userController.updateProfile);
-    router.post("/avatar", userController.uploadOwnAvatar);
+    router.post("/avatar", middlewares([avatarUpload]), userController.uploadOwnAvatar);
     router.post("/password", validate([changePassword]), userController.changePassword);
   });
 
@@ -111,7 +111,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/:userId", validate([getUserById]), userController.getUserById);
     router.post("/create", validate([createUser]), userController.createUser);
     router.put("/:userId", validate([updateUser]), userController.updateUser);
-    router.post("/:userId/avatar", userController.uploadAvatar);
+    router.post("/:userId/avatar", middlewares([avatarUpload]), userController.uploadAvatar);
   });
 
   router.group("/categories", null, (router) => {
@@ -125,7 +125,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
   router.group("/languages", null, (router) => {
     router.get("/", validate([getAllLanguages]), languageController.getAllLanguages);
     router.get("/:languageId", validate([getLanguageById]), languageController.getLanguageById);
-    router.post("/", validate([createLanguage]), languageController.createLanguage);
+    router.post("/", middlewares([flagUpload]), validate([createLanguage]), languageController.createLanguage);
     router.put("/:languageId", validate([updateLanguage]), languageController.updateLanguage);
     router.patch("/:languageId/toggle", validate([toggleLanguageStatus]), languageController.toggleLanguageStatus);
   });

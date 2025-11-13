@@ -1,55 +1,35 @@
 const userService = require("modules/users/services/userService.js");
 const responseUtils = require("utils/responseUtils");
-const multer = require("multer");
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // Giới hạn kích thước tệp là 5MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/jpg"];
-    const ext = file.mimetype.toLowerCase();
-    if (allowedTypes.includes(ext)) {
-      return cb(null, true);
-    }
-    cb(new Error("Invalid file type"));
-  },
-});
 
 const userController = {
-  uploadOwnAvatar: [
-    upload.single("avatar"),
-    async (req, res) => {
-      try {
-        const userId = req.user.id;
-        const file = req.file;
+  uploadOwnAvatar: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const file = req.file;
 
-        if (!file) {
-          throw new Error("No file uploaded");
-        }
-        const result = await userService.updateAvatar(userId, file);
-        return responseUtils.ok(res, result);
-      } catch (error) {
-        return responseUtils.error(res, error.message);
+      if (!file) {
+        throw new Error("No file uploaded");
       }
-    },
-  ],
-  uploadAvatar: [
-    upload.single("avatar"),
-    async (req, res) => {
-      try {
-        const userId = req.params.userId;
-        const file = req.file;
+      const result = await userService.updateAvatar(userId, file);
+      return responseUtils.ok(res, result);
+    } catch (error) {
+      return responseUtils.error(res, error.message);
+    }
+  },
+  uploadAvatar: async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const file = req.file;
 
-        if (!file) {
-          throw new Error("No file uploaded");
-        }
-        const result = await userService.updateAvatar(userId, file);
-        return responseUtils.ok(res, result);
-      } catch (error) {
-        return responseUtils.error(res, error.message);
+      if (!file) {
+        throw new Error("No file uploaded");
       }
-    },
-  ],
+      const result = await userService.updateAvatar(userId, file);
+      return responseUtils.ok(res, result);
+    } catch (error) {
+      return responseUtils.error(res, error.message);
+    }
+  },
   getAllActiveUsers: async (req, res) => {
     try {
       const page = Number.parseInt(req.query.page) || 1;

@@ -1,5 +1,6 @@
 const authenticated = require("./authMiddleware");
 const role = require("./roleMiddleware");
+const {avatarUpload, flagUpload} = require("./uploadMiddleware");
 
 const middlewares = (middlewareArray) => {
     return [
@@ -10,5 +11,6 @@ const middlewares = (middlewareArray) => {
 module.exports = {
     middlewares,
     authenticated,
-    role
+    role,
+    avatarUpload, flagUpload
 }

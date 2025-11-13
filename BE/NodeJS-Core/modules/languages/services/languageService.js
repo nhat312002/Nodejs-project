@@ -17,6 +17,10 @@ const languageService = {
             where.name = { [Op.like]: `%${query.name}%` };
         }
 
+        if (query.locale) {
+            where.locale = { [Op.like]: `%${query.locale}%`};
+        }
+
         const { count, rows } = await Language.findAndCountAll({
             where,
             limit,
