@@ -49,9 +49,11 @@ const commentServices = {
 
         const totalPages = Math.ceil(count / limit);
         return {
-            totalItems: count,
-            totalPages: totalPages,
-            currentPage: page,
+            pagination: {
+                totalRecords: count,
+                totalPages: totalPages,
+                currentPage: page,
+            },
             comments: rows
         }
     },

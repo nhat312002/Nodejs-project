@@ -26,20 +26,18 @@ const categoryService = {
     });
 
     return {
-      total: count,
-      currentPage: page,
-      totalPages: Math.ceil(count / limit),
-      data: rows,
+      pagination: {
+        totalRecords: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      },
+      categories: rows,
     };
   },
   getCategoryById: async (id) => {
     return await Category.findByPk(id);
   },
   createCategory: async (data) => {
-    // const { error } = categoryValidation.createCategory(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const existingCategory = await Category.findOne({
       where: { name: data.name },
     });
@@ -49,10 +47,6 @@ const categoryService = {
     return await Category.create(data);
   },
   updateCategory: async (id, data) => {
-    // const { error } = categoryValidation.updateCategory(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const category = await Category.findByPk(id);
     if (!category) {
       throw new Error("Category not found");

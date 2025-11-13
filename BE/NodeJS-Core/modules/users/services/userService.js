@@ -75,9 +75,11 @@ const userService = {
       order: [["createdAt", "DESC"]],
     });
     return {
-      totalRecords: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      pagination: {
+        totalRecords: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      },
       users: rows,
     };
   },
@@ -117,10 +119,6 @@ const userService = {
     return await User.create(data);
   },
   updateUser: async (id, data) => {
-    // const { error } = userValidation.updateUser(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const user = await User.findByPk(id);
     if (!user) {
       throw new Error("User not found");
@@ -130,6 +128,12 @@ const userService = {
     });
     if (existingEmail) {
       throw new Error("User email must be unique");
+    }
+    const existingUsername = await User.findOne({
+      where: { username: data.username, id: { [Op.ne]: id } },
+    });
+    if (existingUsername) {
+      throw new Error("Username must be unique");
     }
     if (data.password) {
       const salt = await bcrypt.genSalt(10);

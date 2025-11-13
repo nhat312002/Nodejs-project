@@ -1,7 +1,6 @@
 const db = require("models");
 const { Op } = require("sequelize");
 const { Language } = db;
-const languageValidation = require("modules/languages/validations/languageValidation.js");
 
 const languageService = {
     getAllLanguages: async (query) => {
@@ -26,20 +25,18 @@ const languageService = {
         });
 
         return {
-            total: count,
-            currentPage: page,
-            totalPages: Math.ceil(count / limit),
-            data: rows,
+            pagination: {
+                totalRecords: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page,
+            },
+            languages: rows,
         };
     },
     getLanguageById: async (id) => {
         return await Language.findByPk(id);
     },
     createLanguage: async (data) => {
-        // const { error } = languageValidation.createLanguage(data);
-        // if (error) {
-        //     throw new Error(error.details[0].message);
-        // }
         const existingLanguage = await Language.findOne({ where: { name: data.name } });
         if (existingLanguage) {
             throw new Error("Language with this name already exists");
@@ -47,10 +44,6 @@ const languageService = {
         return await Language.create(data);
     },
     updateLanguage: async (id, data) => {
-        // const { error } = languageValidation.updateLanguage(data);
-        // if (error) {
-        //     throw new Error(error.details[0].message);
-        // }
         const language = await Language.findByPk(id);
         if (!language) {
             throw new Error("Language not found");

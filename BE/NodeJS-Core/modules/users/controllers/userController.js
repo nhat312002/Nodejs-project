@@ -89,15 +89,7 @@ const userController = {
 
       const result = await userService.getAllUsers(page, limit, filters);
 
-      return responseUtils.ok(res, {
-        pagination: {
-          totalRecords: result.totalRecords,
-          totalPages: result.totalPages,
-          currentPage: result.currentPage,
-        },
-        users: result.users,
-      }, "User list retrieved successfully",
-      );
+      return responseUtils.ok(res, result, "User list retrieved successfully");
     } catch (error) {
       return responseUtils.error(res, error.message);
     }
