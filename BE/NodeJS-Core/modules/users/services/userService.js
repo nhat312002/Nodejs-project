@@ -98,10 +98,6 @@ const userService = {
     });
   },
   createUser: async (data) => {
-    // const { error } = userValidation.createUser(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const existingUsername = await User.findOne({
       where: { username: data.username },
     });
@@ -123,17 +119,21 @@ const userService = {
     if (!user) {
       throw new Error("User not found");
     }
-    const existingEmail = await User.findOne({
-      where: { email: data.email, id: { [Op.ne]: id } },
-    });
-    if (existingEmail) {
-      throw new Error("User email must be unique");
+    if (data.email){
+      const existingEmail = await User.findOne({
+        where: { email: data.email, id: { [Op.ne]: id } },
+      });
+      if (existingEmail) {
+        throw new Error("User email must be unique");
+      }
     }
-    const existingUsername = await User.findOne({
-      where: { username: data.username, id: { [Op.ne]: id } },
-    });
-    if (existingUsername) {
-      throw new Error("Username must be unique");
+    if (data.username) {
+      const existingUsername = await User.findOne({
+        where: { username: data.username, id: { [Op.ne]: id } },
+      });
+      if (existingUsername) {
+        throw new Error("Username must be unique");
+      }
     }
     if (data.password) {
       const salt = await bcrypt.genSalt(10);
@@ -149,17 +149,21 @@ const userService = {
     if (!user) {
       throw new Error("User not found");
     }
-    const existingEmail = await User.findOne({
-      where: { email: data.email, id: { [Op.ne]: id } },
-    });
-    if (existingEmail) {
-      throw new Error("User email must be unique");
+    if (data.email){
+      const existingEmail = await User.findOne({
+        where: { email: data.email, id: { [Op.ne]: id } },
+      });
+      if (existingEmail) {
+        throw new Error("User email must be unique");
+      }
     }
-    const existingUsername = await User.findOne({
-      where: { username: data.username, id: { [Op.ne]: id } },
-    });
-    if (existingUsername) {
-      throw new Error("Username must be unique");
+    if (data.username) {
+      const existingUsername = await User.findOne({
+        where: { username: data.username, id: { [Op.ne]: id } },
+      });
+      if (existingUsername) {
+        throw new Error("Username must be unique");
+      }
     }
     const updatedUser = await user.update(data);
     delete updatedUser.dataValues.password;
