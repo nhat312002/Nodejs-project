@@ -241,7 +241,21 @@ const postService = {
             // body_text: htmlToText(body)
         });
         if (Array.isArray(categoryIds) && categoryIds.length > 0) {
-            await post.setCategories(categoryIds);
+
+            const existingCategories = await Category.findAll({
+                where: {
+                    id: categoryIds
+                },
+                attributes: ['id']
+            });
+
+            const existingIds = new Set(existingCategories.map(cat => cat.id));
+            const nonExistentIds = categoryIds.filter(id => !existingIds.has(id));
+            if (nonExistentIds.length > 0) {
+                const errorMessage = `The following Category IDs do not exist: ${nonExistentIds.join(', ')}`;
+                throw new Error(errorMessage);
+            }
+            await post.setCategories(...existingIds);
         }
         return post;
     },
@@ -265,8 +279,22 @@ const postService = {
         post.status = '1';
         await post.save();
 
-        if (Array.isArray(categoryIds)) {
-            await post.setCategories(categoryIds);
+        if (Array.isArray(categoryIds) && categoryIds.length > 0) {
+
+            const existingCategories = await Category.findAll({
+                where: {
+                    id: categoryIds
+                },
+                attributes: ['id']
+            });
+
+            const existingIds = new Set(existingCategories.map(cat => cat.id));
+            const nonExistentIds = categoryIds.filter(id => !existingIds.has(id));
+            if (nonExistentIds.length > 0) {
+                const errorMessage = `The following Category IDs do not exist: ${nonExistentIds.join(', ')}`;
+                throw new Error(errorMessage);
+            }
+            await post.setCategories(...existingIds);
         }
 
         return post;

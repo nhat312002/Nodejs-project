@@ -31,6 +31,7 @@ const commentServices = {
             include: [
                 {
                     model: Comment,
+                    as: "replies"
                 },
                 {
                     model: User,

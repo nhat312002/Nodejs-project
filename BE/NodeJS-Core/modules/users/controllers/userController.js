@@ -11,7 +11,7 @@ const userController = {
         throw new Error("No file uploaded");
       }
       const result = await userService.updateAvatar(userId, file);
-      return responseUtils.ok(res, result);
+      return responseUtils.ok(res, result, "Avatar updated successfully");
     } catch (error) {
       return responseUtils.error(res, error.message);
     }
@@ -25,7 +25,7 @@ const userController = {
         throw new Error("No file uploaded");
       }
       const result = await userService.updateAvatar(userId, file);
-      return responseUtils.ok(res, result);
+      return responseUtils.ok(res, result, "Avatar updated successfully");
     } catch (error) {
       return responseUtils.error(res, error.message);
     }

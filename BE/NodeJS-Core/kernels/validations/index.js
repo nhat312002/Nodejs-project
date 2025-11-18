@@ -8,29 +8,29 @@ Joi.defaults((schema) =>
 
 const validate = (schemas = []) => {
   return (req, res, next) => {
-    const errors = {};
+    const errors = [];
 
     for (const schema of schemas) {
       if (schema.body) {
         const { error, value } = schema.body.validate(req.body);
-        if (error) errors.body = (errors.body || []).concat(error.details.map(d => d.message));
+        if (error) errors.push(...error.details.map(d => d.message));
         else req.body = value;
       }
 
       if (schema.query) {
         const { error, value } = schema.query.validate(req.query);
-        if (error) errors.query = (errors.query || []).concat(error.details.map(d => d.message));
+        if (error) errors.push(...error.details.map(d => d.message));
         else req.query = value;
       }
 
       if (schema.params) {
         const { error, value } = schema.params.validate(req.params);
-        if (error) errors.params = (errors.params || []).concat(error.details.map(d => d.message));
+        if (error) errors.push(...error.details.map(d => d.message));
         else req.params = value;
       }
     }
 
-    if (Object.keys(errors).length > 0) {
+    if (errors.length > 0) {
       return responseUtils.invalidated(res, errors);
     }
 

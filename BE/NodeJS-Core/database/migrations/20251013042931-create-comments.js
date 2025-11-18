@@ -31,6 +31,7 @@ module.exports = {
           model: "Comments",
           key: "id",
         },
+        onDelete: "CASCADE"
       },
       content: {
         type: Sequelize.TEXT,

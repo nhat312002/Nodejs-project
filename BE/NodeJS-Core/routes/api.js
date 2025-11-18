@@ -102,7 +102,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
   router.group("/roles", null, (router) => {
     router.get("/", validate([getAllRoles]), roleController.getAllRoles);
     router.get("/:roleId", validate([getRoleById]), roleController.getRoleById);
-    router.post("/create", validate([createRole]), roleController.createRole);
+    // router.post("/create", validate([createRole]), roleController.createRole);
     router.put("/:roleId", validate([updateRole]), roleController.updateRole);
   });
 
@@ -111,7 +111,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/:userId", validate([getUserById]), userController.getUserById);
     router.post("/create", validate([createUser]), userController.createUser);
     router.put("/:userId", validate([updateUser]), userController.updateUser);
-    router.post("/:userId/avatar", middlewares([avatarUpload]), userController.uploadAvatar);
+    // router.post("/:userId/avatar", middlewares([avatarUpload]), userController.uploadAvatar);
   });
 
   router.group("/categories", null, (router) => {
@@ -119,7 +119,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/:categoryId", validate([getCategoryById]), categoryController.getCategoryById);
     router.post("/", validate([createCategory]), categoryController.createCategory);
     router.put("/:categoryId", validate([updateCategory]), categoryController.updateCategory);
-    router.patch("/:categoryId/toggle", validate([toggleCategoryStatus]), categoryController.toggleCategoryStatus);
+    // router.patch("/:categoryId/toggle", validate([toggleCategoryStatus]), categoryController.toggleCategoryStatus);
   });
 
   router.group("/languages", null, (router) => {
@@ -127,7 +127,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/:languageId", validate([getLanguageById]), languageController.getLanguageById);
     router.post("/", middlewares([flagUpload]), validate([createLanguage]), languageController.createLanguage);
     router.put("/:languageId", validate([updateLanguage]), languageController.updateLanguage);
-    router.patch("/:languageId/toggle", validate([toggleLanguageStatus]), languageController.toggleLanguageStatus);
+    // router.patch("/:languageId/toggle", validate([toggleLanguageStatus]), languageController.toggleLanguageStatus);
   });
 });
 

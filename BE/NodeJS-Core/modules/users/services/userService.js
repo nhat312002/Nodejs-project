@@ -37,7 +37,6 @@ const userService = {
     user.url_avatar = avatarUrl;
     await user.save();
     return {
-      message: "Avatar updated successfully",
       url_avatar: avatarUrl,
     };
   },
@@ -175,8 +174,10 @@ const userService = {
       throw new Error("User not found");
     }
     const valid = await bcrypt.compare(data.oldPassword, user.password);
-    if (!valid) throw new Error("Incorrect password");
-
+    if (!valid) throw new Error("Incorrect old password");
+    if (data.oldPassword == data.password){
+      throw new Error("New password must be different");
+    }
     const salt = await bcrypt.genSalt(10);
     data.password = await bcrypt.hash(data.password, salt);
 
