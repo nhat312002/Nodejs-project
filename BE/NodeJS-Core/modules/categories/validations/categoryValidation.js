@@ -1,7 +1,8 @@
 const { Joi } = require("kernels/validations");
 
-const languageValidation = {
-    getAllLanguages: {
+
+const categoryValidation = {
+    getAllCategories: {
         query: Joi.object({
             page: Joi.number().integer().min(1).default(1).messages({
                 'number.base': 'Page must be a number.',
@@ -18,10 +19,6 @@ const languageValidation = {
                 'string.base': 'Name must be a string.',
                 'string.max': 'Name cannot be more than {#limit} characters long.'
             }),
-            locale: Joi.string().max(10).optional().messages({
-                'string.base': 'Locale must be a string.',
-                'string.max': 'Locale cannot be more than {#limit} characters long.'
-            }),
             status: Joi.number().valid(0, 1).optional().messages({
                 'number.base': 'Status must be a number.',
                 'any.only': 'Status must be either 0 (inactive) or 1 (active).'
@@ -29,26 +26,19 @@ const languageValidation = {
         })
     },
 
-    getLanguageById: {
+    getCategoryById: {
         params: Joi.object({
-            languageId: Joi.number().integer().positive().required().messages({
-                'number.base': 'Language ID must be a number.',
-                'number.integer': 'Language ID must be an integer.',
-                'number.positive': 'Language ID must be a positive number.',
-                'any.required': 'Language ID is a required parameter.'
+            categoryId: Joi.number().integer().positive().required().messages({
+                'number.base': 'Category ID must be a number.',
+                'number.integer': 'Category ID must be an integer.',
+                'number.positive': 'Category ID must be a positive number.',
+                'any.required': 'Category ID is a required parameter.'
             }),
         })
     },
 
-    createLanguage: {
+    createCategory: {
         body: Joi.object({
-            locale: Joi.string().min(2).max(5).required().messages({
-                'string.base': 'Locale must be a string.',
-                'string.empty': 'Locale cannot be empty.',
-                'string.min': 'Locale must be at least {#limit} characters long.',
-                'string.max': 'Locale cannot be more than {#limit} characters long.',
-                'any.required': 'Locale is a required field.'
-            }),
             name: Joi.string().min(3).max(255).required().messages({
                 'string.base': 'Name must be a string.',
                 'string.empty': 'Name cannot be empty.',
@@ -61,17 +51,12 @@ const languageValidation = {
                 'any.only': 'Status must be either "1" (active) or "0" (inactive).',
                 'any.required': 'Status is a required field.'
             }),
-        }),
+        })
     },
 
-    updateLanguage: {
+    updateCategory: {
         body: Joi.object({
-            locale: Joi.string().min(2).max(5).messages({
-                'string.base': 'Locale must be a string.',
-                'string.min': 'Locale must be at least {#limit} characters long.',
-                'string.max': 'Locale cannot be more than {#limit} characters long.'
-            }),
-            name: Joi.string().min(3).max(255).messages({
+            name: Joi.string().min(3).max(30).messages({
                 'string.base': 'Name must be a string.',
                 'string.min': 'Name must be at least {#limit} characters long.',
                 'string.max': 'Name cannot be more than {#limit} characters long.'
@@ -81,20 +66,28 @@ const languageValidation = {
                 'any.only': 'Status must be either "1" (active) or "0" (inactive).'
             }),
         }).min(1).messages({
-            'object.min': 'At least one field (locale, name, or status) must be provided to update.'
-        }),  
+            'object.min': 'At least one field (name or status) must be provided to update.'
+        }),
+        params: Joi.object({
+            categoryId: Joi.number().integer().positive().required().messages({
+                'number.base': 'Category ID must be a number.',
+                'number.integer': 'Category ID must be an integer.',
+                'number.positive': 'Category ID must be a positive number.',
+                'any.required': 'Category ID is a required parameter.'
+            }),
+        })
     },
 
-    toggleLanguageStatus: {
+    toggleCategoryStatus : {
         params: Joi.object({
-            languageId: Joi.number().integer().positive().required().messages({
-                'number.base': 'Language ID must be a number.',
-                'number.integer': 'Language ID must be an integer.',
-                'number.positive': 'Language ID must be a positive number.',
-                'any.required': 'Language ID is a required parameter.'
+            categoryId: Joi.number().integer().positive().required().messages({
+                'number.base': 'Category ID must be a number.',
+                'number.integer': 'Category ID must be an integer.',
+                'number.positive': 'Category ID must be a positive number.',
+                'any.required': 'Category ID is a required parameter.'
             }),
         })
     },
 }
 
-module.exports = languageValidation;
+module.exports = categoryValidation;
