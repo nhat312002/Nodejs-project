@@ -85,7 +85,7 @@ const postService = {
             const escapedTitle = sequelize.escape(title);
             titleRelevanceExpr = `MATCH(\`Post\`.\`title\`) AGAINST (${escapedTitle} IN NATURAL LANGUAGE MODE)`;
             where[Op.and] = literal(titleRelevanceExpr);
-            attributes.push([literal(titleRelevanceExpr), 'relevance']);
+            attributes.push([literal(titleRelevanceExpr), 'titleRelevance']);
         }
 
         let textRelevanceExpr = null;
@@ -94,7 +94,7 @@ const postService = {
             const escapedText = sequelize.escape(text);
             textRelevanceExpr = `MATCH(\`Post\`.\`title\`, \`Post\`.\`body\`) AGAINST (${escapedText} IN NATURAL LANGUAGE MODE)`;
             where[Op.and] = literal(textRelevanceExpr);
-            attributes.push([literal(textRelevanceExpr), 'text_relevance']);
+            attributes.push([literal(textRelevanceExpr), 'textRelevance']);
         }
 
         const whereUser = { status: '1' };
@@ -109,7 +109,7 @@ const postService = {
             const escapedName = sequelize.escape(booleanSearchString);
             userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN BOOLEAN MODE)`;
             whereUser[Op.and] = literal(userRelevanceExpr);
-            attributes.push([literal(userRelevanceExpr), 'user_relevance']);
+            attributes.push([literal(userRelevanceExpr), 'userRelevance']);
         }
 
 
@@ -175,10 +175,13 @@ const postService = {
 
         const order = [];
         if (title) {
-            order.push([literal('relevance'), 'DESC']);
+            order.push([literal('titleRelevance'), 'DESC']);
+        }
+        if (text) {
+            order.push([literal('textRelevance'), 'DESC']);
         }
         if (userFullName) {
-            order.push([literal('user_relevance'), 'DESC']);
+            order.push([literal('userRelevance'), 'DESC']);
         }
         const sortOptions = {
             date_asc: ['createdAt', 'ASC'],

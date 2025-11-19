@@ -35,6 +35,7 @@ const commentServices = {
                 },
                 {
                     model: User,
+                    as: "user",
                     where: {
                         status: '1'
                     },
