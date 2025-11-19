@@ -254,17 +254,6 @@ const userValidation = {
           'string.pattern.base': 'Phone number must be 10 or 11 digits.',
           'string.base': 'Phone number must be a string.',
         }),
-      url_avatar: Joi.string()
-        .trim()
-        .uri()
-        .max(255)
-        .optional()
-        .allow(null, '')
-        .messages({
-          'string.uri': 'Avatar URL must be a valid URI.',
-          'string.max': 'Avatar URL must not exceed 255 characters.',
-          'string.base': 'Avatar URL must be a string.',
-        }),
     }),
   },
 

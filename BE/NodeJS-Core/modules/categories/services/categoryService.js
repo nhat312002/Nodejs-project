@@ -51,21 +51,15 @@ const categoryService = {
     if (!category) {
       throw new Error("Category not found");
     }
-    const existingCategory = await Category.findOne({
-      where: { name: data.name, id: { [Op.ne]: id } },
-    });
-    if (existingCategory) {
-      throw new Error("Category name must be unique");
+    if (data.name){
+      const existingCategory = await Category.findOne({
+        where: { name: data.name, id: { [Op.ne]: id } },
+      });
+      if (existingCategory) {
+        throw new Error("Category name must be unique");
+      }
     }
     return await category.update(data);
-  },
-  toggleCategoryStatus: async (id) => {
-    const category = await Category.findByPk(id);
-    if (!category) throw new Error("Category not found");
-
-    category.status = category.status === "1" ? "0" : "1";
-    await category.save();
-    return category;
   },
 };
 

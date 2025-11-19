@@ -118,7 +118,7 @@ const userService = {
     if (!user) {
       throw new Error("User not found");
     }
-    if (data.email){
+    if (data.email) {
       const existingEmail = await User.findOne({
         where: { email: data.email, id: { [Op.ne]: id } },
       });
@@ -148,22 +148,26 @@ const userService = {
     if (!user) {
       throw new Error("User not found");
     }
-    if (data.email){
-      const existingEmail = await User.findOne({
-        where: { email: data.email, id: { [Op.ne]: id } },
-      });
-      if (existingEmail) {
-        throw new Error("User email must be unique");
+    const uniquenessConditions = [];
+    if (data.username)
+      uniquenessConditions.push({ username: data.username });
+    if (data.email)
+      uniquenessConditions.push({ email: data.email });
+
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: uniquenessConditions,
+        id: { [Op.ne]: id }
       }
+    });
+
+    if (existingUser) {
+      if (data.username == existingUser.username)
+        throw new Error("Language name must be unique");
+      if (data.email == existingUser.email)
+        throw new Error("Locale must be unique");
     }
-    if (data.username) {
-      const existingUsername = await User.findOne({
-        where: { username: data.username, id: { [Op.ne]: id } },
-      });
-      if (existingUsername) {
-        throw new Error("Username must be unique");
-      }
-    }
+
     const updatedUser = await user.update(data);
     delete updatedUser.dataValues.password;
     return updatedUser;
@@ -175,7 +179,7 @@ const userService = {
     }
     const valid = await bcrypt.compare(data.oldPassword, user.password);
     if (!valid) throw new Error("Incorrect old password");
-    if (data.oldPassword == data.password){
+    if (data.oldPassword == data.password) {
       throw new Error("New password must be different");
     }
     const salt = await bcrypt.genSalt(10);
