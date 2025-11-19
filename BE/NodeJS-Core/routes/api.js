@@ -57,7 +57,7 @@ router.group("/users", null, (router) => {
 
 
 // Authenticated user routes
-router.group("/me", middlewares([authenticated, role([1, 2, 3])]), (router) => {
+router.group("/", middlewares([authenticated, role([1, 2, 3])]), (router) => {
 
   router.group("/profile", null, (router) => {
     router.get("/", userController.getProfile);
@@ -66,7 +66,7 @@ router.group("/me", middlewares([authenticated, role([1, 2, 3])]), (router) => {
     router.post("/password", validate([changePassword]), userController.changePassword);
   });
 
-  router.group("/posts", null, (router) => {
+  router.group("/myposts", null, (router) => {
     router.get("/", validate([getPosts]), postController.getOwnPosts);
     router.get("/:postId", validate([getPostById]), postController.getOwnPostById);
     router.post("/", validate([createPost]), postController.createPost);
@@ -75,7 +75,7 @@ router.group("/me", middlewares([authenticated, role([1, 2, 3])]), (router) => {
   });
 
   router.group("/comments", null, (router) => {
-    router.get("/", validate([getCommentsByPost]), commentController.getCommentsByOwnPost);
+    // router.get("/", validate([getCommentsByPost]), commentController.getCommentsByOwnPost);
     router.post("/", validate([createComment]), commentController.createComment);
     router.put("/:commentId", validate([updateComment]), commentController.updateComment);
     router.delete("/:commentId", validate([deleteComment]), commentController.deleteComment);

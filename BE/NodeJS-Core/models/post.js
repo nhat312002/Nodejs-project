@@ -9,14 +9,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Post.belongsTo(models.User, { foreignKey: "user_id" });
-      Post.belongsTo(models.Language, { foreignKey: "language_id" });
+      Post.belongsTo(models.User, { foreignKey: "user_id", as: "user" });
+      Post.belongsTo(models.Language, { foreignKey: "language_id", as: "language" });
       Post.belongsTo(models.Post, {
         foreignKey: "original_id",
         as: "originalPost",
       });
       Post.belongsToMany(models.Category, {
         through: models.Post_Category,
+        as: "categories",
         foreignKey: "post_id",
         otherKey: "category_id",
       });

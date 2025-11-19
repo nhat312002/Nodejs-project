@@ -60,9 +60,9 @@ const postService = {
             'id',
             'title',
             'body',
-            'user_id',
-            'original_id',
-            'language_id',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
             'status',
             'createdAt',
             'updatedAt',
@@ -153,16 +153,19 @@ const postService = {
         const include = [
             {
                 model: User,
+                as: "user",
                 where: whereUser,
-                attributes: ["id", "full_name"]
+                attributes: ["id", ["full_name", "fullName"]]
             },
             {
                 model: Language,
+                as: "language",
                 where: { status: "1" },
-                attributes: ["id", "name"]
+                attributes: ["id", "name", "locale"]
             },
             {
                 model: Category,
+                as: "categories",
                 required: (Array.isArray(categoryIds) && categoryIds.length > 0) ? true : false,
                 where: whereCategory,
                 attributes: ["id", "name"],

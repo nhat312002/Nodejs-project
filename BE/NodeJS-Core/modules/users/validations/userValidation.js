@@ -277,9 +277,9 @@ const userValidation = {
         )
         .optional()
         .messages({
-          'string.pattern.base': 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
-          'string.empty': 'Password is required.',
-          'any.required': 'Password is required.',
+          'string.pattern.base': 'Old password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.',
+          'string.empty': 'Old password is required.',
+          'any.required': 'Old password is required.',
         }),
       password: Joi.string()
         .trim()
