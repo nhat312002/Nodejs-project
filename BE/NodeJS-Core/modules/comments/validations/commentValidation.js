@@ -17,7 +17,17 @@ const getCommentsByPost = {
             'number.base': 'Post ID must be a number.',
             'number.integer': 'Post ID must be an integer.',
             'any.required': 'Post ID is a required query parameter.'
-        })
+        }),
+        "page": Joi.number().integer().positive().optional().messages({
+            'number.base': 'Page must be a number.',
+            'number.integer': 'Page must be an integer.',
+            'number.positive': 'Page must be a positive number'
+        }),
+        "limit": Joi.number().integer().positive().optional().messages({
+            'number.base': 'Limit must be a number.',
+            'number.integer': 'Limit must be an integer.',
+            'number.positive': 'Limit must be a positive number'
+        }),
     })
 };
 

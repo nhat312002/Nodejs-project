@@ -69,6 +69,16 @@ const getPosts = {
             'string.base': 'Sort value must be a string.',
             'any.only': 'Sort must be one of [date_asc, date_desc, title_asc, title_desc].'
         }),
+        "page": Joi.number().integer().positive().optional().messages({
+            'number.base': 'Page must be a number.',
+            'number.integer': 'Page must be an integer.',
+            'number.positive': 'Page must be a positive number'
+        }),
+        "limit": Joi.number().integer().positive().optional().messages({
+            'number.base': 'Limit must be a number.',
+            'number.integer': 'Limit must be an integer.',
+            'number.positive': 'Limit must be a positive number'
+        }),
     })
 };
 
