@@ -9,15 +9,18 @@ import { PostPage } from './admin/post/post-page/post-page';
 
 export const routes: Routes = [
     {path: 'admin',
+      component: Home,
         children: [
-            {path: 'home', component: Home},
             {path: 'role-page', component: RolePage},
             {path: 'role-page/create', component: RoleCreate},
             {path: 'user-page', component: UserPage},
             {path: 'category-page', component: CategoryPage},
             {path: 'language-page', component: LanguagePage},
             {path: 'post-page', component: PostPage},
-            {path: '', redirectTo: 'home', pathMatch: 'full'}
         ]
     },
+    {
+      path: 'blog',
+      loadChildren: () => import('./blog/blog.routes').then(m => m.BlogRoutes)
+    }
 ];
