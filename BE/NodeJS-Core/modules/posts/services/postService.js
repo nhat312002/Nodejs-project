@@ -5,6 +5,17 @@ const { Op, literal } = db.Sequelize;
 
 const postService = {
     getPostById: async (postId) => {
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
         // console.log(postId);
         const post = await Post.findOne({
             where: {
@@ -12,7 +23,8 @@ const postService = {
                 status: {
                     [Op.not]: '0'
                 }
-            }
+            },
+            attributes,
         });
 
         if (!post) throw new Error("Post not found");
@@ -21,22 +33,67 @@ const postService = {
 
     getApprovedPostById: async (postId) => {
         // console.log(postId);
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
+        const include = [
+            {
+                model: User,
+                as: "user",
+                attributes: ["id", ["full_name", "fullName"]]
+            },
+            {
+                model: Language,
+                as: "language",
+                where: { status: "1" },
+                attributes: ["id", "name", "locale"]
+            },
+            {
+                model: Category,
+                as: "categories",
+                required: false,
+                attributes: ["id", "name"],
+                through: { attributes: [] }
+            }
+        ];
         const post = await Post.findOne({
             where: {
                 id: postId,
                 status: '2'
-            }
+            },
+            attributes,
+            include,
         });
         if (!post) throw new Error("Post not found");
         return post;
     },
 
     getOwnPostById: async (postId, userId) => {
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
         const post = await Post.findOne({
             where: {
                 id: postId,
                 user_id: userId
-            }
+            },
+            attributes,
         });
         if (!post) throw new Error("Post not found");
         return post;

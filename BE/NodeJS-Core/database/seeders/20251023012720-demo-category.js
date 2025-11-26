@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     /**
      * Add seed commands here.
      *
@@ -12,7 +12,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    await queryInterface.bulkInsert('Categories',[
+    await queryInterface.bulkInsert('Categories', [
       {
         name: "Tech",
         createdAt: new Date(),
@@ -37,11 +37,15 @@ module.exports = {
         name: "Travel",
         createdAt: new Date(),
         updatedAt: new Date()
-      }
+      },
+      { name: "Food", createdAt: new Date(), updatedAt: new Date() },
+      { name: "Health", createdAt: new Date(), updatedAt: new Date() },
+      { name: "Science", createdAt: new Date(), updatedAt: new Date() },
+      { name: "Education", createdAt: new Date(), updatedAt: new Date() }
     ])
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add commands to revert seed here.
      *
