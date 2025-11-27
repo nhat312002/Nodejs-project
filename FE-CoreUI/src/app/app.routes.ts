@@ -3,6 +3,7 @@ import { DefaultLayoutComponent } from './layout';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { guestGuard } from './guards/guest.guard';
+
 export const routes: Routes = [
   {
     path: 'login',
@@ -26,6 +27,13 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./views/users/users.component').then(m => m.UsersComponent),
+        data: {
+          title: 'User Management'
+        }
       },
       {
         path: 'theme',
