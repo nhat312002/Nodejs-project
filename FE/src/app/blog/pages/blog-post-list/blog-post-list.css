@@ -1,0 +1,99 @@
+
+/* blog-post-list.css */
+
+/* 1. CONTAINER CHÍNH */
+.post-list-container {
+  max-width: 1400px; /* Độ rộng tiêu chuẩn của blog hiện đại */
+  margin: 0 auto;
+  width: 95%;
+  padding: 48px 24px;
+  font-family: 'Inter', sans-serif; /* Font mặc định cho body */
+}
+
+/* 2. TIÊU ĐỀ SECTION (Giống Substack) */
+.post-list-container h2 {
+  font-family: 'Merriweather', serif; /* Font có chân sang trọng */
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0; /* Đường kẻ mờ ngăn cách */
+  letter-spacing: -0.5px; /* Thu hẹp khoảng cách chữ chút xíu cho chặt chẽ */
+
+  /* Căn chỉnh tiêu đề khớp với lưới bên dưới */
+  max-width: 100%;
+}
+
+/* 3. LƯỚI BÀI VIẾT (GRID LAYOUT) */
+.posts-grid {
+  display: grid;
+  /* Chia cột tự động:
+     - PC rộng: 3 cột
+     - Tablet: 2 cột
+     - Mobile: 1 cột
+  */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 40px; /* Khoảng cách giữa các bài rộng rãi */
+  margin-bottom: 60px;
+  justify-content: center;
+
+}
+
+/* Tùy chỉnh component app-post-item bên trong grid (nếu cần) */
+.grid-item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  /* Đảm bảo các item không bị vỡ layout */
+}
+
+/* 4. THANH PHÂN TRANG (PAGINATION) */
+/* Override style mặc định của Angular Material để tối giản hơn */
+mat-paginator {
+  background-color: transparent !important;
+  font-family: 'Inter', sans-serif;
+  border-top: 1px solid #e0e0e0;
+  color: #555;
+  font-weight: 500;
+  justify-content: flex-end; /* Đẩy sang phải hoặc để center tùy ý */
+}
+
+/* Tinh chỉnh màu chữ trong paginator */
+::ng-deep .mat-mdc-paginator-range-label {
+  color: #333;
+  font-weight: 600;
+}
+
+/* 5. TRẠNG THÁI LOADING & ERROR */
+.loading-text, .empty-state, .error-message {
+  text-align: center;
+  padding: 60px 0;
+  color: #666;
+  font-size: 1.1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .post-list-container {
+    padding: 24px 16px;
+  }
+
+  .post-list-container h2 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .posts-grid {
+    gap: 24px;
+    grid-template-columns: 1fr; /* Mobile về 1 cột dọc */
+  }
+}

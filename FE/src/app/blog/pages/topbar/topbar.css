@@ -1,0 +1,44 @@
+.topbar {
+  display: flex;
+  width:100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 60px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.left-group {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center; /* Mặc định: tiêu đề ở giữa */
+  gap: 12px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.right-group {
+  display: flex;
+  gap: 12px;
+}
+
+/* Khi màn hình nhỏ hơn breakpoint (vd 600px), logo + tiêu đề gộp về trái */
+@media (max-width: 600px) {
+  .left-group {
+    justify-content: flex-start;
+  }
+}

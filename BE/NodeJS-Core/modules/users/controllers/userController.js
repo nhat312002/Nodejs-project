@@ -1,55 +1,35 @@
 const userService = require("modules/users/services/userService.js");
 const responseUtils = require("utils/responseUtils");
-const multer = require("multer");
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // Giới hạn kích thước tệp là 5MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/jpg"];
-    const ext = file.mimetype.toLowerCase();
-    if (allowedTypes.includes(ext)) {
-      return cb(null, true);
-    }
-    cb(new Error("Invalid file type"));
-  },
-});
 
 const userController = {
-  uploadOwnAvatar: [
-    upload.single("avatar"),
-    async (req, res) => {
-      try {
-        const userId = req.user.id;
-        const file = req.file;
+  uploadOwnAvatar: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const file = req.file;
 
-        if (!file) {
-          throw new Error("No file uploaded");
-        }
-        const result = await userService.updateAvatar(userId, file);
-        return responseUtils.ok(res, result);
-      } catch (error) {
-        return responseUtils.error(res, error.message);
+      if (!file) {
+        throw new Error("No file uploaded");
       }
-    },
-  ],
-  uploadAvatar: [
-    upload.single("avatar"),
-    async (req, res) => {
-      try {
-        const userId = req.params.userId;
-        const file = req.file;
+      const result = await userService.updateAvatar(userId, file);
+      return responseUtils.ok(res, result, "Avatar updated successfully");
+    } catch (error) {
+      return responseUtils.error(res, error.message);
+    }
+  },
+  uploadAvatar: async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const file = req.file;
 
-        if (!file) {
-          throw new Error("No file uploaded");
-        }
-        const result = await userService.updateAvatar(userId, file);
-        return responseUtils.ok(res, result);
-      } catch (error) {
-        return responseUtils.error(res, error.message);
+      if (!file) {
+        throw new Error("No file uploaded");
       }
-    },
-  ],
+      const result = await userService.updateAvatar(userId, file);
+      return responseUtils.ok(res, result, "Avatar updated successfully");
+    } catch (error) {
+      return responseUtils.error(res, error.message);
+    }
+  },
   getAllActiveUsers: async (req, res) => {
     try {
       const page = Number.parseInt(req.query.page) || 1;
@@ -89,15 +69,7 @@ const userController = {
 
       const result = await userService.getAllUsers(page, limit, filters);
 
-      return responseUtils.ok(res, {
-        pagination: {
-          totalRecords: result.totalRecords,
-          totalPages: result.totalPages,
-          currentPage: result.currentPage,
-        },
-        users: result.users,
-      }, "User list retrieved successfully",
-      );
+      return responseUtils.ok(res, result, "User list retrieved successfully");
     } catch (error) {
       return responseUtils.error(res, error.message);
     }
@@ -164,7 +136,20 @@ const userController = {
     try {
       const userId = req.user.id;
       const data = req.body;
-      const updatedUser = await userService.updateUser(userId, data);
+      const updatedUser = await userService.updateProfile(userId, data);
+      responseUtils.ok(res, updatedUser);
+    } catch (error) {
+      if (error.message === "User not found") {
+        return responseUtils.notFound(res);
+      }
+      responseUtils.error(res, error.message);
+    }
+  },
+  changePassword: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const data = req.body;
+      const updatedUser = await userService.changePassword(userId, data);
       responseUtils.ok(res, updatedUser);
     } catch (error) {
       if (error.message === "User not found") {

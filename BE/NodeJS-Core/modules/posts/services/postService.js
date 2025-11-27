@@ -5,25 +5,98 @@ const { Op, literal } = db.Sequelize;
 
 const postService = {
     getPostById: async (postId) => {
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
         // console.log(postId);
-        return await Post.findOne({
+        const post = await Post.findOne({
             where: {
                 id: postId,
                 status: {
                     [Op.not]: '0'
                 }
-            }
+            },
+            attributes,
         });
+
+        if (!post) throw new Error("Post not found");
+        return post;
     },
 
     getApprovedPostById: async (postId) => {
         // console.log(postId);
-        return await Post.findOne({
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
+        const include = [
+            {
+                model: User,
+                as: "user",
+                attributes: ["id", ["full_name", "fullName"]]
+            },
+            {
+                model: Language,
+                as: "language",
+                where: { status: "1" },
+                attributes: ["id", "name", "locale"]
+            },
+            {
+                model: Category,
+                as: "categories",
+                required: false,
+                attributes: ["id", "name"],
+                through: { attributes: [] }
+            }
+        ];
+        const post = await Post.findOne({
             where: {
                 id: postId,
                 status: '2'
-            }
+            },
+            attributes,
+            include,
         });
+        if (!post) throw new Error("Post not found");
+        return post;
+    },
+
+    getOwnPostById: async (postId, userId) => {
+        const attributes = [
+            'id',
+            'title',
+            'body',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
+            'status',
+            'createdAt',
+            'updatedAt',
+        ];
+        const post = await Post.findOne({
+            where: {
+                id: postId,
+                user_id: userId
+            },
+            attributes,
+        });
+        if (!post) throw new Error("Post not found");
+        return post;
     },
 
     getPosts: async (filters) => {
@@ -36,7 +109,7 @@ const postService = {
         const page = Number(filters.page) || 1;
         const offset = (page - 1) * limit;
 
-        const { userId, userFullName, title, text, languageId, categoryIds, originalId, status, categoryMatchAll } = filters;
+        const { userId, userFullName, title, text, languageId, categoryIds, originalId, status, categoryMatchAll, sort } = filters;
 
         console.log(filters);
 
@@ -44,9 +117,9 @@ const postService = {
             'id',
             'title',
             'body',
-            'user_id',
-            'original_id',
-            'language_id',
+            ['user_id', 'userId'],
+            ['original_id', 'originalId'],
+            ['language_id', 'languageId'],
             'status',
             'createdAt',
             'updatedAt',
@@ -69,7 +142,7 @@ const postService = {
             const escapedTitle = sequelize.escape(title);
             titleRelevanceExpr = `MATCH(\`Post\`.\`title\`) AGAINST (${escapedTitle} IN NATURAL LANGUAGE MODE)`;
             where[Op.and] = literal(titleRelevanceExpr);
-            attributes.push([literal(titleRelevanceExpr), 'relevance']);
+            attributes.push([literal(titleRelevanceExpr), 'titleRelevance']);
         }
 
         let textRelevanceExpr = null;
@@ -78,17 +151,22 @@ const postService = {
             const escapedText = sequelize.escape(text);
             textRelevanceExpr = `MATCH(\`Post\`.\`title\`, \`Post\`.\`body\`) AGAINST (${escapedText} IN NATURAL LANGUAGE MODE)`;
             where[Op.and] = literal(textRelevanceExpr);
-            attributes.push([literal(textRelevanceExpr), 'text_relevance']);
+            attributes.push([literal(textRelevanceExpr), 'textRelevance']);
         }
 
         const whereUser = { status: '1' };
         let userRelevanceExpr = null;
 
         if (userFullName) {
-            const escapedName = sequelize.escape(userFullName);
-            userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN NATURAL LANGUAGE MODE)`;
+            const booleanSearchString = userFullName
+                .trim()
+                .split(/\s+/)
+                .map(word => `+${word}*`)
+                .join(' ');
+            const escapedName = sequelize.escape(booleanSearchString);
+            userRelevanceExpr = `MATCH (\`User\`.\`full_name\`) AGAINST (${escapedName} IN BOOLEAN MODE)`;
             whereUser[Op.and] = literal(userRelevanceExpr);
-            attributes.push([literal(userRelevanceExpr), 'user_relevance']);
+            attributes.push([literal(userRelevanceExpr), 'userRelevance']);
         }
 
 
@@ -116,7 +194,7 @@ const postService = {
                         HAVING COUNT(DISTINCT pc.category_id) = ${categoryIds.length}
                         )`)
                 };
-            } else 
+            } else
                 where.id = {
                     [Op.in]: sequelize.literal(`(
                             SELECT DISTINCT pc.post_id FROM Posts_Categories pc
@@ -132,16 +210,19 @@ const postService = {
         const include = [
             {
                 model: User,
+                as: "user",
                 where: whereUser,
-                attributes: ["id", "full_name"]
+                attributes: ["id", ["full_name", "fullName"]]
             },
             {
                 model: Language,
+                as: "language",
                 where: { status: "1" },
-                attributes: ["id", "name"]
+                attributes: ["id", "name", "locale"]
             },
             {
                 model: Category,
+                as: "categories",
                 required: (Array.isArray(categoryIds) && categoryIds.length > 0) ? true : false,
                 where: whereCategory,
                 attributes: ["id", "name"],
@@ -151,12 +232,23 @@ const postService = {
 
         const order = [];
         if (title) {
-            order.push([literal('relevance'), 'DESC']);
+            order.push([literal('titleRelevance'), 'DESC']);
+        }
+        if (text) {
+            order.push([literal('textRelevance'), 'DESC']);
         }
         if (userFullName) {
-            order.push([literal('user_relevance'), 'DESC']);
+            order.push([literal('userRelevance'), 'DESC']);
         }
-        order.push(['createdAt', 'DESC']);
+        const sortOptions = {
+            date_asc: ['createdAt', 'ASC'],
+            date_desc: ['createdAt', 'DESC'],
+            title_asc: ['title', 'ASC'],
+            title_desc: ['title', 'DESC'],
+        };
+        if (sort)
+            order.push(sortOptions[sort]);
+        else order.push(['createdAt', 'DESC']);
 
         const { count, rows } = await Post.findAndCountAll({
             where,
@@ -171,15 +263,22 @@ const postService = {
         const totalPages = Math.ceil(count / limit);
 
         return {
-            totalItems: count,
-            totalPages: totalPages,
-            currentPage: page,
+            pagination: {
+                totalRecords: count,
+                totalPages: totalPages,
+                currentPage: page,
+            },
             posts: rows
         };
     },
 
     getApprovedPosts: async (filters) => {
-        const merged = Object.assign({}, filters, {status: '2'});
+        const merged = Object.assign({}, filters, { status: '2' });
+        return await postService.getPosts(merged);
+    },
+
+    getOwnPosts: async (filters, userId) => {
+        const merged = Object.assign({}, filters, { userId: userId });
         return await postService.getPosts(merged);
     },
 
@@ -205,7 +304,21 @@ const postService = {
             // body_text: htmlToText(body)
         });
         if (Array.isArray(categoryIds) && categoryIds.length > 0) {
-            await post.setCategories(categoryIds);
+
+            const existingCategories = await Category.findAll({
+                where: {
+                    id: categoryIds
+                },
+                attributes: ['id']
+            });
+
+            const existingIds = new Set(existingCategories.map(cat => cat.id));
+            const nonExistentIds = categoryIds.filter(id => !existingIds.has(id));
+            if (nonExistentIds.length > 0) {
+                const errorMessage = `The following Category IDs do not exist: ${nonExistentIds.join(', ')}`;
+                throw new Error(errorMessage);
+            }
+            await post.setCategories(...existingIds);
         }
         return post;
     },
@@ -224,13 +337,27 @@ const postService = {
         if (title !== undefined) post.title = title;
         if (body !== undefined) {
             post.body = body;
-            post.body_text = htmlToText(body);
+            // post.body_text = htmlToText(body);
         }
         post.status = '1';
         await post.save();
 
-        if (Array.isArray(categoryIds)) {
-            await post.setCategories(categoryIds);
+        if (Array.isArray(categoryIds) && categoryIds.length > 0) {
+
+            const existingCategories = await Category.findAll({
+                where: {
+                    id: categoryIds
+                },
+                attributes: ['id']
+            });
+
+            const existingIds = new Set(existingCategories.map(cat => cat.id));
+            const nonExistentIds = categoryIds.filter(id => !existingIds.has(id));
+            if (nonExistentIds.length > 0) {
+                const errorMessage = `The following Category IDs do not exist: ${nonExistentIds.join(', ')}`;
+                throw new Error(errorMessage);
+            }
+            await post.setCategories(...existingIds);
         }
 
         return post;

@@ -1,7 +1,6 @@
 const db = require("models");
 const { Op } = require("sequelize");
 const { Role } = db;
-const roleValidation = require("modules/roles/validations/roleValidation.js");
 
 const roleService = {
   getAllRoles: async (page = 1, limit = 10, filter = {}) => {
@@ -24,9 +23,11 @@ const roleService = {
     });
 
     return {
-      totalRecords: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      pagination: {
+        totalRecords: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      },
       roles: rows,
     };
   },
@@ -34,10 +35,6 @@ const roleService = {
     return await Role.findByPk(id);
   },
   createRole: async (data) => {
-    // const { error } = roleValidation.createRole(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const existingRole = await Role.findOne({ where: { name: data.name } });
     if (existingRole) {
       throw new Error("Role with this name already exists");
@@ -45,10 +42,6 @@ const roleService = {
     return await Role.create(data);
   },
   updateRole: async (id, data) => {
-    // const { error } = roleValidation.updateRole(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const role = await Role.findByPk(id);
     if (!role) {
       throw new Error("Role not found");

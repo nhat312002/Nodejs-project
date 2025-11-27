@@ -37,7 +37,6 @@ const userService = {
     user.url_avatar = avatarUrl;
     await user.save();
     return {
-      message: "Avatar updated successfully",
       url_avatar: avatarUrl,
     };
   },
@@ -75,9 +74,11 @@ const userService = {
       order: [["createdAt", "DESC"]],
     });
     return {
-      totalRecords: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
+      pagination: {
+        totalRecords: count,
+        totalPages: Math.ceil(count / limit),
+        currentPage: page,
+      },
       users: rows,
     };
   },
@@ -96,10 +97,6 @@ const userService = {
     });
   },
   createUser: async (data) => {
-    // const { error } = userValidation.createUser(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const existingUsername = await User.findOne({
       where: { username: data.username },
     });
@@ -117,26 +114,81 @@ const userService = {
     return await User.create(data);
   },
   updateUser: async (id, data) => {
-    // const { error } = userValidation.updateUser(data);
-    // if (error) {
-    //   throw new Error(error.details[0].message);
-    // }
     const user = await User.findByPk(id);
     if (!user) {
       throw new Error("User not found");
     }
-    const existingEmail = await User.findOne({
-      where: { email: data.email, id: { [Op.ne]: id } },
-    });
-    if (existingEmail) {
-      throw new Error("User email must be unique");
+    if (data.email) {
+      const existingEmail = await User.findOne({
+        where: { email: data.email, id: { [Op.ne]: id } },
+      });
+      if (existingEmail) {
+        throw new Error("User email must be unique");
+      }
+    }
+    if (data.username) {
+      const existingUsername = await User.findOne({
+        where: { username: data.username, id: { [Op.ne]: id } },
+      });
+      if (existingUsername) {
+        throw new Error("Username must be unique");
+      }
     }
     if (data.password) {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
     }
-    return await user.update(data);
+    const updatedUser = await user.update(data);
+    delete updatedUser.dataValues.password;
+    return updatedUser;
   },
+  updateProfile: async (id, data) => {
+    console.log("update profile");
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const uniquenessConditions = [];
+    if (data.username)
+      uniquenessConditions.push({ username: data.username });
+    if (data.email)
+      uniquenessConditions.push({ email: data.email });
+
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: uniquenessConditions,
+        id: { [Op.ne]: id }
+      }
+    });
+
+    if (existingUser) {
+      if (data.username == existingUser.username)
+        throw new Error("Language name must be unique");
+      if (data.email == existingUser.email)
+        throw new Error("Locale must be unique");
+    }
+
+    const updatedUser = await user.update(data);
+    delete updatedUser.dataValues.password;
+    return updatedUser;
+  },
+  changePassword: async (id, data) => {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const valid = await bcrypt.compare(data.oldPassword, user.password);
+    if (!valid) throw new Error("Incorrect old password");
+    if (data.oldPassword == data.password) {
+      throw new Error("New password must be different");
+    }
+    const salt = await bcrypt.genSalt(10);
+    data.password = await bcrypt.hash(data.password, salt);
+
+    const updatedUser = await user.update(data);
+    delete updatedUser.dataValues.password;
+    return updatedUser;
+  }
 };
 
 module.exports = userService;

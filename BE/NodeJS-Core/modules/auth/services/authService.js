@@ -7,10 +7,15 @@ const User = db.User;
 exports.register = async (data) => {
   const { full_name, username, email, password } = data;
 
-  const existingUser = await User.findOne({
+  let existingUser = await User.findOne({
     where: { email },
   });
   if (existingUser) throw new Error('Email already exists');
+
+  existingUser = await User.findOne({
+    where: { username },
+  });
+  if (existingUser) throw new Error('Username already exists');
 
   const hashed = await bcrypt.hash(password, 10);
 
@@ -23,7 +28,6 @@ exports.register = async (data) => {
   });
 
   return {
-    message: 'Registration successful',
     user: {
       id: user.id,
       full_name: user.full_name,
@@ -53,7 +57,6 @@ exports.login = async (data) => {
   const refresh_token = jwtUtils.signRefreshToken(user.id, user.role_id);
   
   return {
-    message: 'Login successful',
     token,
     refresh_token,
     user: {
@@ -83,7 +86,6 @@ exports.refresh = async (data) => {
   // revoke or process old refresh token -- to be added
    
   return {
-    message: 'Refresh successful',
     token: newToken,
     refresh_token: newRefreshToken,
     user: {

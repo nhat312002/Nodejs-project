@@ -1,6 +1,6 @@
 require("express-router-group");
 const express = require("express");
-const { middlewares, authenticated, role } = require("kernels/middlewares");
+const { middlewares, authenticated, role, avatarUpload, flagUpload } = require("kernels/middlewares");
 const { validate } = require("kernels/validations");
 const commentController = require("modules/comments/controllers/commentController");
 const { getCommentsByPost, createComment, updateComment, deleteComment } = require("modules/comments/validations/commentValidation");
@@ -10,9 +10,9 @@ const { getPostById, getPosts, createPost, updatePost, disablePost, setPostStatu
 const roleController = require("modules/roles/controllers/roleController");
 const { createRole, getAllRoles, getRoleById, updateRole } = require("modules/roles/validations/roleValidation");
 const userController = require("modules/users/controllers/userController");
-const { createUser, getAllUsers, getUserById, updateUser } = require("modules/users/validations/userValidation");
+const { createUser, getAllUsers, getUserById, updateUser, updateProfile, changePassword } = require("modules/users/validations/userValidation");
 const categoryController = require("modules/categories/controllers/categoryController");
-const { createCategory, getAllCategories, getCategoryById, updateCategory, toggleCategoryStatus} = require("modules/categories/validations/categoryValidation");
+const { createCategory, getAllCategories, getCategoryById, updateCategory, toggleCategoryStatus } = require("modules/categories/validations/categoryValidation");
 const languageController = require("modules/languages/controllers/languageController");
 const { createLanguage, getAllLanguages, getLanguageById, updateLanguage, toggleLanguageStatus } = require("modules/languages/validations/languageValidation");
 const authController = require("modules/auth/controllers/authController");
@@ -41,7 +41,15 @@ router.group("/auth", null, (router) => {
 router.get("/languages", validate([getAllLanguages]), languageController.getActiveLanguages);
 router.get("/categories", validate([getAllCategories]), categoryController.getActiveCategories);
 
+const userMiddlewares = middlewares([authenticated, role([1, 2, 3])]);
 router.group("/posts", null, (router) => {
+
+  router.get("/own", userMiddlewares, validate([getPosts]), postController.getOwnPosts);
+  router.get("/own/:postId", userMiddlewares, validate([getPostById]), postController.getOwnPostById);
+  router.post("/", userMiddlewares, validate([createPost]), postController.createPost);
+  router.put("/:postId", userMiddlewares, validate([updatePost]), postController.updatePost);
+  router.put("/:postId/disable", userMiddlewares, validate([disablePost]), postController.disablePost);
+
   router.get("/", validate([getPosts]), postController.getApprovedPosts);
   router.get("/:postId", validate([getPostById]), postController.getApprovedPostById);
 });
@@ -61,18 +69,13 @@ router.group("/", middlewares([authenticated, role([1, 2, 3])]), (router) => {
 
   router.group("/profile", null, (router) => {
     router.get("/", userController.getProfile);
-    router.put("/", validate([updateUser]), userController.updateProfile);
-    router.post("/avatar", userController.uploadOwnAvatar);
-  });
-
-  router.group("/posts", null, (router) => {
-    // router.post("/", validate([getPosts]), postController.getOwnPosts);
-    router.post("/", validate([createPost]), postController.createPost);
-    router.put("/:postId", validate([updatePost]), postController.updatePost);
-    router.put("/:postId/disable", validate([disablePost]), postController.disablePost);
+    router.put("/", validate([updateProfile]), userController.updateProfile);
+    router.post("/avatar", middlewares([avatarUpload]), userController.uploadOwnAvatar);
+    router.post("/password", validate([changePassword]), userController.changePassword);
   });
 
   router.group("/comments", null, (router) => {
+    // router.get("/", validate([getCommentsByPost]), commentController.getCommentsByOwnPost);
     router.post("/", validate([createComment]), commentController.createComment);
     router.put("/:commentId", validate([updateComment]), commentController.updateComment);
     router.delete("/:commentId", validate([deleteComment]), commentController.deleteComment);
@@ -99,7 +102,6 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
   router.group("/roles", null, (router) => {
     router.get("/", validate([getAllRoles]), roleController.getAllRoles);
     router.get("/:roleId", validate([getRoleById]), roleController.getRoleById);
-    router.post("/create", validate([createRole]), roleController.createRole);
     router.put("/:roleId", validate([updateRole]), roleController.updateRole);
   });
 
@@ -108,7 +110,6 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/:userId", validate([getUserById]), userController.getUserById);
     router.post("/create", validate([createUser]), userController.createUser);
     router.put("/:userId", validate([updateUser]), userController.updateUser);
-    router.post("/:userId/avatar", userController.uploadAvatar);
   });
 
   router.group("/categories", null, (router) => {
@@ -116,15 +117,13 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/:categoryId", validate([getCategoryById]), categoryController.getCategoryById);
     router.post("/", validate([createCategory]), categoryController.createCategory);
     router.put("/:categoryId", validate([updateCategory]), categoryController.updateCategory);
-    router.patch("/:categoryId/toggle", validate([toggleCategoryStatus]), categoryController.toggleCategoryStatus);
   });
 
   router.group("/languages", null, (router) => {
     router.get("/", validate([getAllLanguages]), languageController.getAllLanguages);
     router.get("/:languageId", validate([getLanguageById]), languageController.getLanguageById);
-    router.post("/", validate([createLanguage]), languageController.createLanguage);
+    router.post("/", middlewares([flagUpload]), validate([createLanguage]), languageController.createLanguage);
     router.put("/:languageId", validate([updateLanguage]), languageController.updateLanguage);
-    router.patch("/:languageId/toggle", validate([toggleLanguageStatus]), languageController.toggleLanguageStatus);
   });
 });
 

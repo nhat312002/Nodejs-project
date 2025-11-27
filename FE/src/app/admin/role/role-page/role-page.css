@@ -1,0 +1,44 @@
+.role-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px #0000001a;
+}
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #ff6719;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.btn-add i {
+  font-size: 16px;
+}
+
+.btn-add:hover {
+  opacity: 0.85;
+}
+.role-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.role-table th, .role-table td {
+  padding: 8px;
+  text-align: left;
+}

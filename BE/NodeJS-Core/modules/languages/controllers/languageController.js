@@ -1,41 +1,15 @@
 const languageService = require("modules/languages/services/languageService.js");
 const responseUtils = require("utils/responseUtils");
 const languageValidation = require("modules/languages/validations/languageValidation")
-const multer = require("multer");
-const path = require("path");
-const uploadDir = path.join(process.cwd(), "uploads/flags");
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = Date.now() + "-" + file.originalname;
-        cb(null, uniqueName);
-    },
-});
-
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/jpg"];
-        const ext = file.mimetype.toLowerCase();
-        if (allowedTypes.includes(ext)) {
-            return cb(null, true);
-        }
-        cb(new Error("Invalid file type"));
-    },
-});
 
 const languageController = {
     getActiveLanguages: async (req, res) => {
         try {
-            const merge = Object.assign({}, req.query, {status: "1"});
+            const merge = Object.assign({}, req.query, { status: "1" });
             console.log(merge);
             const languages = await languageService.getAllLanguages(merge);
             responseUtils.ok(res, languages);
-            
+
         } catch (error) {
             responseUtils.error(res, error.message);
         }
@@ -61,20 +35,17 @@ const languageController = {
             responseUtils.error(res, error.message);
         }
     },
-    createLanguage: [
-        upload.single("url_flag"),
-        async (req, res) => {
-            try {
-                const { locale, name, status } = req.body;
-                const url_flag = req.file ? `/uploads/flags/${req.file.filename}` : null;
-                const data = { locale, name, status, url_flag };
-                const newLanguage = await languageService.createLanguage(data);
-                res.status(201).json(newLanguage);
-            } catch (error) {
-                responseUtils.error(res, error.message);
-            }
-        },
-    ],
+    createLanguage: async (req, res) => {
+        try {
+            const { locale, name, status } = req.body;
+            const url_flag = req.file ? `/uploads/flags/${req.file.filename}` : null;
+            const data = { locale, name, status, url_flag };
+            const newLanguage = await languageService.createLanguage(data);
+            res.status(201).json(newLanguage);
+        } catch (error) {
+            responseUtils.error(res, error.message);
+        }
+    },
     updateLanguage: async (req, res) => {
         try {
             const languageId = req.params.languageId;

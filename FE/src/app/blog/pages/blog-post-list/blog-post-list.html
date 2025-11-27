@@ -1,0 +1,34 @@
+<app-topbar></app-topbar>
+<p>blog-post-list works!</p>
+<section class="post-list-container">
+  <h2>Bài viết mới nhất</h2>
+
+
+  @if (loading()) {
+    <p role="status">Đang tải bài viết...</p>
+  } @else if (error(); as errorMessage) {
+    <div class="error-message" role="alert">{{ errorMessage }}</div>
+  } @else {
+    @if (posts().length > 0) {
+      <div class="posts-grid">
+        @for (post of posts(); track post.id) {
+          <app-post-item [post]="post" />
+
+        }
+      </div>
+
+      <mat-paginator
+        [length]="total()"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[10, 15, 20]"
+        (page)="onPageChange($event)"
+        aria-label="Chọn trang"
+        showFirstLastButtons>
+      </mat-paginator>
+    } @else {
+
+      <p>Chưa có bài viết nào được đăng.</p>
+    }
+  }
+</section>
