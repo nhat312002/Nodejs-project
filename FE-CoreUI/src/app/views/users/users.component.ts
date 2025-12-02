@@ -3,8 +3,8 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AvatarModule, BadgeModule, ButtonModule, CardModule, FormModule, GridModule, ModalModule, PaginationModule, SpinnerModule, TableModule } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { UserService } from '../../services/user.service';
-import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../core/services/user.service';
+import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { CustomPaginationComponent } from '../../shared/components/custom-pagination/custom-pagination.component';
 @Component({
