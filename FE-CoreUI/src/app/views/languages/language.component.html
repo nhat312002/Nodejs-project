@@ -1,0 +1,59 @@
+<div class="language-container">
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="language-form">
+
+    <input formControlName="name" placeholder="Tên ngôn ngữ" />
+    <input formControlName="locale" placeholder="Locale (vd: en, vi...)" />
+
+    <input type="file" accept="image/*" (change)="onFileChange($event)" />
+
+    <select formControlName="status">
+      <option value="active">Active</option>
+      <option value="disable">Disable</option>
+    </select>
+
+    <button type="submit">{{ editing ? 'Update' : 'Add' }}</button>
+    <button type="button" (click)="reset()">Cancel</button>
+
+  </form>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Locale</th>
+        <th>Flag</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let item of languages; index as i">
+        <td>{{ i + 1 }}</td>
+        <td>{{ item.name }}</td>
+        <td>{{ item.locale }}</td>
+
+        <td>
+          <img *ngIf="item.flag" [src]="item.flag" class="flag" />
+        </td>
+
+        <td>
+          <span [class.active]="item.status === 'active'"
+                [class.disable]="item.status === 'disable'">
+            {{ item.status }}
+          </span>
+        </td>
+
+        <td>
+          <button (click)="edit(item)">Change</button>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+
+</div>

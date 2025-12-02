@@ -408,6 +408,13 @@ export const navItems: INavData[] = [
       }
     ]
   },
+
+  {
+    name: 'Languages',
+    url: '/languages',
+    iconComponent: { name: 'cil-globe-alt' } 
+  },
+
   {
     title: true,
     name: 'Links',
