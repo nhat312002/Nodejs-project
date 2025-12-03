@@ -25,6 +25,11 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     children: [
       {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
         path: 'dashboard',
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
@@ -32,7 +37,21 @@ export const routes: Routes = [
         path: 'users',
         loadComponent: () => import('./views/users/users.component').then(m => m.UsersComponent),
         data: {
-          title: 'User Management'
+          title: 'Users'
+        }
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./views/categories/categories.component').then(m => m.CategoriesComponent),
+        data: {
+          title: 'Categories'
+        }
+      },
+      {
+        path: 'languages',
+        loadChildren: () => import('./views/languages/routes').then((m) => m.languagesRoutes),
+        data: {
+          title: 'Languages'
         }
       },
       {
@@ -71,10 +90,7 @@ export const routes: Routes = [
         path: 'pages',
         loadChildren: () => import('./views/pages/routes').then((m) => m.routes)
       },
-      {
-        path: 'languages',
-        loadChildren: () => import('./views/languages/routes').then((m) => m.languagesRoutes)
-      }
+
     ]
 
   },

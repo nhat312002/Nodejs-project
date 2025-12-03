@@ -50,17 +50,17 @@ const handle401Error = (
     refreshTokenSubject.next(null);
 
     return authService.refreshToken().pipe(
+      catchError((err) => {
+        isRefreshing = false;
+        authService.logout();
+        return throwError(() => err);
+      }),
       switchMap((response: any) => {
         isRefreshing = false;
         refreshTokenSubject.next(response.data.token);
 
         return next(addTokenHeader(request, response.data.token));
       }),
-      catchError((err) => {
-        isRefreshing = false;
-        authService.logout();
-        return throwError(() => err);
-      })
     );
   } else {
     return refreshTokenSubject.pipe(
