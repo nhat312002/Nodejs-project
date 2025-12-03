@@ -122,10 +122,15 @@ export class CategoriesComponent implements OnInit {
   save() {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
+    const rawName = this.form.value.name;
+    const cleanName = rawName ? rawName.trim() : '';
+
     const payload = {
-      name: this.form.value.name,
+      name: cleanName,
       status: this.form.value.is_active ? '1' : '0'
     };
+
+    this.form.patchValue({ name: cleanName });
 
     const req$ = (this.isEditMode && this.currentId)
       ? this.categoryService.update(this.currentId, payload)
