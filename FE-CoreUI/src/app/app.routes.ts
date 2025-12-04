@@ -35,21 +35,21 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        loadComponent: () => import('./views/users/users.component').then(m => m.UsersComponent),
+        loadComponent: () => import('./views/admin/users/users.component').then(m => m.UsersComponent),
         data: {
           title: 'Users'
         }
       },
       {
         path: 'categories',
-        loadComponent: () => import('./views/categories/categories.component').then(m => m.CategoriesComponent),
+        loadComponent: () => import('./views/admin/categories/categories.component').then(m => m.CategoriesComponent),
         data: {
           title: 'Categories'
         }
       },
       {
         path: 'languages',
-        loadComponent: () => import('./views/languages/languages.component').then((m) => m.LanguagesComponent),
+        loadComponent: () => import('./views/admin/languages/languages.component').then((m) => m.LanguagesComponent),
         data: {
           title: 'Languages'
         }

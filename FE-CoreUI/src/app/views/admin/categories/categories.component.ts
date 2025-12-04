@@ -1,15 +1,16 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { CategoryService } from '../../core/services/category.service';
-import { Category } from '../../core/models/category.model';
-import { CustomPaginationComponent } from '../../shared/components/custom-pagination/custom-pagination.component';
+import { CategoryService } from '../../../core/services/category.service';
+import { Category } from '../../../core/models/category.model';
+import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
 import {
   TableModule, CardModule, ButtonModule, BadgeModule, FormModule,
   GridModule, ModalModule, SpinnerModule
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { useModalCleanup } from '../../shared/utils/modal-cleanup.util';
+import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
+import { NoWhitespaceValidator } from '../../../shared/validators/no-whitespace.validator';
 
 @Component({
   selector: 'app-categories',
@@ -41,7 +42,7 @@ export class CategoriesComponent implements OnInit {
 
   constructor() {
     this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
+      name: ['', [Validators.required, NoWhitespaceValidator, Validators.minLength(2)]],
       is_active: [true]
     });
   }
