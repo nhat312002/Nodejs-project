@@ -1,17 +1,17 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { LanguageService } from '../../core/services/language.service';
-import { Language } from '../../core/models/language.model';
-import { CustomPaginationComponent } from '../../shared/components/custom-pagination/custom-pagination.component';
-import { NoWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
-import { useModalCleanup } from '../../shared/utils/modal-cleanup.util';
+import { LanguageService } from '../../../core/services/language.service';
+import { Language } from '../../../core/models/language.model';
+import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
+import { NoWhitespaceValidator } from '../../../shared/validators/no-whitespace.validator';
+import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
 import {
   TableModule, CardModule, ButtonModule, BadgeModule, FormModule,
   GridModule, ModalModule, SpinnerModule, AvatarModule
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-languages',
