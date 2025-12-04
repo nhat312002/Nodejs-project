@@ -32,7 +32,7 @@ export class LanguageService {
       .set('limit', limit.toString());
 
     if (search.trim()) {
-      params = params.set('search', search.trim());
+      params = params.set('name', search.trim());
     }
 
     return this.http.get<ApiResponse<LanguageListData>>(this.adminApiUrl, { params });
@@ -45,6 +45,7 @@ export class LanguageService {
   update(id: number, data: FormData): Observable<ApiResponse<Language>> {
     return this.http.put<ApiResponse<Language>>(`${this.adminApiUrl}/${id}`, data);
   }
+
 
 
 }

@@ -123,7 +123,7 @@ router.group("/admin", middlewares([authenticated, role([3])]), (router) => {
     router.get("/", validate([getAllLanguages]), languageController.getAllLanguages);
     router.get("/:languageId", validate([getLanguageById]), languageController.getLanguageById);
     router.post("/", middlewares([flagUpload]), validate([createLanguage]), languageController.createLanguage);
-    router.put("/:languageId", validate([updateLanguage]), languageController.updateLanguage);
+    router.put("/:languageId", middlewares([flagUpload]), validate([updateLanguage]), languageController.updateLanguage);
   });
 });
 

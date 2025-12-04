@@ -52,8 +52,10 @@ export class CategoriesComponent implements OnInit {
 
   private modalCleanup = useModalCleanup();
 
-  loadData() {
-    this.isLoading.set(true);
+  loadData(showSpinner = true) {
+    if (showSpinner)
+      this.isLoading.set(true);
+
     this.categoryService.getCategories(this.currentPage(), this.pageSize(), this.searchText()).subscribe({
       next: (res) => {
         if (res.success) {
@@ -139,8 +141,10 @@ export class CategoriesComponent implements OnInit {
     req$.subscribe({
       next: () => {
         this.visible = false;
-        if (!this.isEditMode) this.currentPage.set(1);
-        this.loadData();
+        if (!this.isEditMode) {
+          this.currentPage.set(1);
+          this.loadData();
+        } else this.loadData(false);
       },
       error: (err) => {
         console.error(err);
@@ -149,7 +153,7 @@ export class CategoriesComponent implements OnInit {
           return;
         }
 
-        if (err.status === 422 || err.status === 400) {
+        if (err.status === 422 || err.status === 400 || err.status === 500) {
            const msg = err.error?.data?.[0] || err.error?.message || 'Validation Error';
            this.backendError.set(msg);
         } else {

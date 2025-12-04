@@ -7,6 +7,7 @@ import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { CustomPaginationComponent } from '../../shared/components/custom-pagination/custom-pagination.component';
+import { useModalCleanup } from '../../shared/utils/modal-cleanup.util';
 @Component({
   selector: 'app-users',
   imports: [
@@ -21,6 +22,8 @@ import { CustomPaginationComponent } from '../../shared/components/custom-pagina
 export class UsersComponent implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
+
+  private modalCleanup = useModalCleanup();
 
   users = signal<User[]>([]);
   currentPage = signal<number>(1);
@@ -52,8 +55,10 @@ export class UsersComponent implements OnInit {
     this.loadData();
   }
 
-  loadData() {
-    this.isLoading.set(true);
+  loadData(showSpinner = true) {
+    if (showSpinner)
+      this.isLoading.set(true);
+
     this.userService.getUsers(this.currentPage(), this.limit(), this.searchText()).subscribe({
       next: (res) => {
         if (res.success) {
@@ -120,17 +125,19 @@ export class UsersComponent implements OnInit {
       next: () => {
         this.users.update(list => list.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
         this.resetModal();
+        this.loadData(false);
       },
       error: () => {
         alert('Failed to update status');
         this.resetModal();
+        this.loadData();
       }
     });
   }
 
   resetModal() {
     this.confirmVisible = false;
-    this.userToToggle = null;
+    // this.userToToggle = null;
   }
 
 }

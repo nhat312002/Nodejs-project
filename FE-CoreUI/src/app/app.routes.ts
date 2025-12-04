@@ -49,7 +49,7 @@ export const routes: Routes = [
       },
       {
         path: 'languages',
-        loadChildren: () => import('./views/languages/routes').then((m) => m.languagesRoutes),
+        loadComponent: () => import('./views/languages/languages.component').then((m) => m.LanguagesComponent),
         data: {
           title: 'Languages'
         }
