@@ -109,7 +109,7 @@ const postService = {
         const page = Number(filters.page) || 1;
         const offset = (page - 1) * limit;
 
-        const { userId, userFullName, title, text, languageId, categoryIds, originalId, status, categoryMatchAll, sort } = filters;
+        const { userId, userFullName, title, text, languageId, locale, categoryIds, originalId, status, categoryMatchAll, sort } = filters;
 
         console.log(filters);
 
@@ -169,6 +169,10 @@ const postService = {
             attributes.push([literal(userRelevanceExpr), 'userRelevance']);
         }
 
+        const whereLanguage = { status: "1" };
+        if (locale) {
+            whereLanguage.locale = locale;
+        }
 
         const whereCategory = {
             status: '1',
@@ -217,7 +221,7 @@ const postService = {
             {
                 model: Language,
                 as: "language",
-                where: { status: "1" },
+                where: whereLanguage,
                 attributes: ["id", "name", "locale"]
             },
             {

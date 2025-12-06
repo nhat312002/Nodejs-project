@@ -31,6 +31,10 @@ const getPosts = {
             'number.base': 'Language ID must be a number.',
             'number.integer': 'Language ID must be an integer.'
         }),
+        "locale": Joi.string().trim().pattern(/^[a-z]{2}(-[A-Z]{2})?$/).optional().messages({
+            'string.base': 'Locale must be a string.',
+            'string.pattern.base': 'Locale format must be xx hoặc xx-XX (e.g: vi, en-US)'
+        }),
         "categoryIds": Joi.optional().custom((value, helpers) => {
             if (value === "other") return "other";
             if (typeof value === "string") {
