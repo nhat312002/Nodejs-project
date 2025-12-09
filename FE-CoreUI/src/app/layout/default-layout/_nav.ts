@@ -1,9 +1,11 @@
 import { INavData } from '@coreui/angular';
 
+const baseUrl = '/admin';
+
 export const navItems: INavData[] = [
   {
     name: 'Dashboard',
-    url: '/dashboard',
+    url: `${baseUrl}/dashboard`,
     iconComponent: { name: 'cil-speedometer' },
     badge: {
       color: 'info',
@@ -16,17 +18,17 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Users',
-    url: '/users',
+    url: `${baseUrl}/users`,
     iconComponent: { name: 'cil-people' }
   },
   {
     name: 'Categories',
-    url: '/categories',
+    url: `${baseUrl}/categories`,
     iconComponent: { name: 'cil-newspaper'}
   },
   {
     name: 'Languages',
-    url: '/languages',
+    url: `${baseUrl}/languages`,
     iconComponent: { name: 'cil-language'}
   },
   {
@@ -431,7 +433,7 @@ export const navItems: INavData[] = [
   {
     name: 'Languages',
     url: '/languages',
-    iconComponent: { name: 'cil-globe-alt' } 
+    iconComponent: { name: 'cil-globe-alt' }
   },
 
   {

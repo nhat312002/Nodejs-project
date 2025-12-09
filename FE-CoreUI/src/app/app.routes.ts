@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { DefaultLayoutComponent } from './layout';
+import { DefaultLayoutComponent, ClientLayoutComponent } from './layout';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { guestGuard } from './core/guards/guest.guard';
@@ -16,12 +16,29 @@ export const routes: Routes = [
     loadComponent: () => import('./views/pages/register/register.component').then(m => m.RegisterComponent),
     data: {
       title: 'Register Page'
-    }
+    },
+    canActivate: [guestGuard]
   },
   {
     path: '',
+    component: ClientLayoutComponent,
+    data: { title: 'Home' },
+    children: [
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full'
+      },
+      {
+        path: 'home',
+        loadComponent: () => import('./views/client/home/home.component').then((m) => m.HomeComponent)
+      },
+    ]
+  },
+  {
+    path: 'admin',
     component: DefaultLayoutComponent,
-    data: { title: 'Home', roles: [3] },
+    data: { title: 'Admin Home', roles: [3] },
     canActivate: [authGuard, roleGuard],
     children: [
       {
@@ -54,47 +71,10 @@ export const routes: Routes = [
           title: 'Languages'
         }
       },
-      {
-        path: 'theme',
-        loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
-      },
-      {
-        path: 'base',
-        loadChildren: () => import('./views/base/routes').then((m) => m.routes)
-      },
-      {
-        path: 'buttons',
-        loadChildren: () => import('./views/buttons/routes').then((m) => m.routes)
-      },
-      {
-        path: 'forms',
-        loadChildren: () => import('./views/forms/routes').then((m) => m.routes)
-      },
-      {
-        path: 'icons',
-        loadChildren: () => import('./views/icons/routes').then((m) => m.routes)
-      },
-      {
-        path: 'notifications',
-        loadChildren: () => import('./views/notifications/routes').then((m) => m.routes)
-      },
-      {
-        path: 'widgets',
-        loadChildren: () => import('./views/widgets/routes').then((m) => m.routes)
-      },
-      {
-        path: 'charts',
-        loadChildren: () => import('./views/charts/routes').then((m) => m.routes)
-      },
-      {
-        path: 'pages',
-        loadChildren: () => import('./views/pages/routes').then((m) => m.routes)
-      },
-
     ]
 
   },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: '' }
   // {
   //   path: '',
   //   redirectTo: 'dashboard',

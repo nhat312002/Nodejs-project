@@ -9,12 +9,17 @@ import {Category, CategoryListData} from '../models/category.model';
 export class CategoryService {
   private http = inject(HttpClient);
   private adminApiUrl = `${environment.apiUrl}/admin/categories`;
+  private publicApiUrl = `${environment.apiUrl}/categories`;
 
-  getCategories(page: number = 1, limit: number = 10, search: string = ''): Observable<ApiResponse<CategoryListData>> {
+  getCategories(page: number = 1, limit: number = 10, search: string = '', apiUrl: string = this.adminApiUrl): Observable<ApiResponse<CategoryListData>> {
     const params: any = {page, limit};
     if (search) params.name = search;
 
-    return this.http.get<ApiResponse<CategoryListData>>(this.adminApiUrl, {params});
+    return this.http.get<ApiResponse<CategoryListData>>(apiUrl, {params});
+  }
+
+  getPublicCategories(page: number = 1, limit: number = 10, search: string = '') {
+    return this.getCategories(page, limit, search, this.publicApiUrl);
   }
 
   create(data: Partial<Category>): Observable<ApiResponse<Category>>{

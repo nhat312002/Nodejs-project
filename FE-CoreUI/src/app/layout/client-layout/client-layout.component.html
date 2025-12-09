@@ -1,0 +1,89 @@
+<!-- === TOP BAR (Sticky) === -->
+<header class="client-header border-bottom bg-white sticky-top">
+  <c-container class="d-flex justify-content-between align-items-center h-100">
+
+    <!-- LEFT: Logo & Brand -->
+    <a routerLink="/" class="text-decoration-none d-flex align-items-center gap-2 text-dark brand-link">
+      <!-- Replace with your actual logo path -->
+      <img src="/assets/img/brand/logo.png" height="32" width="32" alt="Logo" class="rounded-1 logo-img">
+      <span class="fw-bold tracking-tight d-none d-sm-block fs-5">My Blog</span>
+    </a>
+
+    <!-- RIGHT: Actions -->
+    <div class="d-flex align-items-center gap-3">
+
+      <!-- 2. AUTHENTICATION -->
+      @if (authService.currentUser(); as user) {
+        <!-- LOGGED IN: User Menu -->
+        <c-dropdown variant="nav-item">
+          <button cDropdownToggle cButton color="light" variant="ghost" class="p-0 border-0 rounded-circle">
+            <c-avatar [src]="'assets/images/avatars/8.jpg'" size="md"></c-avatar>
+          </button>
+
+          <ul cDropdownMenu class="end-0 shadow-lg border-0 mt-2 pt-0 overflow-hidden" style="min-width: 200px;">
+            <!-- User Header -->
+            <li class="px-3 py-3 bg-light border-bottom mb-2">
+              <div class="fw-bold text-truncate text-dark">{{ "user.fullName" }}</div>
+              <div class="small text-muted">@{{ 'user' }}</div>
+            </li>
+
+            <!-- Menu Items -->
+            <li>
+              <a cDropdownItem routerLink="/profile" class="py-2">
+                <svg cIcon name="cilUser" class="me-2 text-muted"></svg> Profile
+              </a>
+            </li>
+
+            <!-- Admin Link (Protected: Only show if Admin) -->
+            @if(user.role === 3) {
+              <li>
+                <a cDropdownItem routerLink="/admin/dashboard" class="py-2">
+                  <svg cIcon name="cilSpeedometer" class="me-2 text-muted"></svg> Dashboard
+                </a>
+              </li>
+            }
+
+            <li><hr cDropdownDivider></li>
+
+            <li>
+              <a cDropdownItem (click)="logout()" class="py-2 text-danger pointer">
+                <svg cIcon name="cilAccountLogout" class="me-2"></svg> Sign out
+              </a>
+            </li>
+          </ul>
+        </c-dropdown>
+
+      } @else {
+        <!-- GUEST: Sign In + Subscribe -->
+        <div class="d-flex align-items-center gap-2">
+
+          <!-- Primary Pill Button -->
+          <a routerLink="/login" class="btn btn-primary-custom btn-sm rounded-pill px-3 fw-bold">
+            Sign in
+          </a>
+        </div>
+      }
+
+    </div>
+  </c-container>
+</header>
+
+<!-- === MAIN CONTENT === -->
+<!-- This handles the wrapper logic (Home Tabs vs Profile) internally via Router -->
+<main class="min-vh-100 bg-white">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- === FOOTER === -->
+<footer class="border-top py-5 mt-auto bg-light">
+  <c-container class="text-center text-muted small">
+    <div class="fw-bold text-dark mb-2 fs-6">My Blog</div>
+    <p class="mb-3">&copy; 2025 My Blog. All rights reserved.</p>
+
+    <div class="d-flex justify-content-center gap-3">
+      <a href="#" class="text-decoration-none text-muted hover-dark">Privacy</a>
+      <a href="#" class="text-decoration-none text-muted hover-dark">Terms</a>
+      <a href="#" class="text-decoration-none text-muted hover-dark">Help</a>
+    </div>
+  </c-container>
+</footer>
