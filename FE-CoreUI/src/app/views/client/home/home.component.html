@@ -2,73 +2,93 @@
 
   <!-- HERO POST -->
   @if (heroPost(); as hero) {
-    <section class="mb-5 pb-4 border-bottom">
-      <div class="row">
-        <div class="col-lg-8">
-          <!-- Ảnh to -->
-          <a [routerLink]="['/post', hero.id]">
-            <img [src]="hero.url_thumbnail | imgUrl" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;">
-          </a>
-        </div>
-        <div class="col-lg-4">
-          <!-- Thông tin -->
-          <h2 class="fw-bold display-6">
-            <a [routerLink]="['/post', hero.id]" class="text-dark text-decoration-none">{{ hero.title }}</a>
-          </h2>
-          <p class="text-muted">{{ hero.excerpt }}</p>
-          <div class="text-muted small">
-            <strong>{{ hero.user?.fullName }}</strong> - {{ hero.createdAt | date }}
-          </div>
+  <section class="mb-4 pb-4 border-bottom">
+    <div class="row">
+      <div class="col-lg-8">
+        <!-- Ảnh to -->
+        <a [routerLink]="['/post', hero.id]">
+          <img [src]="hero.url_thumbnail | imgUrl" class="img-fluid rounded w-100"
+            style="height: 400px; object-fit: cover;">
+        </a>
+      </div>
+      <div class="col-lg-4">
+        <!-- Thông tin -->
+        <h2 class="fw-bold display-6">
+          <a [routerLink]="['/post', hero.id]" class="text-dark text-decoration-none">{{ hero.title }}</a>
+        </h2>
+        <p class="text-muted">{{ hero.excerpt }}</p>
+        <div class="text-muted small">
+          <strong>{{ hero.user?.fullName }}</strong> - {{ hero.createdAt | date }}
         </div>
       </div>
-    </section>
+    </div>
+  </section>
   }
 
   <!-- LATEST GRID -->
   @if (latestPosts().length > 0) {
-    <section class="mb-5">
+  <section class="mb-4 pb-4 border-bottom">
 
-      <h3 class="fw-bold mb-4">Latest posts</h3>
-      <div class="row g-4">
-        @for (post of latestPosts(); track post.id) {
-          <div class="col-md-3">
-            <!-- Dùng lại PostCard -->
-            <app-post-card [post]="post" layout="grid"></app-post-card>
-          </div>
-        }
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2">
+      <h3 class="fw-bold m-0">Latest posts</h3>
+      <!-- Link to standard Archive -->
+      <a routerLink="/archive" class="text-decoration-none fw-bold text-uppercase link-hover">
+        View All &rarr;
+      </a>
+    </div>
+
+    <div class="row g-4">
+      @for (post of latestPosts(); track post.id) {
+      <div class="col-12 col-sm-6 col-lg-3">
+        <!-- Dùng lại PostCard -->
+        <app-post-card [post]="post" layout="grid"></app-post-card>
       </div>
-    </section>
-     <div class="border-bottom mb-4 pb-2"></div>
+      }
+    </div>
+  </section>
+  <!-- <div class="border-bottom mb-4 pb-2"></div> -->
   }
 
   @if (categorySections().length > 0) {
-    @for (sec of categorySections(); track sec.category){
-      <section class="mb-5">
+  @for (sec of categorySections(); track sec.category){
+  <section class="mb-4 pb-4 border-bottom">
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2">
+      <h3 class="fw-bold m-0">{{sec.category.name}}</h3>
+      <!-- Link to standard Archive -->
+      <a routerLink="/archive" class="text-decoration-none fw-bold text-uppercase link-hover">
+        View All &rarr;
+      </a>
+    </div>
 
-        <h3 class="fw-bold mb-4">{{sec.category.name}}</h3>
-        <div class="row g-4">
-          @for (post of sec.posts; track post.id) {
-            <div class="col-md-3">
-              <!-- Dùng lại PostCard -->
-              <app-post-card [post]="post" layout="grid"></app-post-card>
-            </div>
-          }
-        </div>
-      </section>
-       <div class="border-bottom mb-4 pb-2"></div>
-    }
+    <div class="row g-4">
+      @for (post of sec.posts; track post.id) {
+      <div class="col-12 col-sm-6 col-lg-3">
+        <!-- Dùng lại PostCard -->
+        <app-post-card [post]="post" layout="grid"></app-post-card>
+      </div>
+      }
+    </div>
+  </section>
+  <!-- <div class="border-bottom mb-4 pb-2"></div> -->
+  }
   }
 
   @if (otherPosts().length > 0) {
-    <h3 class="fw-bold mb-4">Other posts</h3>
-    <div class="row g-4">
-      @for (post of otherPosts(); track post.id) {
-        <div class="col-md-3">
-          <!-- Dùng lại PostCard -->
-          <app-post-card [post]="post" layout="grid"></app-post-card>
-        </div>
-      }
+  <div class="d-flex justify-content-between align-items-center mb-3 pb-2">
+      <h3 class="fw-bold m-0">Other posts</h3>
+      <!-- Link to standard Archive -->
+      <a routerLink="/archive" class="text-decoration-none fw-bold text-uppercase link-hover">
+        View All &rarr;
+      </a>
     </div>
+  <div class="row g-4">
+    @for (post of otherPosts(); track post.id) {
+    <div class="col-12 col-sm-6 col-lg-3">
+      <!-- Dùng lại PostCard -->
+      <app-post-card [post]="post" layout="grid"></app-post-card>
+    </div>
+    }
+  </div>
   }
 
 </div>

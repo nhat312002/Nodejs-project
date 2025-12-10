@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink } from '@angular/router';
 // import { TranslateModule } from '@ngx-translate/core';
 import {
-  ContainerComponent, ButtonDirective, DropdownModule, AvatarModule
+  ContainerComponent, ButtonDirective, DropdownModule, AvatarModule, NavbarModule
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
@@ -16,7 +16,8 @@ import { ImgUrlPipe } from '../../shared/pipes/img-url.pipe';
   standalone: true,
   imports: [
     CommonModule, RouterOutlet, RouterLink, // TranslateModule,
-    ContainerComponent, ButtonDirective, DropdownModule, AvatarModule, IconDirective,
+    ContainerComponent, ButtonDirective, DropdownModule, AvatarModule, NavbarModule,
+    IconDirective,
     ImgUrlPipe
   ],
   templateUrl: './client-layout.component.html',

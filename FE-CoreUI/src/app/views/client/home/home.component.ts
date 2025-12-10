@@ -32,8 +32,6 @@ export class HomeComponent implements OnInit {
   }
 
   loadData() {
-    // 1. LẤY BÀI MỚI NHẤT (Không truyền locale nữa)
-    // Lấy 5 bài: 1 Hero + 4 Grid
     this.postService.getPublicPosts({ limit: 5 }).subscribe(res => {
       if (res.success && res.data.posts.length > 0) {
         const posts = res.data.posts;
@@ -42,11 +40,9 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    // 2. LẤY BÀI VIẾT THEO DANH MỤC NỔI BẬT
-    // (Tạm thời lấy danh mục tiếng Anh hoặc lấy tất cả danh mục)
-    this.categoryService.getPublicCategories().subscribe(catRes => {
+    this.categoryService.getPublicCategories(1, 100).subscribe(catRes => {
       if (catRes.success) {
-        const topCats = catRes.data.categories.slice(0, 3); // Lấy 3 danh mục đầu
+        const topCats = catRes.data.categories.slice(0, 100); // Lấy 3 danh mục đầu
 
         topCats.forEach(cat => {
           // Lấy bài viết của danh mục này (Không lọc ngôn ngữ)
@@ -63,7 +59,6 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    // 3. LẤY BÀI VIẾT KHÁC ("Other")
     this.postService.getPublicPosts({ limit: 4, categoryIds: 'other' }).subscribe(res => {
       if(res.success) this.otherPosts.set(res.data.posts);
     });
