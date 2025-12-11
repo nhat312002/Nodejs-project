@@ -1,4 +1,4 @@
-<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
+<!-- <div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
   <c-container>
     <c-row class="justify-content-center">
       <c-col lg="7" md="9" xl="6">
@@ -32,6 +32,149 @@
               <div class="d-grid">
                 <button cButton color="success">Create Account</button>
               </div>
+            </form>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div> -->
+<div class="bg-light min-vh-100 d-flex flex-row align-items-center">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col lg="7" md="9" xl="6">
+        <c-card class="mx-4">
+          <c-card-body class="p-4">
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+              <h1>Register</h1>
+              <p class="text-body-secondary">Create your account</p>
+
+              <!-- Global Backend Error -->
+              @if (errorMessage()) {
+                <div class="alert alert-danger">{{ errorMessage() }}</div>
+              }
+
+              <!-- 1. FULL NAME -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input cFormControl
+                       placeholder="Full Name"
+                       formControlName="full_name"
+                       [valid]="getValidationState('full_name')" />
+
+                <c-form-feedback [valid]="false">
+                  @if (form.get('full_name')?.hasError('required')) {
+                    Full name is required.
+                  }
+                </c-form-feedback>
+              </c-input-group>
+
+              <!-- 2. USERNAME -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input cFormControl
+                       placeholder="Username"
+                       formControlName="username"
+                       [valid]="getValidationState('username')" />
+
+                <c-form-feedback [valid]="false">
+                  @if (form.get('username')?.hasError('required')) {
+                    Username is required.
+                  }
+                  @if (form.get('username')?.hasError('minlength')) {
+                    Username must be at least 8 characters.
+                  }
+                </c-form-feedback>
+              </c-input-group>
+
+              <!-- 3. EMAIL -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>@</span>
+                <input cFormControl
+                       placeholder="Email"
+                       formControlName="email"
+                       type="email"
+                       autocomplete="email"
+                       [valid]="getValidationState('email')" />
+
+                <c-form-feedback [valid]="false">
+                  @if (form.get('email')?.hasError('required')) {
+                    Email is required.
+                  }
+                  @if (form.get('email')?.hasError('email')) {
+                    Please enter a valid email.
+                  }
+                </c-form-feedback>
+              </c-input-group>
+
+              <!-- 4. PASSWORD -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input cFormControl
+                       placeholder="Password"
+                       formControlName="password"
+                       type="password"
+                       autocomplete="new-password"
+                       [valid]="getValidationState('password')" />
+
+                <c-form-feedback [valid]="false">
+                  @if (form.get('password')?.hasError('required')) {
+                    Password is required.
+                  }
+                  @if (form.get('password')?.hasError('minlength')) {
+                    Min 8 characters.
+                  }
+                  @if (form.get('password')?.hasError('pattern')) {
+                    Needs 1 Upper, 1 Lower, 1 Number, 1 Special.
+                  }
+                </c-form-feedback>
+              </c-input-group>
+
+              <!-- 5. CONFIRM PASSWORD -->
+              <c-input-group class="mb-4">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input cFormControl
+                       placeholder="Repeat password"
+                       formControlName="confirm_password"
+                       type="password"
+                       autocomplete="new-password"
+                       [valid]="getValidationState('confirm_password')" />
+
+                <c-form-feedback [valid]="false">
+                  @if (form.get('confirm_password')?.hasError('required')) {
+                    Please repeat your password.
+                  }
+                  @if (form.get('confirm_password')?.hasError('mismatch')) {
+                    Passwords do not match.
+                  }
+                </c-form-feedback>
+              </c-input-group>
+
+              <!-- ACTIONS -->
+              <div class="d-grid gap-2">
+                <button cButton color="success" class="text-white" type="submit" [disabled]="isLoading()">
+                  @if (isLoading()) {
+                    <c-spinner size="sm" aria-hidden="true"></c-spinner> Creating Account...
+                  } @else {
+                    Create Account
+                  }
+                </button>
+
+                <div class="text-center mt-2">
+                  <span class="text-muted">Already have an account? </span>
+                  <a routerLink="/login" class="text-decoration-none fw-bold">Sign In</a>
+                </div>
+              </div>
+
             </form>
           </c-card-body>
         </c-card>

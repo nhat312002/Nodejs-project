@@ -78,6 +78,10 @@ export class AuthService {
       );
   }
 
+  register(payload: { full_name: string, username: string, email: string, password: string }) {
+    return this.http.post<any>('http://localhost:3000/auth/register', payload);
+  }
+
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
