@@ -1,0 +1,10 @@
+.sticky-dropdown-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: white; /* Important to hide content behind it */
+  border-top: 1px solid #e9ecef; /* Separator line */
+  z-index: 5;
+  padding-top: 0.5rem;
+  padding-bottom: 0rem;
+  margin-bottom: 0rem; /* Counteract default padding if necessary */
+}

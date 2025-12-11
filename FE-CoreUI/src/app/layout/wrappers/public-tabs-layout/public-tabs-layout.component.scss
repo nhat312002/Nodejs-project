@@ -1,0 +1,69 @@
+/* Wrapper for the grey line */
+.tabs-container {
+  border-bottom: 1px solid #e5e5e5;
+  background: white;
+  width: 100%;
+}
+
+.custom-tabs {
+  /* --- 1. PROPERTIES (Must be at the top) --- */
+  margin: 0;
+  padding: 0; // Reset padding
+  list-style: none;
+
+  display: flex;
+  flex-wrap: nowrap;
+
+  /* Default Alignment */
+  justify-content: flex-start;
+
+  /* Scrolling behavior */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* Hide Scrollbar props */
+  scrollbar-width: none;
+
+  /* Spacing */
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  /* --- 2. NESTED RULES (Must be at the bottom) --- */
+
+  /* Media Query */
+  @media (min-width: 768px) {
+    justify-content: center;
+  }
+
+  /* Pseudo-selector */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Child Selector */
+  .nav-link {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+
+    padding: 0.8rem 0;
+    margin: 0 1rem;
+
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    transition: all 0.2s;
+
+    &:first-child { margin-left: 0; }
+    &:last-child { margin-right: 0; }
+
+    &:hover {
+      color: #000;
+    }
+
+    &.active {
+      color: var(--cui-primary, #ff5722);
+      border-bottom-color: var(--cui-primary, #ff5722);
+    }
+  }
+}

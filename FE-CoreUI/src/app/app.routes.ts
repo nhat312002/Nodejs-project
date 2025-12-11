@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { DefaultLayoutComponent, ClientLayoutComponent } from './layout';
+import { DefaultLayoutComponent, ClientLayoutComponent, PublicTabsLayoutComponent } from './layout';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { guestGuard } from './core/guards/guest.guard';
@@ -19,7 +19,7 @@ export const routes: Routes = [
     },
     canActivate: [guestGuard]
   },
-   {
+  {
     path: '404',
     loadComponent: () => import('./views/pages/page404/page404.component').then(m => m.Page404Component),
     data: {
@@ -40,13 +40,28 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'home',
-        pathMatch: 'full'
+        component: PublicTabsLayoutComponent,
+        children: [
+          {
+            path: '',
+            redirectTo: 'home',
+            pathMatch: 'full'
+          },
+          {
+            path: 'home',
+            loadComponent: () => import('./views/client/home/home.component').then((m) => m.HomeComponent)
+          },
+          {
+            path: 'archive',
+            loadComponent: () => import('./views/client/archive/archive.component').then(m => m.ArchiveComponent)
+          },
+          {
+            path: 'category/:id', // Reuses Archive logic but filtered
+            loadComponent: () => import('./views/client/archive/archive.component').then(m => m.ArchiveComponent)
+          }
+        ]
       },
-      {
-        path: 'home',
-        loadComponent: () => import('./views/client/home/home.component').then((m) => m.HomeComponent)
-      },
+
     ]
   },
   {
@@ -88,7 +103,7 @@ export const routes: Routes = [
     ]
 
   },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '404' }
   // {
   //   path: '',
   //   redirectTo: 'dashboard',

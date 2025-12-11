@@ -1,0 +1,47 @@
+<!-- THE SECONDARY NAV BAR -->
+<div class="border-bottom bg-white">
+  <c-container>
+    <nav class="nav custom-tabs d-flex">
+
+      <!-- Home -->
+      <a class="nav-link"
+         routerLink="/home"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact:true}">
+         Home
+      </a>
+
+      <!-- Dynamic Categories -->
+      @for (cat of mainCategories(); track cat.id) {
+        <a class="nav-link"
+           [routerLink]="['/category', cat.id]"
+           routerLinkActive="active">
+           {{ cat.name }}
+        </a>
+      }
+
+      <!-- Dropdown -->
+      <!-- @if (moreCategories().length > 0) {
+        <c-dropdown variant="nav-item">
+          <a cDropdownToggle class="nav-link" style="cursor: pointer;">More</a>
+          <ul cDropdownMenu class="shadow-sm border-0">
+            @for (cat of moreCategories(); track cat.id) {
+              <li><a cDropdownItem [routerLink]="['/category', cat.id]">{{ cat.name }}</a></li>
+            }
+          </ul>
+        </c-dropdown>
+      } -->
+
+      <!-- Archive -->
+      <a class="nav-link"
+         routerLink="/archive"
+         routerLinkActive="active">
+         Archive
+      </a>
+
+    </nav>
+  </c-container>
+</div>
+
+<!-- !!! DYNAMIC PAGE CONTENT LOADS HERE !!! -->
+<router-outlet></router-outlet>

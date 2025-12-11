@@ -72,7 +72,7 @@ export class AuthService {
 
 
           setTimeout(() => {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['']);
           }, 50);
         })
       );

@@ -1,6 +1,6 @@
 <!-- === TOP BAR (Sticky) === -->
-<header class="client-header border-bottom bg-white sticky-top">
-  <c-container class="d-flex justify-content-between align-items-center h-100">
+<header class="client-header border-bottom bg-white">
+  <c-container class="d-flex justify-content-between align-items-center h-100 p-2">
 
     <!-- LEFT: Logo & Brand -->
     <a routerLink="/" class="text-decoration-none d-flex align-items-center gap-2 text-dark brand-link">
@@ -15,8 +15,8 @@
       <!-- 2. AUTHENTICATION -->
       @if (authService.currentUser(); as user) {
         <!-- LOGGED IN: User Menu -->
-        <c-dropdown variant="nav-item">
-          <button cDropdownToggle cButton color="light" variant="ghost" class="p-0 border-0 rounded-circle">
+        <c-dropdown>
+          <button cDropdownToggle cButton color="secondary" variant="ghost" class="border-0">
             <c-avatar [src]="'assets/images/avatars/8.jpg'" size="sm"></c-avatar>
           </button>
 
@@ -58,9 +58,11 @@
         <div class="d-flex align-items-center gap-2">
 
           <!-- Primary Pill Button -->
-          <a routerLink="/login" class="btn btn-primary-custom btn-sm rounded-pill px-3 fw-bold">
-            Sign in
+           <a routerLink="/login">
+            <button cButton color="primary" variant="outline">Sign in</button>
+            <!-- Sign in -->
           </a>
+
         </div>
       }
 

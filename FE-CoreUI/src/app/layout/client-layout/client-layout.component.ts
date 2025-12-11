@@ -18,7 +18,7 @@ import { ImgUrlPipe } from '../../shared/pipes/img-url.pipe';
     CommonModule, RouterOutlet, RouterLink, // TranslateModule,
     ContainerComponent, ButtonDirective, DropdownModule, AvatarModule, NavbarModule,
     IconDirective,
-    ImgUrlPipe
+    // ImgUrlPipe
   ],
   templateUrl: './client-layout.component.html',
   styleUrl: './client-layout.component.scss'

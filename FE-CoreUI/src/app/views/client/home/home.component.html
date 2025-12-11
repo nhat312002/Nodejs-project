@@ -4,7 +4,7 @@
   @if (heroPost(); as hero) {
   <section class="mb-4 pb-4 border-bottom">
     <div class="row">
-      <div class="col-lg-8">
+      <div class="col-lg-8 mb-4 mb-lg-0">
         <!-- Ảnh to -->
         <a [routerLink]="['/post', hero.id]">
           <img [src]="hero.url_thumbnail | imgUrl" class="img-fluid rounded w-100"
@@ -55,7 +55,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 pb-2">
       <h3 class="fw-bold m-0">{{sec.category.name}}</h3>
       <!-- Link to standard Archive -->
-      <a routerLink="/archive" class="text-decoration-none fw-bold text-uppercase link-hover">
+      <a [routerLink]="`/category/${sec.category.id}`" class="text-decoration-none fw-bold text-uppercase link-hover">
         View All &rarr;
       </a>
     </div>
@@ -76,10 +76,11 @@
   @if (otherPosts().length > 0) {
   <div class="d-flex justify-content-between align-items-center mb-3 pb-2">
       <h3 class="fw-bold m-0">Other posts</h3>
-      <!-- Link to standard Archive -->
-      <a routerLink="/archive" class="text-decoration-none fw-bold text-uppercase link-hover">
-        View All &rarr;
-      </a>
+      <a [routerLink]="['/archive']"
+       [queryParams]="{ cat: 'other' }"
+       class="text-decoration-none fw-bold text-uppercase link-hover">
+      View All &rarr;
+    </a>
     </div>
   <div class="row g-4">
     @for (post of otherPosts(); track post.id) {

@@ -1,0 +1,188 @@
+<c-container class="py-4">
+  <div class="row justify-content-center">
+
+    <div class="col-lg-9">
+
+      <div class="mb-4">
+        <h2 class="fw-bold mb-1">{{ pageTitle() }}</h2>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- TOP FILTER BAR                               -->
+      <!-- ============================================ -->
+      <c-card class="border-0 bg-light mb-5 col-12">
+        <c-card-body>
+
+          <!-- Row 1: Primary Filters (Search & Sort) -->
+          <div class="row g-3 align-items-center">
+
+            <div class="col-12" [class]="isCategoryView() ? 'col-md-6' : 'col-md-4'">
+              <c-input-group sizing="sm" class="shadow-sm">
+                <input cFormControl placeholder="Search title or content..." [ngModel]="searchQuery()"
+                  (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onFilterChange()" class="border-end-0">
+                <!-- Remove right border to blend -->
+
+                <!-- The Button -->
+                <button cButton color="white" class="border-start-0 text-muted" type="button" (click)="onFilterChange()"
+                  title="Search Content">
+                  <svg cIcon name="cilSearch"></svg>
+                </button>
+              </c-input-group>
+            </div>
+
+            <!-- 2. SEARCH AUTHOR (Input Group) -->
+            <div [class]="isCategoryView() ? 'col-6 col-md-4' : 'col-12 col-md-3'">
+              <c-input-group sizing="sm" class="shadow-sm">
+                <input cFormControl placeholder="Filter by author..." [ngModel]="searchAuthor()"
+                  (ngModelChange)="searchAuthor.set($event)" (keyup.enter)="onFilterChange()" class="border-end-0">
+
+                <!-- The Button -->
+                <button cButton color="white" class="border-start-0 text-muted" type="button" (click)="onFilterChange()"
+                  title="Search Author">
+                  <svg cIcon name="cilSearch"></svg> <!-- Different icon for distinction -->
+                </button>
+              </c-input-group>
+            </div>
+
+            <!-- Sort -->
+            <div class="col-6 col-md-2">
+              <select cSelect sizing="sm" [ngModel]="sortOrder()"
+                (change)="sortOrder.set($any($event.target).value); onFilterChange()"
+                class="bg-white border-0 shadow-sm pointer">
+                <option value="date_desc">Newest</option>
+                <option value="date_asc">Oldest</option>
+                <option value="title_asc">A-Z</option>
+                <option value="title_desc">Z-A</option>
+              </select>
+            </div>
+
+            <!-- Category Dropdown (Col 6, MD 3) -->
+             @if(!isCategoryView()){
+
+               <div class="col-6 col-md-3">
+                 <c-dropdown [autoClose]="'outside'" class="d-block">
+
+                   <!-- Button Label -->
+                   <button cButton cDropdownToggle color="white" size="sm"
+                     class="w-100 d-flex justify-content-between align-items-center shadow-sm border-0">
+                     <span class="text-truncate">{{ categoryButtonLabel() }}</span>
+                   </button>
+
+                   <!-- Menu -->
+                   <ul cDropdownMenu class="w-100 p-3 shadow-lg border-0 mt-1" style="max-height: 350px; overflow-y: auto;">
+
+                     <!-- 1. NUMERIC CATEGORIES -->
+                     <li class="mb-2 small text-muted fw-bold text-uppercase">Filter Topics</li>
+
+                     @for (cat of categories(); track cat.id) {
+                     <li class="mb-1">
+                       <c-form-check>
+                         <!--
+                      Logic: Checkbox for specific ID
+                      Change: toggleCategory(cat.id)
+                   -->
+                         <input cFormCheckInput type="checkbox" [id]="'cat-'+cat.id" [checked]="isCategorySelected(cat.id)"
+                           (change)="toggleCategory(cat.id)">
+                         <label cFormCheckLabel [for]="'cat-'+cat.id" class="w-100 cursor-pointer">
+                           {{ cat.name }}
+                         </label>
+                       </c-form-check>
+                     </li>
+                     }
+
+                     <li>
+                       <hr class="dropdown-divider my-2">
+                     </li>
+
+                     <!-- 2. UNCATEGORIZED (Mutually Exclusive) -->
+                     <li class="mb-2">
+                       <c-form-check>
+                         <input cFormCheckInput type="checkbox" id="cat-other" [checked]="isCategorySelected('other')"
+                           (change)="toggleCategory('other')">
+                         <label cFormCheckLabel for="cat-other" class="text-muted fst-italic cursor-pointer">
+                           Uncategorized
+                         </label>
+                       </c-form-check>
+                     </li>
+
+                     <!-- 3. MATCH ALL TOGGLE (Conditional) -->
+                     <!-- Only appears if user selected 2+ topics -->
+                     @if (canMatchAll()) {
+                     <!-- ADD CLASS 'sticky-dropdown-footer' -->
+                     <li class="sticky-dropdown-footer">
+                       <div class="bg-light p-2 rounded">
+                         <c-form-check [switch]="true">
+                           <input cFormCheckInput type="checkbox" id="matchSwitch" [checked]="matchAllCategories()"
+                             (change)="matchAllCategories.set(!matchAllCategories()); onFilterChange()">
+                           <label cFormCheckLabel for="matchSwitch" class="small fw-bold cursor-pointer">
+                             Match ALL selected
+                           </label>
+                         </c-form-check>
+                         <div class="text-muted small ps-1" style="font-size: 0.75rem;">
+                           {{ matchAllCategories() ? 'Must have ALL tags' : 'Can have ANY tag' }}
+                         </div>
+                       </div>
+                     </li>
+                     }
+
+                   </ul>
+                 </c-dropdown>
+               </div>
+             }
+
+          </div>
+
+          <!-- Active Filters Badges (Optional but good UX) -->
+          <!-- @if (!isCategoryView() && (searchQuery() || searchAuthor() || selectedCategoryIds().length > 0)) {
+          <div class="mt-3 d-flex align-items-center gap-2 flex-wrap">
+            <span class="small text-muted me-1">Active filters:</span>
+            <button cButton color="danger" variant="ghost" size="sm" (click)="resetFilters()" class="py-0">
+              Clear all
+            </button>
+          </div>
+          } -->
+
+        </c-card-body>
+      </c-card>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- POST LIST (One Column)                       -->
+  <!-- ============================================ -->
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+
+      @if (isLoading()) {
+      <div class="text-center py-5">
+        <c-spinner color="primary"></c-spinner>
+      </div>
+      }
+
+      @if (!isLoading()) {
+      <div class="d-flex flex-column gap-4">
+        @for (post of posts(); track post.id) {
+        <!-- HERE IT IS: Reuse the Card in LIST mode -->
+        <app-post-card [post]="post" layout="list"></app-post-card>
+        } @empty {
+        <div class="text-center py-5">
+          <h5 class="text-muted">No posts found matching your criteria.</h5>
+        </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+      <div class="mt-5 d-flex justify-content-center">
+        <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)">
+        </app-custom-pagination>
+      </div>
+      }
+      }
+
+    </div>
+  </div>
+
+</c-container>
