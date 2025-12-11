@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
   FormBuilder, FormGroup, Validators, ReactiveFormsModule,
-  AbstractControl, ValidationErrors
+  AbstractControl, ValidationErrors,
+  FormControl
 } from '@angular/forms';
-
+// import { FormInputComponent } from '../../../shared/components/form-input/form-input.component';
 // CoreUI Imports
 import { IconDirective } from '@coreui/icons-angular';
 import {
@@ -18,6 +19,7 @@ import {
 // Services
 import { AuthService } from '../../../core/services/auth.service';
 
+import { AppValidators } from '../../../shared/utils/validator.util';
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -26,7 +28,8 @@ import { AuthService } from '../../../core/services/auth.service';
     CommonModule, ReactiveFormsModule, RouterLink,
     ContainerComponent, RowComponent, ColComponent, CardComponent, CardBodyComponent,
     FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective,
-    FormControlDirective, ButtonDirective, FormFeedbackComponent, SpinnerComponent
+    FormControlDirective, ButtonDirective, FormFeedbackComponent, SpinnerComponent,
+    // FormInputComponent
   ]
 })
 export class RegisterComponent {
@@ -40,28 +43,18 @@ export class RegisterComponent {
 
   constructor() {
     this.form = this.fb.group({
-      // 1. Full Name (Required by your Joi schema)
-      full_name: ['', [Validators.required, Validators.maxLength(255)]],
-
-      // 2. Username (Min 8 chars based on your Joi schema)
-      username: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(255)]],
-
-      // 3. Email
-      email: ['', [Validators.required, Validators.email]],
-
-      // 4. Password (Complex Regex)
-      password: ['', [
-        Validators.required,
-        Validators.minLength(8),
-        // Regex: 1 Lower, 1 Upper, 1 Digit, 1 Special Char
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]).{8,255}$/)
-      ]],
-
-      // 5. Confirm Password
+      // Use the Shared Validators
+      full_name: ['', AppValidators.fullName],
+      username: ['', AppValidators.username],
+      email: ['', AppValidators.email],
+      password: ['', AppValidators.password],
       confirm_password: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }
 
+  getControl(name: string): FormControl {
+    return this.form.get(name) as FormControl;
+  }
   // Helper to determine state: True (Green), False (Red), Undefined (Neutral)
   getValidationState(controlName: string): boolean | undefined {
     const control = this.form.get(controlName);

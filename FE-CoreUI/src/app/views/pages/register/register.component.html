@@ -69,6 +69,9 @@
                   @if (form.get('full_name')?.hasError('required')) {
                     Full name is required.
                   }
+                  @if (form.get('full_name')?.hasError('pattern')) {
+                    Full name must not include special characters and numbers.
+                  }
                 </c-form-feedback>
               </c-input-group>
 
@@ -108,6 +111,9 @@
                   }
                   @if (form.get('email')?.hasError('email')) {
                     Please enter a valid email.
+                  }
+                  @if (form.get('email')?.hasError('pattern')) {
+                    Email must be in correct format. (a@example.com)
                   }
                 </c-form-feedback>
               </c-input-group>
