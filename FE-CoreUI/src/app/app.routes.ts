@@ -8,14 +8,14 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./views/pages/login/login.component').then(m => m.LoginComponent),
-    data: { title: 'Login Page' },
+    data: { title: 'Login - My Blog' },
     canActivate: [guestGuard]
   },
   {
     path: 'register',
     loadComponent: () => import('./views/pages/register/register.component').then(m => m.RegisterComponent),
     data: {
-      title: 'Register Page'
+      title: 'Register - My Blog'
     },
     canActivate: [guestGuard]
   },
@@ -49,11 +49,13 @@ export const routes: Routes = [
           },
           {
             path: 'home',
-            loadComponent: () => import('./views/client/home/home.component').then((m) => m.HomeComponent)
+            loadComponent: () => import('./views/client/home/home.component').then((m) => m.HomeComponent),
+            title: 'Home - My Blog',
           },
           {
             path: 'archive',
-            loadComponent: () => import('./views/client/archive/archive.component').then(m => m.ArchiveComponent)
+            loadComponent: () => import('./views/client/archive/archive.component').then(m => m.ArchiveComponent),
+            title: 'Archive - My Blog'
           },
           {
             path: 'category/:id', // Reuses Archive logic but filtered
@@ -61,7 +63,10 @@ export const routes: Routes = [
           }
         ]
       },
-
+      {
+        path: 'post/:id',
+        loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent)
+      }
     ]
   },
   {

@@ -22,8 +22,8 @@ export class PostService {
     return this.http.get<ApiResponse<PostListData>>(this.publicApiUrl, { params });
   }
 
-  getPostDetail(id: number | string): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(`${this.publicApiUrl}/${id}`);
+  getPostDetail(id: number | string): Observable<ApiResponse<{post: Post}>> {
+    return this.http.get<ApiResponse<{post: Post}>>(`${this.publicApiUrl}/${id}`);
   }
 
   // Lấy tất cả bài viết (cho bảng quản lý)

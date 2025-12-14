@@ -9,9 +9,9 @@ const commentServices = {
 
     getCommentsByPost: async (data) => {
         const limit = 10;
-        const {postId, approvedOnly, userId} = data;
+        const { postId, approvedOnly, userId } = data;
         const page = Number(data.page) || 1;
-        const offset = (page - 1)*limit;
+        const offset = (page - 1) * limit;
         const post = await postService.getPostById(postId);
 
         if (!post) {
@@ -23,7 +23,16 @@ const commentServices = {
         if (userId && post.user_id != userId)
             throw new Error("Post not found");
 
-        const {count, rows} = await Comment.findAndCountAll({
+        const { count, rows } = await Comment.findAndCountAll({
+            attributes: [
+                'id',
+                ['post_id', 'postId'],
+                ['user_id', 'userId'],
+                ['parent_id', 'parentId'],
+                'content',
+                'createdAt',
+                'updatedAt',
+            ],
             where: {
                 post_id: postId,
                 parent_id: null,
@@ -31,7 +40,16 @@ const commentServices = {
             include: [
                 {
                     model: Comment,
-                    as: "replies"
+                    as: "replies",
+                    attributes: [
+                        'id',
+                        ['post_id', 'postId'],
+                        ['user_id', 'userId'],
+                        ['parent_id', 'parentId'],
+                        'content',
+                        'createdAt',
+                        'updatedAt',
+                    ],
                 },
                 {
                     model: User,
@@ -39,7 +57,7 @@ const commentServices = {
                     where: {
                         status: '1'
                     },
-                    attributes: ['id', 'full_name']
+                    attributes: ['id', ['full_name', 'fullName']]
                 },
             ],
             limit,
@@ -61,7 +79,7 @@ const commentServices = {
     },
 
     createComment: async (data) => {
-        const {postId, userId, parentId, content} = data;
+        const { postId, userId, parentId, content } = data;
         const post = await postService.getApprovedPostById(postId);
         if (!post) throw new Error("Post not found");
 
@@ -88,7 +106,7 @@ const commentServices = {
     },
 
     updateComment: async (data) => {
-        const {commentId, content, userId} = data;
+        const { commentId, content, userId } = data;
         const comment = await Comment.findByPk(commentId);
         if (comment == null)
             throw new Error("Comment not found");
@@ -101,12 +119,12 @@ const commentServices = {
     },
 
     deleteComment: async (data) => {
-        const {commentId, userId, userRoleId} = data;
+        const { commentId, userId, userRoleId } = data;
         const comment = await Comment.findByPk(commentId);
         if (comment == null)
             throw new Error("Comment not found");
-        if (comment.user_id != userId){
-            if (userRoleId != '3') 
+        if (comment.user_id != userId) {
+            if (userRoleId != '3')
                 throw new Error("Insufficient permissions");
             else throw new Error("Unauthorized");
         }

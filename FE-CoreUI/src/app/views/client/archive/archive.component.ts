@@ -21,6 +21,7 @@ import { Category } from '../../../core/models/category.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
 import { combineLatest } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 @Component({
   selector: 'app-archive',
   imports: [
@@ -38,6 +39,7 @@ export class ArchiveComponent implements OnInit {
   private langService = inject(LanguageService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private titleService = inject(Title);
 
   // --- DATA SIGNALS ---
   posts = signal<Post[]>([]);
@@ -97,6 +99,22 @@ export class ArchiveComponent implements OnInit {
         this.loadPosts();
       });
     });
+
+    effect(() => {
+      const isCatView = this.isCategoryView();
+      const categories = this.categories();
+      const selectedIds = this.selectedCategoryIds();
+
+      if (isCatView && selectedIds.length > 0) {
+        const id = selectedIds[0];
+        const cat = categories.find(c => c.id === id);
+        if (cat) {
+          this.titleService.setTitle(`${cat.name} - My Blog`);
+        }
+      } else {
+        this.titleService.setTitle('Archive - My Blog');
+      }
+    });
   }
 
   ngOnInit() {
@@ -118,9 +136,18 @@ export class ArchiveComponent implements OnInit {
         this.isCategoryView.set(true);
         this.selectedCategoryIds.set([Number(catId)]); // Lock to this category
         this.matchAllCategories.set(false);
+
+        const id = Number(catId);
+        const cat = this.categories().find(c => c.id === id);
+
+        const title = cat ? `${cat.name} - My Blog` : 'Category - My Blog';
+        this.titleService.setTitle(title);
+
       } else {
         // --- ARCHIVE TAB (/archive) ---
         this.isCategoryView.set(false);
+
+        this.titleService.setTitle('Archive - My Blog');
 
         // Restore Categories from URL ?cat=1,2,other
         const catParam = queryParams.get('cat');

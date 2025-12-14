@@ -7,15 +7,15 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   // Nested Objects from Sequelize
-  user?: {
+  user: {
     id: number;
     fullName: string;
+    url_avatar: string;
   };
-  categories?: {
+  categories: {
     id: number;
     name: string;
   }[];
-
   // These might be null in DB, so we handle them in the component
   excerpt?: string;
   url_thumbnail?: string;

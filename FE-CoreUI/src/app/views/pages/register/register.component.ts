@@ -27,7 +27,7 @@ import { AppValidators } from '../../../shared/utils/validator.util';
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink,
     ContainerComponent, RowComponent, ColComponent, CardComponent, CardBodyComponent,
-    FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective,
+    InputGroupComponent, InputGroupTextDirective, IconDirective,
     FormControlDirective, ButtonDirective, FormFeedbackComponent, SpinnerComponent,
     // FormInputComponent
   ]
