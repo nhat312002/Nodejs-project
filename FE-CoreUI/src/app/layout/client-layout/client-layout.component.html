@@ -34,6 +34,12 @@
               </a>
             </li>
 
+            <li>
+              <a cDropdownItem routerLink="/profile/posts" class="py-2">
+                <svg cIcon name="cilLibrary" class="me-2 text-muted"></svg> My Posts
+              </a>
+            </li>
+
             <!-- Admin Link (Protected: Only show if Admin) -->
             @if(user.role === 3) {
               <li>

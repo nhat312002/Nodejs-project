@@ -19,6 +19,7 @@ export interface Post {
   // These might be null in DB, so we handle them in the component
   excerpt?: string;
   url_thumbnail?: string;
+  status?: string;
 }
 
 export interface PostListData {

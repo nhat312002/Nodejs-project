@@ -6,7 +6,8 @@ import { FormsModule } from '@angular/forms';
 
 // CoreUI & Icons
 import {
-  AvatarModule, ButtonDirective, SpinnerModule, FormModule, DropdownModule
+  AvatarModule, ButtonDirective, SpinnerModule, FormModule, DropdownModule,
+  BadgeComponent
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
@@ -24,7 +25,7 @@ import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
   imports: [
     CommonModule, RouterLink, DatePipe, FormsModule,
     AvatarModule, ButtonDirective, SpinnerModule, IconDirective, FormModule, DropdownModule,
-    ImgUrlPipe
+    ImgUrlPipe, BadgeComponent
   ],
   templateUrl: './post-detail.component.html',
   styleUrl: './post-detail.component.scss'
@@ -55,18 +56,38 @@ export class PostDetailComponent implements OnInit {
   replyText = signal('');
   isReplySubmitting = signal(false);
 
+  mode = signal<'public' | 'owner' | 'admin'>('public');
+  isProcessing = signal(false); // For delete/approve buttons
+
   ngOnInit() {
+    // 1. Determine Mode
+    const routeDataMode = this.route.snapshot.data['mode'];
+    this.mode.set(routeDataMode || 'public');
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
-      if (id) {
-        this.loadData(id);
-      }
+      if (id) this.loadData(id);
     });
   }
 
   loadData(id: string) {
     this.isLoading.set(true);
-    this.postService.getPostDetail(id).subscribe({
+
+    let request$;
+    switch (this.mode()) {
+      case 'owner':
+        request$ = this.postService.getOwnPostDetail(id);
+        break;
+      case 'admin':
+        request$ = this.postService.getAdminPostDetail(id);
+        break;
+      case 'public':
+      default:
+        request$ = this.postService.getPostDetail(id);
+        break;
+    }
+
+    request$.subscribe({
       next: (res) => {
         if (res.success) {
           this.post.set(res.data.post);
@@ -188,6 +209,22 @@ export class PostDetailComponent implements OnInit {
       next: () => {
         // Optimistic update
         this.loadComments(String(this.post()?.id));
+      }
+    });
+  }
+
+  deletePost() {
+    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+    this.isProcessing.set(true);
+
+    this.postService.delete(this.post()!.id).subscribe({
+      next: () => {
+        alert('Post deleted.');
+        this.router.navigate(['/profile/posts']);
+      },
+      error: () => {
+        alert('Failed to delete.');
+        this.isProcessing.set(false);
       }
     });
   }

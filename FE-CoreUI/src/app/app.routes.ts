@@ -65,7 +65,39 @@ export const routes: Routes = [
       },
       {
         path: 'post/:id',
-        loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent)
+        loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
+        data: { mode: "public " }
+      },
+      // ... Profile Routes ...
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        children: [
+          // List of my posts
+          {
+            path: 'posts',
+            loadComponent: () => import('./views/client/my-post-list/my-post-list.component').then(m => m.MyPostListComponent)
+          },
+          // Preview my specific post (Draft/Pending)
+          {
+            path: 'posts/preview/:id',
+            loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
+            data: { mode: 'owner' } // <--- OWNER VIEW
+          }
+        ]
+      },
+    ]
+  },
+
+
+  // ... Admin/Manage Routes ...
+  {
+    path: 'manage',
+    children: [
+      {
+        path: 'posts/:id', // Moderator reviewing a post
+        loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
+        data: { mode: 'admin' } // <--- ADMIN VIEW
       }
     ]
   },

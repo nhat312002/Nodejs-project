@@ -3,6 +3,48 @@
   <c-spinner color="primary"></c-spinner>
 </div>
 } @else if (post(); as p) {
+<!-- === MANAGEMENT BAR (Owner/Admin Only) === -->
+@if (mode() !== 'public') {
+<div class="bg-warning-subtle border-bottom py-3 mb-4">
+  <div class="container reading-container d-flex justify-content-between align-items-center">
+
+    <!-- Left: Status Badge -->
+    <div class="d-flex align-items-center gap-2">
+      <span class="small fw-bold text-uppercase text-muted">Status:</span>
+      @switch (p.status) {
+      @case ('1') { <c-badge color="warning">Pending Review</c-badge> }
+      @case ('2') { <c-badge color="success">Published</c-badge> }
+      @case ('3') { <c-badge color="danger">Rejected</c-badge> }
+      }
+    </div>
+
+    <!-- Right: Actions -->
+    <div class="d-flex gap-2">
+
+      <!-- OWNER MODE -->
+      @if (mode() === 'owner') {
+      <!-- Edit Button -->
+      <a [routerLink]="['/profile/posts/edit', p.id]" cButton color="dark" variant="outline" size="sm">
+        <svg cIcon name="cilPencil" size="sm" class="me-1"></svg> Edit
+      </a>
+
+      <!-- Delete Button -->
+      <button cButton color="danger" variant="ghost" size="sm" (click)="deletePost()" [disabled]="isProcessing()">
+        <svg cIcon name="cilTrash" size="sm"></svg>
+      </button>
+      }
+
+      <!-- ADMIN MODE -->
+      @if (mode() === 'admin') {
+      <!-- You can add Approve/Reject buttons here,
+                  or keep it read-only and manage via the list -->
+      <a routerLink="/manage/posts" cButton color="secondary" size="sm">Back to List</a>
+      }
+
+    </div>
+  </div>
+</div>
+}
 
 <!-- === MAIN POST === -->
 <article class="reading-container mx-auto px-3 py-5">
@@ -10,25 +52,24 @@
   <!-- HEADER -->
   <header class="mb-5 pb-4 border-bottom">
     @if (p.categories && p.categories.length > 0) {
-  <!-- 1. Use d-flex to align items horizontally, flex-wrap for safety -->
-  <div class="d-flex flex-wrap align-items-center mb-3">
+    <!-- 1. Use d-flex to align items horizontally, flex-wrap for safety -->
+    <div class="d-flex flex-wrap align-items-center mb-3">
 
-    @for (cat of p.categories; track cat.id; let isLast = $last) {
+      @for (cat of p.categories; track cat.id; let isLast = $last) {
 
       <!-- 2. Removed 'd-block' and 'mb-3'. Added 'link-hover' for style. -->
-      <a [routerLink]="['/category', cat.id]"
-         class="text-primary text-decoration-none fw-bold text-uppercase small">
+      <a [routerLink]="['/category', cat.id]" class="text-primary text-decoration-none fw-bold text-uppercase small">
         {{ cat.name }}
       </a>
 
       <!-- 3. Add Middot if it is NOT the last item -->
       @if (!isLast) {
-        <span class="mx-2 text-muted">&middot;</span>
+      <span class="mx-2 text-muted">&middot;</span>
       }
 
+      }
+    </div>
     }
-  </div>
-}
     <h1 class="fw-bold display-5 mb-4 text-dark font-serif">{{ p.title }}</h1>
     <div class="d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center gap-3">
