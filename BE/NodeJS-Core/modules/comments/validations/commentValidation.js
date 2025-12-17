@@ -32,7 +32,13 @@ const getCommentsByPost = {
 };
 
 const createComment = {
-    query: Joi.object({
+    body: Joi.object({
+        "content": Joi.string().trim().max(2000).required().messages({
+            'string.base': 'Content must be a string.',
+            'string.empty': 'Content cannot be empty.',
+            'string.max': 'Content cannot be more than {#limit} characters long.',
+            'any.required': 'Content is a required field.'
+        }),
         "postId": Joi.number().integer().required().messages({
             'number.base': 'Post ID must be a number.',
             'number.integer': 'Post ID must be an integer.',
@@ -41,14 +47,6 @@ const createComment = {
         "parentId": Joi.number().integer().optional().messages({
             'number.base': 'Parent ID must be a number.',
             'number.integer': 'Parent ID must be an integer.'
-        })
-    }),
-    body: Joi.object({
-        "content": Joi.string().trim().max(2000).required().messages({
-            'string.base': 'Content must be a string.',
-            'string.empty': 'Content cannot be empty.',
-            'string.max': 'Content cannot be more than {#limit} characters long.',
-            'any.required': 'Content is a required field.'
         })
     })
 };

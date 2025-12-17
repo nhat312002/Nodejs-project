@@ -43,9 +43,9 @@ const commentController = {
     createComment: async (req, res) => {
         try {
             const commentData = {
-                postId: req.query.postId,
-                userId: req.user?.id || req.body.userId,
-                parentId: req.query.parentId || null,
+                postId: req.body.postId,
+                userId: req.user.id,
+                parentId: req.body.parentId || null,
                 content: req.body.content
             };
             const comment = await commentService.createComment(commentData);

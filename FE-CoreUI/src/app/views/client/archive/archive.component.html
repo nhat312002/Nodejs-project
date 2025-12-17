@@ -174,9 +174,9 @@
 
       <!-- Pagination -->
       @if (totalPages() > 1) {
-      <div class="mt-5 d-flex justify-content-center">
+      <div class="mt-5 w-100">
         <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
-          (pageChange)="onPageChange($event)">
+          (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)">
         </app-custom-pagination>
       </div>
       }

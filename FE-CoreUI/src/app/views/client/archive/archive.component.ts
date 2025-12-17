@@ -118,38 +118,57 @@ export class ArchiveComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Load categories for the dropdown menu once
-    this.loadCategories();
+    // 1. Load Categories FIRST
+    this.categoryService.getPublicCategories(1, 100).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const cats = res.data.categories;
+          this.categories.set(cats);
 
-    // 1. LISTEN TO URL CHANGES (Path AND Query)
-    // This is the source of truth. It handles Tabs, Back Button, and Reloads.
+          // 2. NOW listen to route changes (after we have the list)
+          this.handleRouteChanges(cats);
+        }
+      },
+      error: () => console.error('Failed to load categories')
+    });
+  }
+
+  // Refactored logic into a helper method
+  handleRouteChanges(allCategories: Category[]) {
     combineLatest([
-      this.route.paramMap,      // /category/:id
-      this.route.queryParamMap  // ?text=abc&page=2
+      this.route.paramMap,
+      this.route.queryParamMap
     ]).subscribe(([params, queryParams]) => {
 
-      // A. DETERMINE CONTEXT & CATEGORY
-      const catId = params.get('id');
+      const catIdParam = params.get('id');
 
-      if (catId) {
-        // --- CATEGORY TAB (/category/5) ---
+      if (catIdParam) {
+        const catId = Number(catIdParam);
+
+        // --- CHECK IF EXISTS ---
+        const exists = allCategories.some(c => c.id === catId);
+
+        if (!exists) {
+          // Category not found -> Redirect to 404
+          this.router.navigate(['/404'], { skipLocationChange: false });
+          return; // Stop here
+        }
+
+        // --- CATEGORY TAB ---
         this.isCategoryView.set(true);
-        this.selectedCategoryIds.set([Number(catId)]); // Lock to this category
+        this.selectedCategoryIds.set([catId]);
         this.matchAllCategories.set(false);
 
-        const id = Number(catId);
-        const cat = this.categories().find(c => c.id === id);
-
-        const title = cat ? `${cat.name} - My Blog` : 'Category - My Blog';
-        this.titleService.setTitle(title);
+        // Update Title
+        const cat = allCategories.find(c => c.id === catId);
+        this.titleService.setTitle(cat ? `${cat.name} - My Blog` : 'Category');
 
       } else {
-        // --- ARCHIVE TAB (/archive) ---
+        // --- ARCHIVE TAB ---
         this.isCategoryView.set(false);
-
         this.titleService.setTitle('Archive - My Blog');
 
-        // Restore Categories from URL ?cat=1,2,other
+        // Restore Categories from URL
         const catParam = queryParams.get('cat');
         if (catParam) {
           const ids = catParam.split(',').map(id => id === 'other' ? 'other' : Number(id));
@@ -158,18 +177,15 @@ export class ArchiveComponent implements OnInit {
           this.selectedCategoryIds.set([]);
         }
 
-        // Restore Match All
         this.matchAllCategories.set(queryParams.get('matchAll') === 'true');
       }
 
-      // B. RESTORE COMMON FILTERS
-      // Defaults to '' or 1 if param is missing (Logic Reset)
+      // Restore Filters & Load
       this.searchQuery.set(queryParams.get('text') || '');
       this.searchAuthor.set(queryParams.get('author') || '');
       this.sortOrder.set(queryParams.get('sort') || 'date_desc');
       this.currentPage.set(Number(queryParams.get('page')) || 1);
-
-      // C. TRIGGER DATA LOAD
+      this.pageSize.set(Number(queryParams.get('limit')) || 10);
 
       this.loadPosts();
     });
@@ -185,6 +201,7 @@ export class ArchiveComponent implements OnInit {
       author: this.searchAuthor() || null,
       sort: this.sortOrder(),
       page: page > 1 ? page : null, // Hide page=1 to keep URL clean
+      limit: this.pageSize() !== 10 ? this.pageSize() : null
     };
 
     // Only sync categories if we are in Archive view (not fixed category view)
@@ -224,7 +241,7 @@ export class ArchiveComponent implements OnInit {
     const params: any = {
       page: this.currentPage(),
       limit: this.pageSize(),
-      locale: locale,
+      // locale: locale,
       sort: this.sortOrder(),
       categoryIds: this.selectedCategoryIds(), // Pass the array
       categoryMatchAll: this.matchAllCategories()
@@ -259,6 +276,14 @@ export class ArchiveComponent implements OnInit {
     this.updateQueryParams(false);
   }
 
+   onPageSizeChange(newSize: number) {
+    this.pageSize.set(newSize);
+
+    this.currentPage.set(1);
+
+    this.updateQueryParams(true);
+  }
+
   // Triggered by Category Checkbox
   toggleCategory(id: number | string) {
     this.selectedCategoryIds.update(currentIds => {
@@ -275,16 +300,30 @@ export class ArchiveComponent implements OnInit {
 
       // SCENARIO 2: User clicked a specific Number ID
       else {
-        // If "Uncategorized" is currently selected, clear it first!
-        if (currentIds.includes('other')) {
-          return [id]; // Start fresh with just this number
+
+         // --- 1. SANITIZE: Get list of currently valid IDs from the API ---
+        const validAvailableIds = this.categories().map(c => c.id);
+
+        // --- 2. CLEANUP: Filter 'currentIds' ---
+        // Keep 'other' (handled in next step)
+        // OR Keep the ID if it exists in the valid list.
+        // This removes '36' because 36 is not in 'validAvailableIds'
+        let cleanIds = currentIds.filter(cid =>
+          cid === 'other' || validAvailableIds.includes(cid as number)
+        );
+
+       // --- 3. STANDARD LOGIC ---
+
+        // If "Uncategorized" was selected, clear it and start fresh with clicked ID
+        if (cleanIds.includes('other')) {
+          return [id];
         }
 
-        // Standard Toggle Logic (Add/Remove)
-        if (currentIds.includes(id)) {
-          return currentIds.filter(i => i !== id);
+        // Toggle Logic (Add/Remove) using the CLEAN list
+        if (cleanIds.includes(id)) {
+          return cleanIds.filter(i => i !== id);
         } else {
-          return [...currentIds, id];
+          return [...cleanIds, id];
         }
       }
     });

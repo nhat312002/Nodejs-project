@@ -71,9 +71,9 @@ export class AuthService {
           this.loadUserFromToken();
 
 
-          setTimeout(() => {
-            this.router.navigate(['']);
-          }, 50);
+          // setTimeout(() => {
+          //   this.router.navigate(['']);
+          // }, 50);
         })
       );
   }

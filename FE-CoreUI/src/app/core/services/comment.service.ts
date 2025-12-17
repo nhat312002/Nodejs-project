@@ -15,4 +15,24 @@ export class CommentService {
       params: { postId, limit: 50 } // Fetch enough comments
     });
   }
+
+  createComment(postId: number, content: string, parentId: number | null = null): Observable<ApiResponse<any>> {
+    let params: any = {
+      postId,
+      content
+    };
+
+    if (parentId) params.parentId = parentId;
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/comments`, params);
+  }
+
+  updateComment(commentId: number, content: string): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/comments/${commentId}`, {
+      content: content
+    });
+  }
+
+  deleteComment(commentId: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/comments/${commentId}`);
+  }
 }

@@ -50,6 +50,17 @@ const commentServices = {
                         'createdAt',
                         'updatedAt',
                     ],
+                    include: [
+                        {
+                            model: User,
+                            as: "user",
+                            where: {
+                                status: '1'
+                            },
+                            required: false, 
+                            attributes: ['id', ['full_name', 'fullName']]
+                        }
+                    ]
                 },
                 {
                     model: User,

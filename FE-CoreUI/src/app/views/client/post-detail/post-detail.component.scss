@@ -1,0 +1,55 @@
+/* 1. THE LAYOUT MAGIC */
+.reading-container {
+  /* Mobile First: Take full width */
+  width: 100%;
+
+  /* Desktop Limit: Stop growing at this width (Substack standard) */
+  max-width: 720px;
+
+  /* Centering: Equal margins on left/right */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 2. TYPOGRAPHY (Substack Feel) */
+// .font-serif {
+//   font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+// }
+
+.post-content {
+  line-height: 1.8;
+  color: #2c2c2c;
+  font-size: 1.15rem;
+
+  /* Handle images inside content to match width */
+  ::ng-deep img {
+    max-width: 100%; /* Shrink if image is wider than 720px */
+    height: auto;
+    border-radius: 4px;
+    margin: 2rem 0;
+    display: block;
+  }
+
+  /* Optional: Make images pop out slightly on desktop (Substack style) */
+  /* Remove this block if you want strict alignment */
+  @media (min-width: 900px) {
+    ::ng-deep img {
+      width: 120%; /* Make image wider than text */
+      max-width: 120%;
+      margin-left: -10%; /* Center the wider image */
+    }
+  }
+
+  ::ng-deep h2, ::ng-deep h3 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+  transition: color 0.2s;
+  &:hover { color: var(--cui-primary); }
+}
