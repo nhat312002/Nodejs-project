@@ -44,7 +44,7 @@ export class AuthService {
     this.loadUserFromToken();
   }
 
-  private loadUserFromToken() {
+  public loadUserFromToken() {
     const token = localStorage.getItem('token');
     if (token) {
       try {
@@ -154,11 +154,11 @@ export class AuthService {
 
     if (!user) return '/login';
 
-    if (user.role == 3) {
-      return '/dashboard';
-    } else {
+    // if (user.role == 3) {
+      // return '/admin/dashboard';
+    // } else {
       return '/home';
-    }
+    // }
   }
 
   isAccessTokenExpired(): boolean {

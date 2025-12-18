@@ -100,21 +100,33 @@ export const routes: Routes = [
 
         ]
       },
+      {
+        path: 'manage',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: [2, 3] }, // Mods & Admins
+        children: [
+          { path: '', redirectTo: 'posts', pathMatch: 'full' },
+
+          // LIST
+          // {
+          //   path: 'posts',
+          //   loadComponent: () => import('./views/client/manage-posts/manage-post-list.component').then(m => m.ManagePostListComponent)
+          // },
+
+          // DETAIL (Admin Mode)
+          {
+            path: 'posts/:id',
+            loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
+            data: { mode: 'admin' } // This triggers the Approve/Reject bar in detail view
+          }
+        ]
+      },
     ]
   },
 
 
   // ... Admin/Manage Routes ...
-  {
-    path: 'manage',
-    children: [
-      {
-        path: 'posts/:id', // Moderator reviewing a post
-        loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
-        data: { mode: 'admin' } // <--- ADMIN VIEW
-      }
-    ]
-  },
+
   {
     path: 'admin',
     component: DefaultLayoutComponent,
@@ -154,7 +166,15 @@ export const routes: Routes = [
     ]
 
   },
-  { path: '**', redirectTo: '404' }
+  // { path: '**', redirectTo: '404' }
+  {
+    path: '**',
+    loadComponent: () => import('./views/pages/page404/page404.component').then(m => m.Page404Component),
+    data: {
+      title: 'Page 404'
+    }
+  },
+
   // {
   //   path: '',
   //   redirectTo: 'dashboard',
