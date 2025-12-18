@@ -1,6 +1,6 @@
 require("express-router-group");
 const express = require("express");
-const { middlewares, authenticated, role, avatarUpload, flagUpload } = require("kernels/middlewares");
+const { middlewares, authenticated, role, avatarUpload, flagUpload , thumbnailUpload, postImageUpload} = require("kernels/middlewares");
 const { validate } = require("kernels/validations");
 const commentController = require("modules/comments/controllers/commentController");
 const { getCommentsByPost, createComment, updateComment, deleteComment } = require("modules/comments/validations/commentValidation");
@@ -46,8 +46,8 @@ router.group("/posts", null, (router) => {
 
   router.get("/own", userMiddlewares, validate([getPosts]), postController.getOwnPosts);
   router.get("/own/:postId", userMiddlewares, validate([getPostById]), postController.getOwnPostById);
-  router.post("/", userMiddlewares, validate([createPost]), postController.createPost);
-  router.put("/:postId", userMiddlewares, validate([updatePost]), postController.updatePost);
+  router.post("/", userMiddlewares, thumbnailUpload, validate([createPost]), postController.createPost);
+  router.put("/:postId", userMiddlewares, thumbnailUpload, validate([updatePost]), postController.updatePost);
   router.put("/:postId/disable", userMiddlewares, validate([disablePost]), postController.disablePost);
 
   router.get("/", validate([getPosts]), postController.getApprovedPosts);

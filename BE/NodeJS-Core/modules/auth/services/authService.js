@@ -71,15 +71,17 @@ exports.login = async (data) => {
 
 exports.refresh = async (data) => {
   const { refresh_token } = data;
-  console.log(refresh_token);
+  console.log(`Refresh token is: ${refresh_token}`);
   const { userId, role } = jwtUtils.verify(refresh_token);
 
   // find user in db
   const user = await User.findByPk(userId);
+  console.log(user);
   if (!user) throw new Error("User not found");
   if (user.role_id != role) throw new Error("User role does not match");
   // require signing in if user role changes
-
+  
+  console.log('Signing new token!');
   const newToken = jwtUtils.sign(userId, role);
   const newRefreshToken = jwtUtils.signRefreshToken(userId, role);
 

@@ -30,7 +30,8 @@
     "slugify": "^1.6.6",
     "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "git-branch-is": "^4.0.0",

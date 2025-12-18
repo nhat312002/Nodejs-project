@@ -3,6 +3,8 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { skipRefreshLogic } from '../interceptors/skip.context';
 
 export interface LoginResponse {
   success: boolean;
@@ -57,7 +59,7 @@ export class AuthService {
   }
 
   login(credentials: any) {
-    return this.http.post<LoginResponse>('http://localhost:3000/auth/login', credentials)
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
       .pipe(
         tap(response => {
 
@@ -82,39 +84,58 @@ export class AuthService {
     return this.http.post<any>('http://localhost:3000/auth/register', payload);
   }
 
-  logout() {
+  logout(redirectTo: string = '/', returnUrl?: string) {
+
+    // 1. Clear Data & Cleanup (Keep your existing cleanup logic here)
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     this.currentUser.set(null);
-    this.router.navigate(['']);
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+
+    // 2. Prepare Navigation Extras
+    const navigationExtras: any = {};
+    if (returnUrl) {
+      navigationExtras.queryParams = { returnUrl: returnUrl };
+    }
+
+    // 3. Navigate
+    this.router.navigate([redirectTo], navigationExtras);
   }
 
-  refreshToken(): Observable<any> {
+  refreshToken(urlToReturnTo?: string): Observable<any> {
     const refreshToken = localStorage.getItem('refreshToken');
-
-    console.log('Attempting refresh');
+    const target = urlToReturnTo || this.router.url;
 
     if (!refreshToken) {
-      console.log('No refresh token found');
-      this.logout();
+      this.logout('/login', target);
       return throwError(() => new Error('No refresh token'));
     }
 
-    return this.http.post<any>('http://localhost:3000/auth/refresh', { refresh_token: refreshToken })
-      .pipe(
-        tap((response) => {
-          console.log('Refresh API success');
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('refreshToken', response.data.refresh_token);
-
-          this.loadUserFromToken();
-        }),
-        catchError((err) => {
-          console.log("Error error");
-          this.logout();
-          return throwError(() => err);
-        })
-      );
+    return this.http.post<any>(
+      `${environment.apiUrl}/auth/refresh`,
+      { refresh_token: refreshToken },
+      // --- THE FIX IS HERE ---
+      { context: skipRefreshLogic() }
+      // -----------------------
+    ).pipe(
+      tap((response) => {
+        console.log('Refresh Success');
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('refreshToken', response.data.refresh_token);
+        this.loadUserFromToken();
+      }),
+      catchError((err) => {
+        console.log("Refresh Failed - Logging out");
+        // The loop stops here because the Interceptor will see the flag
+        // and won't retry this request.
+        this.logout();
+        return throwError(() => err);
+      })
+    );
   }
 
   getAccessToken(): string | null {

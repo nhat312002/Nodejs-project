@@ -17,6 +17,26 @@ const postService = {
             'updatedAt',
         ];
         // console.log(postId);
+        const include = [
+            {
+                model: User,
+                as: "user",
+                attributes: ["id", ["full_name", "fullName"]]
+            },
+            {
+                model: Language,
+                as: "language",
+                where: { status: "1" },
+                attributes: ["id", "name", "locale"]
+            },
+            {
+                model: Category,
+                as: "categories",
+                required: false,
+                attributes: ["id", "name"],
+                through: { attributes: [] }
+            }
+        ];
         const post = await Post.findOne({
             where: {
                 id: postId,
@@ -25,6 +45,7 @@ const postService = {
                 }
             },
             attributes,
+            include,
         });
 
         if (!post) throw new Error("Post not found");
@@ -88,12 +109,33 @@ const postService = {
             'createdAt',
             'updatedAt',
         ];
+        const include = [
+            {
+                model: User,
+                as: "user",
+                attributes: ["id", ["full_name", "fullName"]]
+            },
+            {
+                model: Language,
+                as: "language",
+                where: { status: "1" },
+                attributes: ["id", "name", "locale"]
+            },
+            {
+                model: Category,
+                as: "categories",
+                required: false,
+                attributes: ["id", "name"],
+                through: { attributes: [] }
+            }
+        ];
         const post = await Post.findOne({
             where: {
                 id: postId,
                 user_id: userId
             },
             attributes,
+            include,
         });
         if (!post) throw new Error("Post not found");
         return post;
@@ -487,6 +529,7 @@ const postService = {
 
     createPost: async (data) => {
         const { title, body, userId, languageId, categoryIds, originalId } = data;
+        console.log(data);
         if (originalId != null) {
             const originalPost = await postService.getPostById(originalId);
             if (originalPost == null) {
@@ -529,11 +572,14 @@ const postService = {
     updatePost: async (id, userId, data) => {
         const { title, body, categoryIds } = data;
         const post = await postService.getPostById(id);
+        // console.log(post.dataValues);
+
         if (!post) {
             throw new Error("Post not found");
         }
-
-        if (post.user_id != userId) {
+        
+        if (post.dataValues.userId != userId) {
+            console.log (`\n ${post.dataValues.user_id} != ${userId} \n`)
             throw new Error("Unauthorized");
         }
 
@@ -568,10 +614,12 @@ const postService = {
 
     disablePost: async (postId, userId) => {
         const post = await postService.getPostById(postId);
+        
         if (!post) {
             throw new Error("Post not found");
         }
-        if (post.user_id != userId) {
+        const authorId = post.dataValues.userId; 
+        if (authorId != userId) {
             throw new Error("Unauthorized");
         }
         post.status = "0";

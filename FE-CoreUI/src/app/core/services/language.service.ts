@@ -25,8 +25,9 @@ export interface LanguageListData {
 export class LanguageService {
   private http = inject(HttpClient);
   private adminApiUrl = `${environment.apiUrl}/admin/languages`;
+  private publicApiUrl = `${environment.apiUrl}/languages`;
 
-  getAll(page: number = 1, limit: number = 10, search: string): Observable<ApiResponse<LanguageListData>> {
+  getAll(page: number = 1, limit: number = 10, search: string = ''): Observable<ApiResponse<LanguageListData>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
@@ -36,6 +37,18 @@ export class LanguageService {
     }
 
     return this.http.get<ApiResponse<LanguageListData>>(this.adminApiUrl, { params });
+  }
+
+  getPublicLanguages(page: number = 1, limit: number = 10, search: string = ''): Observable<ApiResponse<LanguageListData>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (search.trim()) {
+      params = params.set('name', search.trim());
+    }
+
+    return this.http.get<ApiResponse<LanguageListData>>(this.publicApiUrl, { params });
   }
 
   create(data: FormData): Observable<ApiResponse<Language>> {

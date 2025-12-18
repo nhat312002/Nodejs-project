@@ -66,7 +66,7 @@ export const routes: Routes = [
       {
         path: 'post/:id',
         loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
-        data: { mode: "public " }
+        data: { mode: "public" }
       },
       // ... Profile Routes ...
       {
@@ -83,7 +83,21 @@ export const routes: Routes = [
             path: 'posts/preview/:id',
             loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
             data: { mode: 'owner' } // <--- OWNER VIEW
+          },
+          // 1. Create Route (No ID)
+          {
+            path: 'posts/create',
+            loadComponent: () => import('./views/client/post-editor/post-editor.component').then(m => m.PostEditorComponent),
+            title: 'New Post'
+          },
+
+          // 2. Edit Route (Has ID)
+          {
+            path: 'posts/edit/:id',
+            loadComponent: () => import('./views/client/post-editor/post-editor.component').then(m => m.PostEditorComponent),
+            title: 'Edit Post'
           }
+
         ]
       },
     ]

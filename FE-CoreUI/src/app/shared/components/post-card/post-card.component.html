@@ -1,55 +1,88 @@
-<a [routerLink]="['/post', post().id]" class="text-decoration-none text-dark h-100 d-block card-hover">
-  @if (layout() === 'grid'){
-  <div class="card h-100 border-0 bg-transparent">
+<!-- WRAPPER: Needs position-relative to place badges/actions absolutely -->
+<div class="h-100 position-relative group">
 
-    <!-- Thumbnail -->
-    <div class="overflow-hidden rounded mb-3 position-relative bg-light" style="aspect-ratio: 16/9">
-      <img [src]="displayImage()" alt="Post Cover" class="img-fluid w-100 h-100 object-fit-cover transition-zoom">
-    </div>
-
-    <!-- Content -->
-    <div class="d-flex flex-column">
-      <div class="d-flex flex-wrap gap-1 mb-1">
-        @for (cat of postCategories(); track cat.id; let last = $last) {
-        <span class="text-primary small fw-bold text-uppercase">
-          {{ cat.name }} {{ !last ? '&middot;' : '' }}
-        </span>
-        }
-      </div>
-      <h5 class="fw-bold mb-2 lh-sm">{{ post().title }}</h5>
-
-      <p class="text-muted small line-clamp-3 mb-2">
-        {{ displayExcerpt() }}
-      </p>
-
-      <div class="d-flex align-items-center small text-muted mt-auto pt-2">
-        <span class="fw-semibold text-dark">{{ authorName() }}</span>
-        <span class="mx-1">&middot;</span>
-        <span>{{ post().createdAt | date:'mediumDate' }}</span>
-      </div>
-    </div>
-
+  <!-- 1. STATUS BADGE (Top Right) -->
+  @if (showStatus()) {
+  <div class="position-absolute top-0 end-0 m-2 z-2">
+    @switch (post().status) {
+    @case ('1') { <c-badge color="warning">Pending</c-badge> }
+    @case ('2') { <c-badge color="success">Published</c-badge> }
+    @case ('3') { <c-badge color="danger">Rejected</c-badge> }
+    }
   </div>
   }
 
-  @if (layout() === 'list') {
-  <div class="d-flex align-items-start gap-4 py-4 border-bottom">
-    <div class="flex-grow-1">
-      <div class="d-flex align-items-center small text-muted mb-2">
-        <span class="fw-semibold text-dark">{{ authorName() }}</span>
-        <span class="mx-1">&middot;</span>
-        <span>{{post().createdAt | date: 'mediumDate'}}</span>
+  <!-- 2. MAIN CLICKABLE AREA -->
+  <!-- We wrap the content in the link, BUT the actions sit outside/above it visually -->
+  <a [routerLink]="[linkPrefix(), post().id]" class="text-decoration-none text-dark h-100 d-block card-hover">
+
+    <!-- GRID LAYOUT -->
+    @if (layout() === 'grid'){
+    <div class="card h-100 border-0 bg-transparent">
+
+      <!-- Thumbnail -->
+      <div class="overflow-hidden rounded mb-3 position-relative bg-light" style="aspect-ratio: 16/9">
+        <!-- Added ImgUrlPipe here just in case -->
+        <img [src]="displayImage()" alt="Post Cover" class="img-fluid w-100 h-100 object-fit-cover transition-zoom">
       </div>
 
-      <h5 class="fw-bold mb-2">{{ post().title }}</h5>
-      <p class="text-muted small line-clamp-2 mb-0 d-none d-md-block">
-        {{ displayExcerpt() }}
-      </p>
-    </div>
+      <!-- Content -->
+      <div class="d-flex flex-column">
+        <div class="d-flex flex-wrap gap-1 mb-1">
+          @for (cat of postCategories(); track cat.id; let last = $last) {
+          <span class="text-primary small fw-bold text-uppercase">
+            {{ cat.name }} {{ !last ? '&middot;' : '' }}
+          </span>
+          }
+        </div>
+        <h5 class="fw-bold mb-2 lh-sm">{{ post().title }}</h5>
 
-    <div class="flex-shrink-0 bg-light rounded overflow-hidden border" style="width: 140px; height: 100px;">
-      <img [src]="displayImage()" class="img-fluid w-100 h-100 object-fit-cover">
+        <p class="text-muted small line-clamp-3 mb-2">
+          {{ displayExcerpt() }}
+        </p>
+
+        <div class="d-flex align-items-center small text-muted mt-auto pt-2">
+          <span class="fw-semibold text-dark">{{ authorName() }}</span>
+          <span class="mx-1">&middot;</span>
+          <span>{{ post().createdAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
     </div>
-  </div>
-  }
-</a>
+    }
+
+    <!-- LIST LAYOUT -->
+    @if (layout() === 'list') {
+    <div class="d-flex align-items-start gap-4 py-4 border-bottom position-relative">
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center small text-muted mb-2">
+          <span class="fw-semibold text-dark">{{ authorName() }}</span>
+          <span class="mx-1">&middot;</span>
+          <span>{{post().createdAt | date: 'mediumDate'}}</span>
+        </div>
+
+        <h5 class="fw-bold mb-2">{{ post().title }}</h5>
+        <p class="text-muted small line-clamp-2 mb-0 d-none d-md-block" style="max-width: 90%;">
+          {{ displayExcerpt() }}
+        </p>
+      </div>
+
+      <div class="flex-shrink-0 bg-light rounded overflow-hidden border" style="width: 140px; height: 100px;">
+        <img [src]="displayImage()" class="img-fluid w-100 h-100 object-fit-cover">
+      </div>
+    </div>
+    }
+  </a>
+
+  <!-- 3. ACTION SLOT (Meatball Menu) -->
+  <!-- This projects the content passed from the parent (MyPostList) -->
+  <!-- z-3 ensures it sits ON TOP of the link so clicking it doesn't open the post -->
+  <div class="position-absolute"
+     style="bottom: 10px; z-index: 100;"
+     [style.right]="layout() === 'list' ? '155px' : '10px'">
+
+    <ng-content select="[card-actions]"></ng-content>
+
+</div>
+
+</div>

@@ -20,6 +20,7 @@ export interface Post {
   excerpt?: string;
   url_thumbnail?: string;
   status?: string;
+  languageId?: string;
 }
 
 export interface PostListData {

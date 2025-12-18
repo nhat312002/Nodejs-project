@@ -57,14 +57,14 @@
 
             <!-- Reuse Card + Status -->
             <!-- <app-post-card [post]="post" layout="list" [showStatus]="true"> -->
-            <app-post-card [post]="post" layout="list">
+            <app-post-card [post]="post" layout="list" [showStatus]="true" linkPrefix="/profile/posts/preview">
               <!-- INJECTED ACTIONS (Meatball Menu) -->
               <div card-actions class="position-absolute bottom-0 end-0 m-3 z-3">
-                <c-dropdown direction="dropstart" variant="btn-group">
+                <c-dropdown direction="center" variant="btn-group">
                   <button cButton cDropdownToggle color="light" variant="ghost" size="sm" class="border shadow-sm text-dark">
-                    <svg cIcon name="cilOptions"></svg>
+                    <!-- <svg cIcon name="cilOptions"></svg> -->
                   </button>
-                  <ul cDropdownMenu class="shadow-sm border-0">
+                  <ul cDropdownMenu class="shadow-sm border-0" >
 
                     <!-- EDIT -->
                     <li>

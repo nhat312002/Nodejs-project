@@ -1,5 +1,6 @@
 const { BodyWithLocale, ParamWithLocale, QueryWithLocale } = require("kernels/rules");
 const { Joi } = require("kernels/validations");
+const language = require("models/language");
 
 const getPostById = {
     params: Joi.object({
@@ -107,10 +108,38 @@ const createPost = {
             'number.integer': 'Language ID must be an integer.',
             'any.required': 'Language ID is required.'
         }),
-        "categoryIds": Joi.array().items(Joi.number()).optional().messages({
-            'array.base': 'Category IDs must be an array.',
-            'array.includes': 'Each category ID must be a number.'
-        })
+        categoryIds: Joi.optional().custom((value, helpers) => {
+            // 1. Handle String (FormData: "1, 2")
+            if (typeof value === "string") {
+                if (!value.trim()) return []; // Handle empty string gracefully
+
+                const ids = value
+                    .split(",")
+                    .map((id) => Number(id.trim()))
+                    .filter((v) => !Number.isNaN(v) && v > 0); // Ensure valid positive IDs
+
+                if (ids.length === 0 && value.trim().length > 0) {
+                    return helpers.message("Category IDs must contain valid numbers.");
+                }
+                return ids;
+            }
+
+            // 2. Handle Array (JSON: [1, 2])
+            if (Array.isArray(value)) {
+                // Optional: Ensure all items in array are numbers
+                const isValid = value.every(item => Number.isInteger(item) && item > 0);
+                if (!isValid) return helpers.message("Category IDs must be an array of integers.");
+                return value;
+            }
+
+            return helpers.message("Category IDs must be an array or a comma-separated string.");
+        }),
+        "url_thumbnail": Joi.string().trim().uri().optional().allow(null, '').messages({
+            'string.uri': 'Avatar URL must be a valid URI.',
+            'string.max': 'Avatar URL must not exceed 255 characters.',
+            'string.base': 'Avatar URL must be a string.',
+        }),
+        "excerpt": Joi.optional(),
     })
 };
 
@@ -133,10 +162,39 @@ const updatePost = {
             'string.min': 'Body must be at least {#limit} characters long.',
             'string.max': 'Body cannot be more than {#limit} characters long.'
         }),
-        "categoryIds": Joi.array().items(Joi.number()).optional().messages({
-            'array.base': 'Category IDs must be an array.',
-            'array.includes': 'Each category ID must be a number.'
-        })
+        "categoryIds": Joi.optional().custom((value, helpers) => {
+            // 1. Handle String (FormData: "1, 2")
+            if (typeof value === "string") {
+                if (!value.trim()) return []; // Handle empty string gracefully
+
+                const ids = value
+                    .split(",")
+                    .map((id) => Number(id.trim()))
+                    .filter((v) => !Number.isNaN(v) && v > 0); // Ensure valid positive IDs
+
+                if (ids.length === 0 && value.trim().length > 0) {
+                    return helpers.message("Category IDs must contain valid numbers.");
+                }
+                return ids;
+            }
+
+            // 2. Handle Array (JSON: [1, 2])
+            if (Array.isArray(value)) {
+                // Optional: Ensure all items in array are numbers
+                const isValid = value.every(item => Number.isInteger(item) && item > 0);
+                if (!isValid) return helpers.message("Category IDs must be an array of integers.");
+                return value;
+            }
+
+            return helpers.message("Category IDs must be an array or a comma-separated string.");
+        }),
+        "url_thumbnail": Joi.string().trim().uri().optional().allow(null, '').messages({
+            'string.uri': 'Avatar URL must be a valid URI.',
+            'string.max': 'Avatar URL must not exceed 255 characters.',
+            'string.base': 'Avatar URL must be a string.',
+        }),
+        "excerpt": Joi.optional(),
+        "language_id": Joi.optional(),
     }).min(1).messages({
         'object.min': 'At least one field (title, body, or categoryIds) must be provided to update.'
     }),

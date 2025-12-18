@@ -70,9 +70,15 @@ const postController = {
         try {
             const userId = req.user?.id || req.body.userId;
 
+            let url_thumbnail = null;
+            if (req.file) {
+                url_thumbnail = `/uploads/posts/${req.file.filename}`;
+            }
+
             const post = await postService.createPost({
                 userId,
                 ...req.body,
+                url_thumbnail
             });
 
             return responseUtils.ok(res, { post: post });
@@ -86,7 +92,15 @@ const postController = {
             const data = req.body;
             const { postId } = req.params;
             const userId = req.user.id;
-            const post = await postService.updatePost(postId, userId, data);
+            let url_thumbnail = undefined; // undefined means "don't change"
+
+            if (req.file) {
+                // User uploaded a NEW file
+                url_thumbnail = `/uploads/posts/${req.file.filename}`;
+            }
+
+
+            const post = await postService.updatePost(postId, userId, {...req.body, url_thumbnail});
             return responseUtils.ok(res, { post: post });
         } catch (error) {
             if (error.message === "Unauthorized")
