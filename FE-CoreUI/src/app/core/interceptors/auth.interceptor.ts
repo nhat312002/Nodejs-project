@@ -53,6 +53,11 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
       catchError((err) => {
         // CRITICAL: If refresh fails, STOP. Logout.
         isRefreshing = false;
+
+        if (err.status === 422 || err.status === 400) {
+          return throwError(() => err);
+        }
+
         authService.logout();
         return throwError(() => err);
       })
@@ -69,6 +74,6 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
 
 const addTokenHeader = (request: HttpRequest<any>, token: string) => {
   return request.clone({
-    setHeaders: { Authorization: `Bearer ${token}`}
+    setHeaders: { Authorization: `Bearer ${token}` }
   });
 }
