@@ -48,9 +48,28 @@ export class ProfileEditComponent {
     this.profileService.changePassword({
       currentPassword: this.passwordForm.value.currentPassword!,
       newPassword: this.passwordForm.value.newPassword!
-    }).subscribe(() => {
-      alert('Password changed successfully');
-      this.passwordForm.reset();
+    }).subscribe({
+      next: () => {
+        alert('Password changed successfully');
+        this.passwordForm.reset();
+      },
+      error: (err) => {
+        console.error(err);
+
+        let msg = 'Failed to change password';
+
+        // 1. Check for Validation Array in 'data' (e.g. 422 errors)
+        if (err.error?.data && Array.isArray(err.error.data) && err.error.data.length > 0) {
+          // Grab the first error message from the array
+          msg = err.error.data[0];
+        }
+        // 2. Check for generic 'message' (e.g. 400/401 errors)
+        else if (err.error?.message) {
+          msg = err.error.message;
+        }
+
+        alert(msg);
+      }
     });
   }
 }

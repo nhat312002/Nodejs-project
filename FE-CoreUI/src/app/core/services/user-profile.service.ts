@@ -8,13 +8,16 @@ import { ApiResponse } from '../models/api.model';
 })
 export class UserProfileService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/users`;
+  private apiUrl = `${environment.apiUrl}`;
 
   /** Cập nhật tên + số điện thoại */
   updateProfile(data: { fullName: string; phone: string }) {
     return this.http.put<ApiResponse<any>>(
       `${this.apiUrl}/profile`,
-      data
+      {
+        full_name: data.fullName,
+        phone: data.phone
+      }
     );
   }
 
@@ -23,9 +26,12 @@ export class UserProfileService {
     currentPassword: string;
     newPassword: string;
   }) {
-    return this.http.put<ApiResponse<any>>(
-      `${this.apiUrl}/change-password`,
-      data
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/profile/password`,
+      {
+        password: data.newPassword,
+        oldPassword: data.currentPassword,
+      }
     );
   }
 }
