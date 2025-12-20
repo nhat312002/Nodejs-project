@@ -1,0 +1,34 @@
+<div class="profile-edit">
+
+  <h2>Thông tin cá nhân</h2>
+  <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+    <input placeholder="Username" formControlName="fullName" />
+    <small *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+      Minimum 3 characters required
+    </small>
+
+    <input placeholder="Phone Number" formControlName="phone" />
+    <small *ngIf="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched">
+     Invalid Phone Number
+    </small>
+
+    <button [disabled]="profileForm.invalid">Save</button>
+  </form>
+
+  <hr />
+
+
+  <h2>Change Password</h2>
+  <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+    <input type="password" placeholder="Mật khẩu hiện tại" formControlName="currentPassword" />
+    <input type="password" placeholder="Mật khẩu mới" formControlName="newPassword" />
+    <input type="password" placeholder="Nhập lại mật khẩu mới" formControlName="confirmPassword" />
+
+    <small *ngIf="passwordForm.errors?.mismatch">
+      Passwords do not match
+    </small>
+
+    <button [disabled]="passwordForm.invalid">Change Password</button>
+  </form>
+
+</div>
