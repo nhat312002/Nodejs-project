@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './layout';
-import { authGuard } from './guards/auth.guard';
-import { roleGuard } from './guards/role.guard';
-import { guestGuard } from './guards/guest.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { guestGuard } from './core/guards/guest.guard';
+
 export const routes: Routes = [
   {
     path: 'login',
@@ -24,8 +25,34 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     children: [
       {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
         path: 'dashboard',
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./views/admin/users/users.component').then(m => m.UsersComponent),
+        data: {
+          title: 'Users'
+        }
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./views/admin/categories/categories.component').then(m => m.CategoriesComponent),
+        data: {
+          title: 'Categories'
+        }
+      },
+      {
+        path: 'languages',
+        loadComponent: () => import('./views/admin/languages/languages.component').then((m) => m.LanguagesComponent),
+        data: {
+          title: 'Languages'
+        }
       },
       {
         path: 'theme',
@@ -63,10 +90,7 @@ export const routes: Routes = [
         path: 'pages',
         loadChildren: () => import('./views/pages/routes').then((m) => m.routes)
       },
-      {
-        path: 'languages',
-        loadChildren: () => import('./views/languages/routes').then((m) => m.languagesRoutes)
-      }
+
     ]
 
   },

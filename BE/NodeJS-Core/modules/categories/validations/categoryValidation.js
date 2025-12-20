@@ -15,7 +15,7 @@ const categoryValidation = {
                 'number.min': 'Limit must be at least {#limit}.',
                 'number.max': 'Limit cannot be more than {#limit}.'
             }),
-            name: Joi.string().max(255).optional().messages({
+            name: Joi.string().trim().max(255).optional().messages({
                 'string.base': 'Name must be a string.',
                 'string.max': 'Name cannot be more than {#limit} characters long.'
             }),
@@ -39,14 +39,14 @@ const categoryValidation = {
 
     createCategory: {
         body: Joi.object({
-            name: Joi.string().min(3).max(255).required().messages({
+            name: Joi.string().trim().min(3).max(255).required().messages({
                 'string.base': 'Name must be a string.',
                 'string.empty': 'Name cannot be empty.',
                 'string.min': 'Name must be at least {#limit} characters long.',
                 'string.max': 'Name cannot be more than {#limit} characters long.',
                 'any.required': 'Name is a required field.'
             }),
-            status: Joi.string().valid("1", "0").required().messages({
+            status: Joi.string().trim().valid("1", "0").required().messages({
                 'string.base': 'Status must be a string.',
                 'any.only': 'Status must be either "1" (active) or "0" (inactive).',
                 'any.required': 'Status is a required field.'
@@ -56,12 +56,14 @@ const categoryValidation = {
 
     updateCategory: {
         body: Joi.object({
-            name: Joi.string().min(3).max(30).messages({
+            name: Joi.string().trim().min(3).max(30).messages({
                 'string.base': 'Name must be a string.',
+                'string.empty': 'Name cannot be empty.',
                 'string.min': 'Name must be at least {#limit} characters long.',
-                'string.max': 'Name cannot be more than {#limit} characters long.'
+                'string.max': 'Name cannot be more than {#limit} characters long.',
+                'any.required': 'Name is a required field.'
             }),
-            status: Joi.string().valid("1", "0").messages({
+            status: Joi.string().trim().valid("1", "0").messages({
                 'string.base': 'Status must be a string.',
                 'any.only': 'Status must be either "1" (active) or "0" (inactive).'
             }),

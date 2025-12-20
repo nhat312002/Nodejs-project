@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse, Pagination } from '../core/models/api.model';
-import { environment } from '../../environments/environment';
+import { ApiResponse, Pagination } from '../models/api.model';
+import { environment } from '../../../environments/environment';
 
 export interface Language {
   id: number;
@@ -24,7 +24,7 @@ export interface LanguageListData {
 })
 export class LanguageService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/languages`;
+  private adminApiUrl = `${environment.apiUrl}/admin/languages`;
 
   getAll(page: number = 1, limit: number = 10, search: string): Observable<ApiResponse<LanguageListData>> {
     let params = new HttpParams()
@@ -32,12 +32,19 @@ export class LanguageService {
       .set('limit', limit.toString());
 
     if (search.trim()) {
-      params = params.set('search', search.trim());
+      params = params.set('name', search.trim());
     }
 
-    return this.http.get<ApiResponse<LanguageListData>>(this.apiUrl, { params });
+    return this.http.get<ApiResponse<LanguageListData>>(this.adminApiUrl, { params });
   }
 
+  create(data: FormData): Observable<ApiResponse<Language>> {
+    return this.http.post<ApiResponse<Language>>(this.adminApiUrl, data);
+  }
+
+  update(id: number, data: FormData): Observable<ApiResponse<Language>> {
+    return this.http.put<ApiResponse<Language>>(`${this.adminApiUrl}/${id}`, data);
+  }
 
 
 

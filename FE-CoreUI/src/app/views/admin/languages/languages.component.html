@@ -1,0 +1,167 @@
+<c-row>
+  <c-col xs="12">
+    <c-card class="mb-4">
+      <c-card-header>
+        <div class="d-flex justify-content-between align-items-center">
+          <strong>Languages</strong>
+          <button cButton color="primary" (click)="openModal()">
+            <svg cIcon name="cilPlus" class="me-1"></svg> Add Language
+          </button>
+        </div>
+      </c-card-header>
+
+      <c-card-body>
+        <!-- SEARCH -->
+        <c-input-group class="mb-3">
+          <input cFormControl placeholder="Search languages..." [ngModel]="searchText()"
+            (ngModelChange)="searchText.set($event)" (keyup.enter)="onSearch()" />
+          <button cButton color="secondary" (click)="onSearch()">
+            <svg cIcon name="cilSearch"></svg> Search
+          </button>
+        </c-input-group>
+
+        <!-- TABLE -->
+        @if (!isLoading()) {
+        <table [hover]="true" [striped]="true" [responsive]="true" cTable class="align-middle text-nowrap">
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Icon</th>
+              <th>Name</th>
+              <th>Locale</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lang of languages(); track lang.id) {
+            <tr>
+              <!-- Flag Avatar -->
+              <td>
+                <c-avatar [src]="getImageUrl(lang.url_flag) || '/assets/img/defaults/flag.png'" size="md"></c-avatar>
+              </td>
+              <td>
+                <!--
+                  Use the helper function to calculate the name.
+                  Add a 'title' so hovering shows the code.
+                -->
+                <svg cIcon [name]="getFlagIcon(lang.locale)" size="3xl" [title]="lang.locale">
+                </svg>
+              </td>
+
+
+              <td class="fw-semibold">{{ lang.name }}</td>
+              <td><code>{{ lang.locale }}</code></td>
+
+              <td>
+                <c-badge [color]="lang.status == '1' ? 'success' : 'secondary'">
+                  {{ lang.status == '1' ? 'Active' : 'Disabled' }}
+                </c-badge>
+              </td>
+
+              <td>
+                <button cButton color="info" size="sm" class="text-white" (click)="openModal(lang)">
+                  <svg cIcon name="cilPencil" size="sm"></svg> Edit
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="5" class="text-center py-4">No languages found.</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        }
+
+        <!-- PAGINATION -->
+        @if (!isLoading() && totalPages() > 0) {
+        <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)">
+        </app-custom-pagination>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- MODAL -->
+<c-modal [visible]="visible" (visibleChange)="handleVisibleChange($event)">
+  <c-modal-header>
+    <h5 cModalTitle>{{ isEditMode ? 'Edit' : 'Add' }} Language</h5>
+  </c-modal-header>
+
+  <c-modal-body>
+    <form [formGroup]="form">
+
+      <!-- General Backend Error -->
+      @if (backendError()) {
+      <div class="alert alert-danger" role="alert">
+        {{ backendError() }}
+      </div>
+      }
+      <!-- Name Input -->
+      <div class="mb-3">
+        <label cLabel>Name</label>
+        <input cFormControl formControlName="name" placeholder="e.g. English" sizing="sm" (input)="onInputChange()"
+          [valid]="(form.get('name')?.dirty || backendError()) ? (form.get('name')?.valid && !backendError()) : undefined" />
+
+        <c-form-feedback [valid]="false"
+          *ngIf="(form.get('name')?.dirty && form.get('name')?.invalid)">
+          @if(form.get('name')?.hasError('required')) { <span>Required.</span> }
+
+        </c-form-feedback>
+      </div>
+
+      <!-- Locale Input -->
+      <div class="mb-3">
+        <label cLabel>Locale Code</label>
+        <input cFormControl formControlName="locale" placeholder="e.g. en-US" sizing="sm" (input)="onInputChange()"
+          [valid]="(form.get('locale')?.dirty) ? form.get('locale')?.valid : undefined" />
+
+        <c-form-feedback [valid]="false" *ngIf="form.get('locale')?.dirty && form.get('locale')?.invalid">
+          @if(form.get('locale')?.hasError('pattern')) { <span>Format: xx or xx-XX (e.g. en, en-US)</span> }
+        </c-form-feedback>
+      </div>
+
+      <!-- File Upload & Preview -->
+      <div class="mb-3">
+        <label cLabel>Flag Image</label>
+        <div class="d-flex gap-3 align-items-center">
+
+          <!-- Image Preview Box -->
+          <div class="border rounded p-1" style="width: 50px; height: 35px; background: #f0f0f0;">
+            @if (previewUrl) {
+            <img [src]="previewUrl" style="width: 100%; height: 100%; object-fit: cover;">
+            } @else {
+            <div class="small text-muted text-center" style="line-height: 35px;">?</div>
+            }
+          </div>
+
+          <!-- Input -->
+          <input cFormControl type="file" sizing="sm" (change)="onFileSelect($event)" accept="image/*">
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="mb-3">
+        <label cLabel>Status</label>
+        <c-form-check [switch]="true">
+          <input cFormCheckInput type="checkbox" formControlName="is_active" id="langSwitch" />
+          <label cFormCheckLabel for="langSwitch">
+            {{ form.get('is_active')?.value ? 'Active' : 'Disabled' }}
+          </label>
+        </c-form-check>
+      </div>
+
+    </form>
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button cButton color="secondary" type="button" (click)="closeModal()">Cancel</button>
+    <button cButton color="primary" type="button" (click)="save()" [disabled]="form.invalid || form.pristine"
+      [attr.disabled]="(form.invalid || form.pristine) ? true : null">
+      Save
+    </button>
+  </c-modal-footer>
+</c-modal>

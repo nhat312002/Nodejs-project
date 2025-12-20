@@ -21,7 +21,7 @@ module.exports = {
       },
       url_flag: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       status: {
         type: Sequelize.ENUM("1", "0"),

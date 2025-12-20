@@ -12,6 +12,25 @@ export const navItems: INavData[] = [
   },
   {
     title: true,
+    name: 'Management'
+  },
+  {
+    name: 'Users',
+    url: '/users',
+    iconComponent: { name: 'cil-people' }
+  },
+  {
+    name: 'Categories',
+    url: '/categories',
+    iconComponent: { name: 'cil-newspaper'}
+  },
+  {
+    name: 'Languages',
+    url: '/languages',
+    iconComponent: { name: 'cil-language'}
+  },
+  {
+    title: true,
     name: 'Theme'
   },
   {

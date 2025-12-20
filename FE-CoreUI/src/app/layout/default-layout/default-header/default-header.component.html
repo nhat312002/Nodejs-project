@@ -145,12 +145,18 @@
       </li>
       <li>
         <a cDropdownItem routerLink="">
+          <svg cIcon class="me-2" name="cilHome"></svg>
+          View Public Site
+        </a>
+      </li>
+      <!-- <li>
+        <a cDropdownItem routerLink="">
           <svg cIcon class="me-2" name="cilLockLocked"></svg>
           Lock Account
         </a>
-      </li>
+      </li> -->
       <li>
-        <a cDropdownItem routerLink="">
+        <a cDropdownItem routerLink="" (click)="logout()">
           <svg cIcon class="me-2" name="cilAccountLogout"></svg>
           Logout
         </a>

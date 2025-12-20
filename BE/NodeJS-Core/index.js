@@ -15,10 +15,10 @@ app.disable("x-powered-by");
 app.use(cors());
 
 app.use(bodyParser.json());
-app.use("/", router);
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api-docs", swaggerUIServe, swaggerUISetup);
 app.use("/public", express.static("public"));
+app.use("/", router);
 
 module.exports = app;

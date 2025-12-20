@@ -61,6 +61,7 @@ const languageValidation = {
                 'any.only': 'Status must be either "1" (active) or "0" (inactive).',
                 'any.required': 'Status is a required field.'
             }),
+            url_flag: Joi.string().optional(),
         }),
     },
 
@@ -81,6 +82,7 @@ const languageValidation = {
                 'string.base': 'Status must be a string.',
                 'any.only': 'Status must be either "1" (active) or "0" (inactive).'
             }),
+            url_flag: Joi.string().optional(),
         }).min(1).messages({
             'object.min': 'At least one field (locale, name, or status) must be provided to update.'
         }),  

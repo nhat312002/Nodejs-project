@@ -52,8 +52,8 @@ const userService = {
     }
     if (filters.search) {
       where[Op.or] = [
-        { full_name: { [Op.iLike]: `%${filters.search}%` } },
-        { email: { [Op.iLike]: `%${filters.search}%` } },
+        { full_name: { [Op.like]: `%${filters.search}%` } },
+        { email: { [Op.like]: `%${filters.search}%` } },
       ];
     }
 
