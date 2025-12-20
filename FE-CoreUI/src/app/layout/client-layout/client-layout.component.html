@@ -28,6 +28,12 @@
             </li>
 
             <!-- Menu Items -->
+             <li>
+              <a cDropdownItem routerLink="/home" class="py-2">
+                <svg cIcon name="cilHome" class="me-2 text-muted"></svg> Home
+              </a>
+            </li>
+
             <li>
               <a cDropdownItem routerLink="/profile" class="py-2">
                 <svg cIcon name="cilUser" class="me-2 text-muted"></svg> Profile
@@ -40,6 +46,13 @@
               </a>
             </li>
 
+            @if(user.role === 2 || user.role === 3) {
+              <li>
+                <a cDropdownItem routerLink="/manage/posts" class="py-2">
+                  <svg cIcon name="cilList" class="me-2 text-muted"></svg> Manage Content
+                </a>
+              </li>
+            }
             <!-- Admin Link (Protected: Only show if Admin) -->
             @if(user.role === 3) {
               <li>

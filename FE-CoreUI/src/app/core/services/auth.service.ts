@@ -42,6 +42,41 @@ export class AuthService {
 
   constructor() {
     this.loadUserFromToken();
+    this.checkSessionValidity();
+  }
+  private checkSessionValidity() {
+    const refreshToken = this.getRefreshToken();
+
+    // Scenario A: No tokens at all -> Ensure state is null
+    if (!refreshToken) {
+      this.currentUser.set(null);
+      return;
+    }
+
+    try {
+      // Scenario B: Check if Refresh Token is expired
+      const decoded: any = jwtDecode(refreshToken);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        console.log('Session expired (Refresh token dead). logging out...');
+        this.logout(); // Clears storage and signals
+        return;
+      }
+
+      // Scenario C: Refresh Token is alive, but Access Token is dead
+      // We should attempt a silent refresh right now so the user is ready
+      if (this.isAccessTokenExpired()) {
+        console.log('Access token expired on startup. Refreshing...');
+        this.refreshToken().subscribe({
+          error: () => console.log('Startup refresh failed') // logout() is handled inside refreshToken
+        });
+      }
+
+    } catch (error) {
+      // Token malformed? Logout.
+      this.logout();
+    }
   }
 
   public loadUserFromToken() {
@@ -53,8 +88,11 @@ export class AuthService {
         this.currentUser.set(decoded);
 
       } catch (error) {
-        this.logout();
+        this.currentUser.set(null);
+        // this.logout();
       }
+    } else {
+      this.currentUser.set(null);
     }
   }
 
@@ -155,9 +193,9 @@ export class AuthService {
     if (!user) return '/login';
 
     // if (user.role == 3) {
-      // return '/admin/dashboard';
+    // return '/admin/dashboard';
     // } else {
-      return '/home';
+    return '/home';
     // }
   }
 

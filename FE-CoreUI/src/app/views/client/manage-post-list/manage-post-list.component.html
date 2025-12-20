@@ -1,0 +1,106 @@
+<c-container class="py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+
+      <!-- HEADER -->
+      <div class="mb-4">
+        <h2 class="fw-bold mb-1">Moderate Posts</h2>
+        <p class="text-muted mb-0">Review pending submissions</p>
+      </div>
+
+      <!-- FILTER BAR -->
+      <c-card class="mb-4 border-0 bg-light shadow-sm">
+        <c-card-body>
+          <div class="d-flex gap-3 align-items-center">
+
+            <!-- Status Filter -->
+            <div style="min-width: 180px;">
+              <select cSelect sizing="sm" [ngModel]="statusFilter()"
+                (change)="statusFilter.set($any($event.target).value); onFilterChange()"
+                class="bg-white border-0 shadow-sm">
+                <option value="">All Posts</option>
+                <option value="1">⚠️ Pending Review</option>
+                <option value="2">✅ Published</option>
+                <option value="3">❌ Rejected</option>
+              </select>
+            </div>
+
+            <!-- Search -->
+            <div class="flex-grow-1 position-relative">
+              <input cFormControl sizing="sm" placeholder="Search title or author..." [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onFilterChange()"
+                class="ps-5 bg-white border-0 shadow-sm">
+              <svg cIcon name="cilSearch"
+                class="text-muted position-absolute top-50 start-0 translate-middle-y ms-3"></svg>
+            </div>
+          </div>
+        </c-card-body>
+      </c-card>
+
+      <!-- POST LIST -->
+      @if (isLoading()) {
+      <div class="text-center py-5"><c-spinner color="primary"></c-spinner></div>
+      }
+
+      @if (!isLoading()) {
+      <div class="d-flex flex-column gap-3">
+        @for (post of posts(); track post.id) {
+
+        <!-- Reuse Card + Show Status Badge -->
+        <!-- Link Prefix goes to Admin Mode Detail View -->
+        <app-post-card [post]="post" layout="list" [showStatus]="true" linkPrefix="/manage/posts">
+
+          <!-- ACTIONS INJECTED INTO NEW SLOT -->
+          <div card-actions class="d-flex align-items-center gap-2">
+
+            <!-- 1. Review (Also needs to stop propagation) -->
+<a [routerLink]="['/manage/posts', post.id]"
+   (click)="$event.stopPropagation()"
+   cButton color="secondary" variant="outline" size="sm" class="fw-semibold">
+   Review
+</a>
+
+            <!-- Separator -->
+            <!-- <div class="vr mx-1 bg-secondary" style="height: 20px;"></div> -->
+
+            <!-- 2. Approve -->
+@if (post.status !== '2') {
+  <button cButton color="success" size="sm" variant="outline" class="fw-bold d-flex align-items-center"
+    (click)="updateStatus(post, '2', $event)"> <!-- Pass $event here -->
+    Approve
+  </button>
+}
+
+<!-- 3. Reject -->
+@if (post.status !== '3') {
+  <button cButton color="danger" size="sm" variant="outline" class="fw-bold d-flex align-items-center"
+    (click)="updateStatus(post, '3', $event)"> <!-- Pass $event here -->
+    Reject
+  </button>
+}
+
+
+          </div>
+
+        </app-post-card>
+
+        } @empty {
+        <div class="text-center py-5 text-muted">
+          No posts found matching filter.
+        </div>
+        }
+      </div>
+
+      <!-- PAGINATION -->
+      @if (totalPages() > 1) {
+      <div class="mt-4 w-100">
+        <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)">
+        </app-custom-pagination>
+      </div>
+      }
+      }
+
+    </div>
+  </div>
+</c-container>

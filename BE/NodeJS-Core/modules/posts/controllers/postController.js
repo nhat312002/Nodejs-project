@@ -58,7 +58,7 @@ const postController = {
     getPostById: async (req, res) => {
         try {
             const post = await postService.getPostById(req.params.postId);
-            return responseUtils.ok(res, post);
+            return responseUtils.ok(res, {post: post});
         } catch (error) {
             if (error.message === "Post not found")
                 return responseUtils.notFound(res, error.message);

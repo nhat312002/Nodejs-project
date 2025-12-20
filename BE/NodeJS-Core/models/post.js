@@ -31,6 +31,14 @@ module.exports = (sequelize, DataTypes) => {
     {
       title: { type: DataTypes.STRING, allowNull: false },
       body: { type: DataTypes.TEXT('long'), allowNull: false },
+      excerpt: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      url_thumbnail: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       // body_text: {type: DataTypes.TEXT('long'), allowNull: false},
       user_id: {
         type: DataTypes.INTEGER,

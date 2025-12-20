@@ -108,10 +108,10 @@ export const routes: Routes = [
           { path: '', redirectTo: 'posts', pathMatch: 'full' },
 
           // LIST
-          // {
-          //   path: 'posts',
-          //   loadComponent: () => import('./views/client/manage-posts/manage-post-list.component').then(m => m.ManagePostListComponent)
-          // },
+          {
+            path: 'posts',
+            loadComponent: () => import('./views/client/manage-post-list/manage-post-list.component').then(m => m.ManagePostListComponent)
+          },
 
           // DETAIL (Admin Mode)
           {

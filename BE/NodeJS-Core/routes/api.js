@@ -17,6 +17,7 @@ const languageController = require("modules/languages/controllers/languageContro
 const { createLanguage, getAllLanguages, getLanguageById, updateLanguage, toggleLanguageStatus } = require("modules/languages/validations/languageValidation");
 const authController = require("modules/auth/controllers/authController");
 const { register, login, refresh } = require("modules/auth/validations/authValidation");
+const fileController = require("modules/files/controller/fileController");
 const router = express.Router({ mergeParams: true });
 
 // ===== EXAMPLE Request, make this commented =====
@@ -42,6 +43,13 @@ router.get("/languages", validate([getAllLanguages]), languageController.getActi
 router.get("/categories", validate([getAllCategories]), categoryController.getActiveCategories);
 
 const userMiddlewares = middlewares([authenticated, role([1, 2, 3])]);
+
+router.post("/media/upload", 
+  userMiddlewares, 
+  postImageUpload, // Expects form-data field: "file"
+  fileController.uploadImage
+);
+
 router.group("/posts", null, (router) => {
 
   router.get("/own", userMiddlewares, validate([getPosts]), postController.getOwnPosts);

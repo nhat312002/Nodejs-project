@@ -51,6 +51,7 @@ import {
   cilFile,
   cilGrid,
   cilHome,
+  cilHeart,
   cilInbox,
   cilIndentDecrease,
   cilIndentIncrease,
@@ -86,6 +87,7 @@ import {
   cilSettings,
   cilShare,
   cilShareAll,
+  cilShareAlt,
   cilShareBoxed,
   cilSpeech,
   cilSpeedometer,
@@ -100,13 +102,15 @@ import {
   cilUserFemale,
   cilUserFollow,
   cilUserUnfollow,
-  flagSet
+  flagSet,
+  cilBrowser
 } from '@coreui/icons';
 
 import { signet } from './signet';
 import { logo } from './logo';
 
 export const iconSubset = {
+  cilBrowser,
   cibCcAmex,
   cibCcApplePay,
   cibCcMastercard,
@@ -158,6 +162,7 @@ export const iconSubset = {
   cilExternalLink,
   cilFile,
   cilGrid,
+  cilHeart,
   cilHome,
   cilInbox,
   cilIndentDecrease,
@@ -194,6 +199,7 @@ export const iconSubset = {
   cilSettings,
   cilShare,
   cilShareAll,
+  cilShareAlt,
   cilShareBoxed,
   cilSpeech,
   cilSpeedometer,

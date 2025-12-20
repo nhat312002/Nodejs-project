@@ -21,10 +21,9 @@
 
             <!-- Status Filter -->
             <div style="min-width: 150px;">
-              <select cSelect sizing="sm"
-                      [ngModel]="statusFilter()"
-                      (change)="statusFilter.set($any($event.target).value); onFilterChange()"
-                      class="bg-white border-0 shadow-sm">
+              <select cSelect sizing="sm" [ngModel]="statusFilter()"
+                (change)="statusFilter.set($any($event.target).value); onFilterChange()"
+                class="bg-white border-0 shadow-sm">
                 <option value="">All Statuses</option>
                 <option value="2">✅ Published</option>
                 <option value="1">⚠️ Pending</option>
@@ -34,13 +33,11 @@
 
             <!-- Search -->
             <div class="flex-grow-1 position-relative">
-              <input cFormControl sizing="sm"
-                     placeholder="Search your posts..."
-                     [ngModel]="searchQuery()"
-                     (ngModelChange)="searchQuery.set($event)"
-                     (keyup.enter)="onFilterChange()"
-                     class="ps-5 bg-white border-0 shadow-sm">
-              <svg cIcon name="cilSearch" class="text-muted position-absolute top-50 start-0 translate-middle-y ms-3"></svg>
+              <input cFormControl sizing="sm" placeholder="Search your posts..." [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onFilterChange()"
+                class="ps-5 bg-white border-0 shadow-sm">
+              <svg cIcon name="cilSearch"
+                class="text-muted position-absolute top-50 start-0 translate-middle-y ms-3"></svg>
             </div>
           </div>
         </c-card-body>
@@ -48,66 +45,71 @@
 
       <!-- POST LIST -->
       @if (isLoading()) {
-        <div class="text-center py-5"><c-spinner color="primary"></c-spinner></div>
+      <div class="text-center py-5"><c-spinner color="primary"></c-spinner></div>
       }
 
       @if (!isLoading()) {
-        <div class="d-flex flex-column gap-3">
-          @for (post of posts(); track post.id) {
+      <div class="d-flex flex-column gap-3">
+        @for (post of posts(); track post.id) {
 
-            <!-- Reuse Card + Status -->
-            <!-- <app-post-card [post]="post" layout="list" [showStatus]="true"> -->
-            <app-post-card [post]="post" layout="list" [showStatus]="true" linkPrefix="/profile/posts/preview">
-              <!-- INJECTED ACTIONS (Meatball Menu) -->
-              <div card-actions class="position-absolute bottom-0 end-0 m-3 z-3">
-                <c-dropdown direction="center" variant="btn-group">
-                  <button cButton cDropdownToggle color="light" variant="ghost" size="sm" class="border shadow-sm text-dark">
-                    <!-- <svg cIcon name="cilOptions"></svg> -->
-                  </button>
-                  <ul cDropdownMenu class="shadow-sm border-0" >
+        <!-- Reuse Card + Status -->
+        <!-- <app-post-card [post]="post" layout="list" [showStatus]="true"> -->
+        <app-post-card [post]="post" layout="list" [showStatus]="true" linkPrefix="/profile/posts/preview">
+          <!-- INJECTED ACTIONS (Meatball Menu) -->
+          <div card-menu>
+            <c-dropdown>
+              <!-- Your White Circle Button -->
+              <button cButton cDropdownToggle color="white"
+                class="p-0 border shadow-sm rounded-circle d-flex align-items-center justify-content-center text-dark"
+                style="width: 32px; height: 32px;">
+                <!-- <svg cIcon name="cilOptions" size="sm"></svg> -->
+              </button>
+              <ul cDropdownMenu class="shadow-sm border-0">
 
-                    <!-- EDIT -->
-                    <li>
-                      <a cDropdownItem [routerLink]="['/profile/posts/edit', post.id]">
-                        <svg cIcon name="cilPencil" size="sm" class="me-2"></svg> Edit
-                      </a>
-                    </li>
+                <!-- EDIT -->
+                <li>
+                  <a cDropdownItem [routerLink]="['/profile/posts/edit', post.id]">
+                    <svg cIcon name="cilPencil" size="sm" class="me-2"></svg> Edit
+                  </a>
+                </li>
 
-                    <!-- PREVIEW / VIEW -->
-                    <li>
-                      <a cDropdownItem target="_blank"
-                         [routerLink]="post.status === '2' ? ['/post', post.id] : ['/profile/posts/preview', post.id]">
-                         <svg cIcon name="cilEye" size="sm" class="me-2"></svg>
-                         {{ post.status === '2' ? 'View Live' : 'Preview' }}
-                      </a>
-                    </li>
+                <!-- PREVIEW / VIEW -->
+                <li>
+                  <a cDropdownItem target="_blank"
+                    [routerLink]="post.status === '2' ? ['/post', post.id] : ['/profile/posts/preview', post.id]">
+                    <svg cIcon name="cilBrowser" size="sm" class="me-2"></svg>
+                    {{ post.status === '2' ? 'View Live' : 'Preview' }}
+                  </a>
+                </li>
 
-                    <li><hr cDropdownDivider></li>
+                <li>
+                  <hr cDropdownDivider>
+                </li>
 
-                    <!-- DELETE -->
-                    <li>
-                      <a cDropdownItem (click)="deletePost(post.id)" class="text-danger pointer">
-                        <svg cIcon name="cilTrash" size="sm" class="me-2"></svg> Delete
-                      </a>
-                    </li>
-                  </ul>
-                </c-dropdown>
-              </div>
-
-            </app-post-card>
-          } @empty {
-             <div class="text-center py-5 text-muted">You have no posts yet.</div>
-          }
-        </div>
-
-        <!-- PAGINATION -->
-        @if (totalPages() > 1) {
-          <div class="mt-4 w-100">
-            <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
-              (pageChange)="onPageChange($event)">
-            </app-custom-pagination>
+                <!-- DELETE -->
+                <li>
+                  <a cDropdownItem (click)="deletePost(post.id)" class="text-danger pointer">
+                    <svg cIcon name="cilTrash" size="sm" class="me-2"></svg> Delete
+                  </a>
+                </li>
+              </ul>
+            </c-dropdown>
           </div>
+
+        </app-post-card>
+        } @empty {
+        <div class="text-center py-5 text-muted">You have no posts yet.</div>
         }
+      </div>
+
+      <!-- PAGINATION -->
+      @if (totalPages() > 1) {
+      <div class="mt-4 w-100">
+        <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)">
+        </app-custom-pagination>
+      </div>
+      }
       }
 
     </div>

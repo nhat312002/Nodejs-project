@@ -17,6 +17,14 @@ module.exports = {
         type: Sequelize.TEXT('long'),
         allowNull: false,
       },
+      excerpt: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      url_thumbnail: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,

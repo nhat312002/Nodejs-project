@@ -42,8 +42,16 @@ export class LoginComponent implements OnInit {
     this.authService.login({ email: this.email, password: this.password })
       .subscribe({
         next: () => {
-          console.log('Login success');
-          this.router.navigateByUrl(this.returnUrl);
+          const target = this.returnUrl;
+
+          if (target.startsWith('/') && !target.startsWith('//') && !target.startsWith('http')) {
+            // Safe internal redirect
+            this.router.navigateByUrl(target);
+          } else {
+            // Suspicious/External URL detected. Force redirect to Home.
+            this.router.navigate(['/']);
+          }
+
         },
         error: (err: any) => {
           console.error(err);

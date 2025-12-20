@@ -23,7 +23,7 @@
       <!-- Thumbnail -->
       <div class="overflow-hidden rounded mb-3 position-relative bg-light" style="aspect-ratio: 16/9">
         <!-- Added ImgUrlPipe here just in case -->
-        <img [src]="displayImage()" alt="Post Cover" class="img-fluid w-100 h-100 object-fit-cover transition-zoom">
+        <img [src]="displayImage() | imgUrl" alt="Post Cover" class="img-fluid w-100 h-100 object-fit-cover transition-zoom">
       </div>
 
       <!-- Content -->
@@ -51,38 +51,71 @@
     </div>
     }
 
-    <!-- LIST LAYOUT -->
     @if (layout() === 'list') {
-    <div class="d-flex align-items-start gap-4 py-4 border-bottom position-relative">
-      <div class="flex-grow-1">
-        <div class="d-flex align-items-center small text-muted mb-2">
-          <span class="fw-semibold text-dark">{{ authorName() }}</span>
-          <span class="mx-1">&middot;</span>
-          <span>{{post().createdAt | date: 'mediumDate'}}</span>
+    <!--
+      FIX: Changed 'align-items-start' to 'align-items-center'.
+      This forces both the Text Column and the Image to center vertically
+      relative to each other within the row.
+  -->
+    <div class="d-flex align-items-center gap-3 py-3 border border-top position-relative p-3">
+
+      <!-- TEXT COLUMN -->
+      <div class="flex-grow-1 position-relative" style="min-width: 0;">
+
+        <!-- SLOT A: MEATBALL MENU -->
+        <!--
+         We keep this absolute to the top-right of the TEXT block.
+         Since the text block is centered, this menu will stay with the text.
+      -->
+        <div class="position-absolute top-0 end-0 z-3" (click)="$event.stopPropagation(); $event.preventDefault()">
+          <ng-content select="[card-menu]"></ng-content>
         </div>
 
-        <h5 class="fw-bold mb-2">{{ post().title }}</h5>
-        <p class="text-muted small line-clamp-2 mb-0 d-none d-md-block" style="max-width: 90%;">
-          {{ displayExcerpt() }}
-        </p>
+        <div class="pe-4"> <!-- Padding right to avoid text hitting menu -->
+
+          <!-- Author / Date (Top) -->
+          <div class="d-flex align-items-center small text-muted mb-1">
+            <span class="fw-semibold text-dark">{{ authorName() }}</span>
+            <span class="mx-1">&middot;</span>
+            <span>{{ post().createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <!-- Title -->
+          <h5 class="fw-bold mb-2 text-dark lh-sm">{{ post().title }}</h5>
+
+          <!-- Excerpt -->
+          <p class="text-muted small line-clamp-2 mb-0 d-none d-sm-block">
+            {{ displayExcerpt() }}
+          </p>
+        </div>
+
+        <!-- SLOT B: ACTION BUTTONS (Manage View) -->
+        <!-- These flow naturally below the text -->
+        <div class="mt-2 d-flex justify-content-start gap-2"
+          (click)="$event.stopPropagation(); $event.preventDefault()">
+          <ng-content select="[card-actions]"></ng-content>
+        </div>
+
       </div>
 
+      <!-- THUMBNAIL (Right Side) -->
+      <!-- Fixed dimensions ensure it doesn't stretch or shrink weirdly -->
       <div class="flex-shrink-0 bg-light rounded overflow-hidden border" style="width: 140px; height: 100px;">
-        <img [src]="displayImage()" class="img-fluid w-100 h-100 object-fit-cover">
+        <img [src]="displayImage() | imgUrl" class="img-fluid w-100 h-100 object-fit-cover">
       </div>
+
     </div>
     }
   </a>
 
-  <!-- 3. ACTION SLOT (Meatball Menu) -->
-  <!-- This projects the content passed from the parent (MyPostList) -->
+  <!-- 3. ACTION SLOT (Meatball Menu)
+  This projects the content passed from the parent (MyPostList) -->
   <!-- z-3 ensures it sits ON TOP of the link so clicking it doesn't open the post -->
-  <div class="position-absolute"
-     style="bottom: 10px; z-index: 100;"
-     [style.right]="layout() === 'list' ? '155px' : '10px'">
+  <!-- <div class="position-absolute" style="bottom: 10px; z-index: 100;"
+    [style.right]="layout() === 'list' ? '155px' : '10px'">
 
     <ng-content select="[card-actions]"></ng-content>
 
-</div>
+  </div> -->
 
 </div>

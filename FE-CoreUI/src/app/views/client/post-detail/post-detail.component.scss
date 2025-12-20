@@ -21,30 +21,68 @@
   color: #2c2c2c;
   font-size: 1.15rem;
 
-  /* Handle images inside content to match width */
-  ::ng-deep img {
-    max-width: 100%; /* Shrink if image is wider than 720px */
-    height: auto;
-    border-radius: 4px;
-    margin: 2rem 0;
-    display: block;
-  }
+  // /* Handle images inside content to match width */
+  // ::ng-deep img {
+  //   max-width: 100%; /* Shrink if image is wider than 720px */
+  //   height: auto;
+  //   border-radius: 4px;
+  //   margin: 2rem 0;
+  //   display: block;
+  // }
 
   /* Optional: Make images pop out slightly on desktop (Substack style) */
   /* Remove this block if you want strict alignment */
-  @media (min-width: 900px) {
-    ::ng-deep img {
-      width: 120%; /* Make image wider than text */
-      max-width: 120%;
-      margin-left: -10%; /* Center the wider image */
-    }
-  }
+  // @media (min-width: 900px) {
+  //   ::ng-deep img {
+  //     width: 120%; /* Make image wider than text */
+  //     max-width: 120%;
+  //     margin-left: -10%; /* Center the wider image */
+  //   }
+  // }
 
   ::ng-deep h2, ::ng-deep h3 {
     margin-top: 2.5rem;
     margin-bottom: 1rem;
     font-weight: bold;
     font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  /* TARGET IMAGES INSIDE HTML */
+  ::ng-deep img {
+    /* 1. Responsiveness: Never wider than the reading container */
+    max-width: 100% !important;
+    max-height: 1080px !important;
+    /* 2. Aspect Ratio: Maintain proportions if width changes */
+    height: auto !important;
+
+    /* 3. Aesthetics: Add spacing and rounded corners */
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    display: block; // Fixes weird bottom spacing in some browsers
+  }
+
+  /* 4. Fix Center Alignment from TinyMCE */
+  /* TinyMCE often uses 'margin-left: auto; margin-right: auto' for centering */
+  ::ng-deep img[style*="margin-left: auto"][style*="margin-right: auto"] {
+    display: block !important;
+    margin: 1.5rem auto !important;
+  }
+
+  /* 5. Fix Caption/Figure styles (if you use captions) */
+  ::ng-deep figure {
+    max-width: 100%;
+    margin: 2rem 0;
+    text-align: center;
+
+    img {
+      margin-bottom: 0.5rem;
+    }
+
+    figcaption {
+      color: #666;
+      font-size: 0.9rem;
+      font-style: italic;
+    }
   }
 }
 

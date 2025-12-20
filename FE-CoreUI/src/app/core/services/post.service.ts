@@ -10,7 +10,7 @@ export class PostService {
   private http = inject(HttpClient);
   private publicApiUrl = `${environment.apiUrl}/posts`;
   private privateApiUrl = `${environment.apiUrl}/posts/own`;
-  private moderatorApiUrl = `${environment.apiUrl}/moderate/posts`;
+  private moderatorApiUrl = `${environment.apiUrl}/manage/posts`;
 
   getPublicPosts(params: {
     page?: number,
@@ -81,5 +81,9 @@ export class PostService {
 
   delete(id: number): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.publicApiUrl}/${id}/disable`, {});
+  }
+
+  updateStatus(id: number, status: string): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.moderatorApiUrl}/${id}/status`, { status });
   }
 }

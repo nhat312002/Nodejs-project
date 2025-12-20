@@ -4,10 +4,11 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { BadgeComponent, CardModule } from '@coreui/angular';
 import { stripHtml } from '../../utils/html.util';
 import { Post } from '../../../core/models/post.model';
+import { ImgUrlPipe } from '../../pipes/img-url.pipe';
 
 @Component({
   selector: 'app-post-card',
-  imports: [CommonModule, CardModule, RouterLink, DatePipe, BadgeComponent],
+  imports: [CommonModule, CardModule, RouterLink, DatePipe, BadgeComponent, ImgUrlPipe],
   templateUrl: './post-card.component.html',
   styleUrl: './post-card.component.scss',
 })
@@ -25,7 +26,7 @@ export class PostCardComponent {
       return this.post().url_thumbnail;
     }
 
-    return '/assets/images/vue.jpg';
+    return null;
   });
 
   displayExcerpt = computed(() => {

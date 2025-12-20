@@ -2,8 +2,26 @@ const db = require("models");
 const { Post, Category, Language, User, sequelize } = db;
 const { Op, literal } = db.Sequelize;
 // const { htmlToText } = require("html-to-text");
+const cheerio = require("cheerio");
 
 const postService = {
+    extractThumbnailFromBody: (htmlContent) => {
+        if (!htmlContent) return null;
+
+        // Load HTML into Cheerio
+        const $ = cheerio.load(htmlContent);
+
+        // Find the first image tag
+        const firstImg = $('img').first();
+
+        // If found, return the 'src' attribute
+        if (firstImg.length > 0) {
+            return firstImg.attr('src');
+        }
+
+        return null; // No image found
+    },
+
     getPostById: async (postId) => {
         const attributes = [
             'id',
@@ -15,6 +33,7 @@ const postService = {
             'status',
             'createdAt',
             'updatedAt',
+            'url_thumbnail',
         ];
         // console.log(postId);
         const include = [
@@ -64,6 +83,7 @@ const postService = {
             'status',
             'createdAt',
             'updatedAt',
+            'url_thumbnail',
         ];
         const include = [
             {
@@ -108,6 +128,7 @@ const postService = {
             'status',
             'createdAt',
             'updatedAt',
+            'url_thumbnail',
         ];
         const include = [
             {
@@ -161,6 +182,7 @@ const postService = {
             ['original_id', 'originalId'],
             ['language_id', 'languageId'],
             'status', 'createdAt', 'updatedAt',
+            'url_thumbnail',
         ];
 
         const include = [
@@ -528,7 +550,7 @@ const postService = {
     },
 
     createPost: async (data) => {
-        const { title, body, userId, languageId, categoryIds, originalId } = data;
+        const { title, body, userId, languageId, categoryIds, originalId, excerpt, url_thumbnail } = data;
         console.log(data);
         if (originalId != null) {
             const originalPost = await postService.getPostById(originalId);
@@ -541,12 +563,20 @@ const postService = {
             if (originalPost.language_id === languageId)
                 throw new Error("Original post is already in this language.");
         }
+
+        let finalThumbnail = url_thumbnail;
+
+        if (!finalThumbnail) {
+            finalThumbnail = postService.extractThumbnailFromBody(body);
+        }
+
         const post = await Post.create({
             title: title,
             body: body,
             user_id: userId,
             language_id: languageId,
             original_id: originalId,
+            url_thumbnail: finalThumbnail,
             // body_text: htmlToText(body)
         });
         if (Array.isArray(categoryIds) && categoryIds.length > 0) {
@@ -564,13 +594,13 @@ const postService = {
                 const errorMessage = `The following Category IDs do not exist: ${nonExistentIds.join(', ')}`;
                 throw new Error(errorMessage);
             }
-            await post.setCategories(...existingIds);
+            await post.setCategories(Array.from(existingIds));
         }
         return post;
     },
 
     updatePost: async (id, userId, data) => {
-        const { title, body, categoryIds } = data;
+        const { title, body, categoryIds, languageId, excerpt, url_thumbnail, deleteThumbnail } = data;
         const post = await postService.getPostById(id);
         // console.log(post.dataValues);
 
@@ -588,6 +618,28 @@ const postService = {
             post.body = body;
             // post.body_text = htmlToText(body);
         }
+        if (languageId !== undefined) {
+            post.languageId = languageId;
+        }
+         // Case A: User uploaded a NEW file manually
+        if (url_thumbnail) {
+            post.url_thumbnail = url_thumbnail;
+        }
+        // Case B: User clicked "Remove Cover" (Explicit Delete)
+        else if (deleteThumbnail == true) {
+            // Option 1: Set to null (No image)
+            // post.url_thumbnail = null; 
+            
+            // Option 2: Fallback to Body Image again (Smart Fallback)
+            post.url_thumbnail = postService.extractThumbnailFromBody(post.body);
+        }
+        // Case C: User didn't touch the cover, BUT they changed the body content.
+        // We might want to re-scan the body IF the current thumbnail was auto-generated previously.
+        // For simplicity, we usually only re-scan if the current thumbnail is null.
+        else if (!post.url_thumbnail && body) {
+             post.url_thumbnail = postService.extractThumbnailFromBody(body);
+        }
+ 
         post.status = '1';
         await post.save();
 
@@ -606,7 +658,8 @@ const postService = {
                 const errorMessage = `The following Category IDs do not exist: ${nonExistentIds.join(', ')}`;
                 throw new Error(errorMessage);
             }
-            await post.setCategories(...existingIds);
+            console.log(`\n Update categories: ${Array.from(existingIds)} \n`);
+            await post.setCategories(Array.from(existingIds));
         }
 
         return post;

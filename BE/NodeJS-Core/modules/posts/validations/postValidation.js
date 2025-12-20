@@ -162,6 +162,10 @@ const updatePost = {
             'string.min': 'Body must be at least {#limit} characters long.',
             'string.max': 'Body cannot be more than {#limit} characters long.'
         }),
+        "languageId": Joi.number().integer().optional().messages({
+            'number.base': 'Language ID must be a number.',
+            'number.integer': 'Language ID must be an integer.',
+        }),
         "categoryIds": Joi.optional().custom((value, helpers) => {
             // 1. Handle String (FormData: "1, 2")
             if (typeof value === "string") {
@@ -195,6 +199,7 @@ const updatePost = {
         }),
         "excerpt": Joi.optional(),
         "language_id": Joi.optional(),
+        "deleteThumbnail": Joi.boolean().optional(),
     }).min(1).messages({
         'object.min': 'At least one field (title, body, or categoryIds) must be provided to update.'
     }),

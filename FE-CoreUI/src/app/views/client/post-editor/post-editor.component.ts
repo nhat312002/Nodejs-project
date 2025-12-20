@@ -18,6 +18,10 @@ import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService, Language } from '../../../core/services/language.service';
 import { environment } from '../../../../environments/environment';
 import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
+import { AuthService } from '../../../core/services/auth.service';
+import { firstValueFrom } from 'rxjs';
+
+import { NoWhitespaceValidator } from '../../../shared/utils/validator.util'
 
 @Component({
   selector: 'app-post-editor',
@@ -40,6 +44,7 @@ export class PostEditorComponent implements OnInit {
   private postService = inject(PostService);
   private categoryService = inject(CategoryService);
   private langService = inject(LanguageService);
+  private authService = inject(AuthService);
 
   // --- STATE ---
   form: FormGroup;
@@ -56,6 +61,7 @@ export class PostEditorComponent implements OnInit {
   // Cover Image
   selectedFile: File | null = null;
   previewUrl: string | null = null;
+  isCoverRemoved = false;
 
   // --- HELPER FOR CATEGORY BUTTON ---
   selectedCatIds = signal<number[]>([]); // Tracks selection for UI
@@ -81,31 +87,115 @@ export class PostEditorComponent implements OnInit {
     menubar: false,
     plugins: 'image link lists media table wordcount',
     toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | image link',
-    images_upload_handler: (blobInfo: any) => new Promise<string>((resolve, reject) => {
-      const formData = new FormData();
-      formData.append('file', blobInfo.blob(), blobInfo.filename());
-      // Assuming your http client is injected as 'http' (not shown here but needed)
-      // For brevity using fetch:
-      fetch(`${environment.apiUrl}/media/upload`, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      })
-        .then(r => r.json())
-        .then(res => resolve(res.location))
-        .catch(() => reject('Upload failed'));
-    })
+    // 1. CSS inside the editor (Matches your frontend font and image behavior)
+    content_style: `
+    // body { font-family: Georgia, serif; font-size: 18px; color: #2c2c2c; }
+    img { max-width: 100%; height: auto; display: block; margin: 10px auto; border-radius: 5px; }
+  `,
+
+    // 2. Default Class (Applied to every new image)
+    // This ensures your frontend renders it nicely even without extra CSS
+    image_class_list: [
+      { title: 'Responsive', value: 'img-fluid rounded' },
+      { title: 'None', value: '' }
+    ],
+
+    // 1. Tell TinyMCE where relative images live
+    // If your image is "uploads/abc.jpg", TinyMCE will load "http://localhost:3000/uploads/abc.jpg"
+    // But internally it keeps the path as "uploads/abc.jpg"
+    document_base_url: environment.apiUrl + '/',
+
+    // 2. Prevent TinyMCE from rewriting URLs to absolute
+    relative_urls: false,
+    remove_script_host: false,
+    convert_urls: true,
+    images_upload_handler: (blobInfo: any) => { return this.handleImageUpload(blobInfo); }
   };
 
   constructor() {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(5)]],
+      title: ['', [Validators.required, Validators.minLength(3), NoWhitespaceValidator]],
       excerpt: ['', [Validators.maxLength(250)]],
       body: ['', [Validators.required]],
-      language_id: [null, [Validators.required]],
-      category_ids: [[]], // Array of IDs
+      languageId: [1, [Validators.required]],
+      categoryIds: [[]], // Array of IDs
       // status: ['1'] // Default to Draft
     });
+  }
+
+  private async handleImageUpload(blobInfo: any): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+    // 1. Get current token
+    let token = this.authService.getAccessToken();
+
+    try {
+      // 2. Try Upload
+      const response = await fetch(`${environment.apiUrl}/media/upload`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // 3. Success? Return URL
+      if (response.ok) {
+        const json = await response.json();
+        let location = json.data.location;
+
+
+        // if (location && !location.startsWith('http')) {
+        //   // Remove trailing slash from API URL just in case
+        //   const baseUrl = environment.apiUrl.replace(/\/$/, '');
+        //   if (!location.startsWith('/')) location = `/${location}`;
+        //   location = `${baseUrl}${location}`;
+        // }
+
+        return location;
+      }
+
+      // 4. Handle 401 (Token Expired)
+      if (response.status === 401) {
+        console.log('TinyMCE upload 401. Refreshing token...');
+
+        // A. Call Refresh (Convert Observable to Promise)
+        // This will update LocalStorage automatically via the service tap()
+        await firstValueFrom(this.authService.refreshToken());
+
+        // B. Get New Token
+        const newToken = this.authService.getAccessToken();
+
+        // C. Retry Upload with New Token
+        const retryResponse = await fetch(`${environment.apiUrl}/media/upload`, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Authorization': `Bearer ${newToken}` }
+        });
+
+        if (retryResponse.ok) {
+          const json = await retryResponse.json();
+          let location = json.data.location;
+
+          if (location && !location.startsWith('http')) {
+            // Remove trailing slash from API URL just in case
+            const baseUrl = environment.apiUrl.replace(/\/$/, '');
+            if (!location.startsWith('/')) location = `/${location}`;
+            location = `${baseUrl}${location}`;
+          }
+
+          return location;
+        }
+      }
+
+      // 5. Handle Other Errors
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Upload failed');
+
+    } catch (error: any) {
+      console.error('TinyMCE Upload Error:', error);
+      // If refresh failed, or retry failed, reject the promise
+      throw new Error(error.message || 'Image upload failed');
+    }
   }
 
   ngOnInit() {
@@ -161,8 +251,8 @@ export class PostEditorComponent implements OnInit {
           title: p.title,
           excerpt: p.excerpt,
           body: p.body,
-          language_id: p.languageId,
-          category_ids: catIds,
+          languageId: p.languageId,
+          categoryIds: catIds,
           // status: p.status
         });
 
@@ -181,7 +271,7 @@ export class PostEditorComponent implements OnInit {
   // --- ACTIONS ---
 
   toggleCategory(id: number) {
-    const currentIds = this.form.value.category_ids as number[];
+    const currentIds = this.form.value.categoryIds as number[];
     let newIds: number[];
 
     if (currentIds.includes(id)) {
@@ -191,7 +281,7 @@ export class PostEditorComponent implements OnInit {
     }
 
     // Update Form & Signal
-    this.form.patchValue({ category_ids: newIds });
+    this.form.patchValue({ categoryIds: newIds });
     this.form.markAsDirty();
     this.selectedCatIds.set(newIds);
   }
@@ -204,6 +294,7 @@ export class PostEditorComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
+      this.isCoverRemoved = false;
       this.form.markAsDirty();
       const reader = new FileReader();
       reader.onload = (e) => this.previewUrl = e.target?.result as string;
@@ -214,6 +305,7 @@ export class PostEditorComponent implements OnInit {
   removeCover() {
     this.selectedFile = null;
     this.previewUrl = null;
+    this.isCoverRemoved = true;
     this.form.markAsDirty();
     // Logic note: If editing, backend needs to know we removed it.
     // For simple implementation, backend overrides if file sent, ignores if not.
@@ -233,7 +325,7 @@ export class PostEditorComponent implements OnInit {
     const formData = new FormData();
     // Append Text Fields
     Object.keys(this.form.value).forEach(key => {
-      if (key === 'category_ids') {
+      if (key === 'categoryIds') {
         // Convert array [1, 2] to string "1,2" for Joi
         const ids = this.form.value[key];
         if (ids && ids.length) formData.append('categoryIds', ids.join(','));
@@ -246,7 +338,9 @@ export class PostEditorComponent implements OnInit {
     if (this.selectedFile) {
       formData.append('thumbnail', this.selectedFile);
     }
-
+    else if (this.isCoverRemoved && this.isEditMode()) {
+      formData.append('deleteThumbnail', 'true');
+    }
     const request$ = this.isEditMode()
       ? this.postService.update(this.postId!, formData)
       : this.postService.create(formData);
