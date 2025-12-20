@@ -9,7 +9,8 @@ export class ImgUrlPipe implements PipeTransform {
 
   transform(relativePath: string | undefined | null): string {
     if (!relativePath) {
-      return '/assets/images/react.jpg';
+      // return '/assets/images/react.jpg';
+      return '/assets/images/placeholder.png';
     }
 
     if (relativePath.startsWith('http') || relativePath.startsWith('data:')) {

@@ -86,7 +86,7 @@ export class PostEditorComponent implements OnInit {
     height: 600,
     menubar: false,
     plugins: 'image link lists media table wordcount',
-    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | image link',
+    toolbar: 'undo redo | blocks | bold italic | bullist numlist | image link',
     // 1. CSS inside the editor (Matches your frontend font and image behavior)
     content_style: `
     // body { font-family: Georgia, serif; font-size: 18px; color: #2c2c2c; }
@@ -121,6 +121,19 @@ export class PostEditorComponent implements OnInit {
       categoryIds: [[]], // Array of IDs
       // status: ['1'] // Default to Draft
     });
+  }
+
+  private removeFailedImages(html: string): string {
+    if (!html) return '';
+
+    // Regex to find <img> tags where src starts with "data:"
+    // It replaces the whole <img> tag with an empty string
+    return html.replace(/<img[^>]+src="data:[^">]+"[^>]*>/g, '');
+  }
+
+  // Optional: Check if there are bad images to warn the user
+  private hasBadImages(html: string): boolean {
+    return /<img[^>]+src="data:/.test(html);
   }
 
   private async handleImageUpload(blobInfo: any): Promise<string> {
@@ -319,6 +332,25 @@ export class PostEditorComponent implements OnInit {
       return;
     }
 
+     // 1. Get raw content
+    let content = this.form.value.body;
+
+    // 2. CHECK FOR FAILED IMAGES
+    if (this.hasBadImages(content)) {
+      // Option A: Hard Block (Force user to fix it)
+      // alert('Some images failed to upload (File too large?). Please delete them from the editor.');
+      // return;
+      console.log("HAS BAD IMAGES");
+      // Option B: Auto-Remove (Smoother UX)
+      if (confirm('Some images failed to upload (likely too large) and will be removed. Continue?')) {
+        content = this.removeFailedImages(content);
+        // Update form to reflect the cleanup in the UI
+        this.form.patchValue({ body: content });
+      } else {
+        return; // User cancelled
+      }
+    }
+
     this.isSubmitting.set(true);
     // this.form.patchValue({ status: targetStatus });
 
@@ -350,7 +382,16 @@ export class PostEditorComponent implements OnInit {
         this.router.navigate(['/profile/posts']);
       },
       error: (err) => {
-        alert(err.error?.message || 'Failed to save');
+         let msg = 'Failed to save';
+
+        if (err.error?.data && Array.isArray(err.error.data)) {
+          // Join array items with a new line
+          msg = err.error.data.join('\n');
+        } else if (err.error?.message) {
+          msg = err.error.message;
+        }
+
+        alert(msg);
         this.isSubmitting.set(false);
       }
     });
