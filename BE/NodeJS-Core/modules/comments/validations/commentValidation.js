@@ -11,12 +11,41 @@ const getCommentById = {
     })
 };
 
+const getReplies = {
+    // 1. Route Param: /comments/:commentId/replies
+    params: Joi.object({
+        "commentId": Joi.number().integer().required().messages({
+            'number.base': 'Parent Comment ID must be a number.',
+            'number.integer': 'Parent Comment ID must be an integer.',
+            'any.required': 'Parent Comment ID is a required parameter.'
+        })
+    }),
+    
+    // 2. Query Params: ?cursor=123&limit=5
+    query: Joi.object({
+        "cursor": Joi.number().integer().optional().messages({
+            'number.base': 'Cursor must be a number.',
+            'number.integer': 'Cursor must be an integer.'
+        }),
+        "limit": Joi.number().integer().min(1).max(100).optional().messages({
+            'number.base': 'Limit must be a number.',
+            'number.integer': 'Limit must be an integer.',
+            'number.min': 'Limit must be at least 1.',
+            'number.max': 'Limit cannot exceed 100.'
+        })
+    })
+};
+
 const getCommentsByPost = {
     query: Joi.object({
         "postId": Joi.number().integer().required().messages({
             'number.base': 'Post ID must be a number.',
             'number.integer': 'Post ID must be an integer.',
             'any.required': 'Post ID is a required query parameter.'
+        }),
+        "cursor": Joi.number().integer().optional().messages({
+            'number.base': 'Cursor must be a number.',
+            'number.integer': 'Cursor must be an integer.'
         }),
         "page": Joi.number().integer().positive().optional().messages({
             'number.base': 'Page must be a number.',
@@ -82,6 +111,7 @@ const deleteComment = {
 module.exports = {
     getCommentById,
     getCommentsByPost,
+    getReplies,
     createComment,
     updateComment,
     deleteComment,

@@ -3,7 +3,7 @@ const express = require("express");
 const { middlewares, authenticated, role, avatarUpload, flagUpload , thumbnailUpload, postImageUpload} = require("kernels/middlewares");
 const { validate } = require("kernels/validations");
 const commentController = require("modules/comments/controllers/commentController");
-const { getCommentsByPost, createComment, updateComment, deleteComment } = require("modules/comments/validations/commentValidation");
+const { getCommentsByPost, getReplies, createComment, updateComment, deleteComment } = require("modules/comments/validations/commentValidation");
 const exampleController = require("modules/examples/controllers/exampleController");
 const postController = require("modules/posts/controllers/postController");
 const { getPostById, getPosts, createPost, updatePost, disablePost, setPostStatus } = require("modules/posts/validations/postValidation")
@@ -64,6 +64,12 @@ router.group("/posts", null, (router) => {
 
 router.group("/comments", null, (router) => {
   router.get("/", validate([getCommentsByPost]), commentController.getCommentsByApprovedPost);
+  router.get(
+    "/:commentId/replies", // :commentId maps to params.commentId
+    // middlewares([optionalAuthenticated]), // If you need to check if user is admin/owner of private post
+    validate([getReplies]), 
+    commentController.getReplies
+);
 });
 
 router.group("/users", null, (router) => {

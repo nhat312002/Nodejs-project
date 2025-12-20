@@ -43,6 +43,11 @@ export class PostDetailComponent implements OnInit {
   comments = signal<Comment[]>([]);
   isLoading = signal(true);
 
+   // --- CURSOR PAGINATION STATE ---
+  nextCursor = signal<number | null>(null); // The ID to fetch after
+  hasMore = signal(false); // Should we show "Load More"?
+  isLoadingComments = signal(false); // Spinner for the button
+
   // --- STATE FOR ACTIONS ---
   newCommentText = signal('');
   isSubmitting = signal(false);
@@ -100,12 +105,49 @@ export class PostDetailComponent implements OnInit {
     });
   }
 
-  loadComments(postId: string) {
+  _loadComments(postId: string) {
     this.commentService.getCommentsByPost(postId).subscribe(res => {
       if (res.success) {
         this.comments.set(res.data.comments);
       }
     });
+  }
+
+  // 1. UPDATED LOAD COMMENTS (Cursor Logic)
+  loadComments(postId: string, isLoadMore: boolean = false) {
+    this.isLoadingComments.set(true);
+
+    // If initial load, send null cursor
+    const cursorToSend = isLoadMore ? this.nextCursor() : null;
+
+    this.commentService.getCommentsByPost(postId, cursorToSend).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const newComments = res.data.comments;
+
+          // Update Meta
+          this.nextCursor.set(res.data.meta.nextCursor);
+          this.hasMore.set(res.data.meta.hasMore);
+
+          if (isLoadMore) {
+            // Append
+            this.comments.update(current => [...current, ...newComments]);
+          } else {
+            // Replace (Fresh Load)
+            this.comments.set(newComments);
+          }
+        }
+        this.isLoadingComments.set(false);
+      },
+      error: () => this.isLoadingComments.set(false)
+    });
+  }
+
+  // 2. ACTION: Load More Button
+  onLoadMore() {
+    if (this.hasMore() && this.nextCursor()) {
+      this.loadComments(String(this.post()?.id), true);
+    }
   }
 
   // --- HELPER FOR POSTING ---
@@ -118,7 +160,7 @@ export class PostDetailComponent implements OnInit {
 
     this.commentService.createComment(post.id, content, parentId).subscribe({
       next: () => {
-        this.loadComments(String(post.id));
+        this.loadComments(String(post.id), false);
         this.isSubmitting.set(false);
         onSuccess();
       },

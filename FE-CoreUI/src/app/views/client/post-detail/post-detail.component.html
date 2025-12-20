@@ -301,6 +301,19 @@
       }
     </div>
 
+    @if (hasMore()) {
+    <div class="text-center mt-4">
+      <button cButton color="light" variant="ghost" class="fw-bold text-primary rounded-pill px-4"
+        (click)="onLoadMore()" [disabled]="isLoadingComments()">
+
+        @if (isLoadingComments()) {
+        <c-spinner size="sm" class="me-2"></c-spinner> Loading...
+        } @else {
+        Load more comments
+        }
+      </button>
+    </div>
+    }
   </div>
 </section>
 

@@ -4,7 +4,7 @@ const commentService = require("modules/comments/services/commentService");
 const commentController = {
     getCommentsByApprovedPost: async (req, res) => {
         try {
-            const results = await commentService.getCommentsByPost({approvedOnly: true, ...req.query});
+            const results = await commentService.getCommentsByPost({ approvedOnly: true, ...req.query });
             return responseUtils.ok(res, results);
         } catch (error) {
             if (error.message === "Post not found") {
@@ -16,7 +16,7 @@ const commentController = {
 
     getCommentsByOwnPost: async (req, res) => {
         try {
-            const results = await commentService.getCommentsByPost({userId: req.user.id, ...req.query});
+            const results = await commentService.getCommentsByPost({ userId: req.user.id, ...req.query });
             return responseUtils.ok(res, results);
         } catch (error) {
             if (error.message === "Post not found") {
@@ -30,7 +30,7 @@ const commentController = {
     getCommentsByPost: async (req, res) => {
         try {
             const results = await commentService.getCommentsByPost(req.query);
-            return responseUtils.ok(res, results );
+            return responseUtils.ok(res, results);
         } catch (error) {
             if (error.message === "Post not found") {
                 return responseUtils.notFound(res, error.message);
@@ -40,6 +40,30 @@ const commentController = {
 
     },
 
+    getReplies: async (req, res) => {
+        try {
+            const { commentId } = req.params;
+            const { cursor, limit } = req.query;
+            const userId = req.user ? req.user.id : null;
+            const userRoleId = req.user ? req.user.role_id : null;
+
+            const result = await commentServices.getReplies({
+                parentId: commentId,
+                cursor,
+                limit,
+                userId,
+                userRoleId
+            });
+
+            return responseUtils.ok(res, result);
+        } catch (error) {
+            if (error.message === "Post not found") {
+                return responseUtils.notFound(res, error.message);
+            }
+            return responseUtils.error(res, error.message);
+        }
+    },
+    
     createComment: async (req, res) => {
         try {
             const commentData = {
@@ -60,8 +84,8 @@ const commentController = {
             const commentId = req.params.commentId;
             const { content } = req.body;
             const userId = req.user.id;
-            
-            const comment = await commentService.updateComment({commentId, content, userId});
+
+            const comment = await commentService.updateComment({ commentId, content, userId });
             return responseUtils.ok(res, { updated_comment: comment });
         } catch (error) {
             return responseUtils.error(res, error.message);
@@ -73,8 +97,8 @@ const commentController = {
             const commentId = req.params.commentId;
             const userId = req.user.id;
             const userRoleId = req.user.role_id;
-            const deleted = await commentService.deleteComment({commentId, userId, userRoleId});
-            
+            const deleted = await commentService.deleteComment({ commentId, userId, userRoleId });
+
             return responseUtils.ok(res, { deleted_comment: deleted });
         } catch (error) {
             if (error.message === "Unauthorized") responseUtils.unauthorized(res);
