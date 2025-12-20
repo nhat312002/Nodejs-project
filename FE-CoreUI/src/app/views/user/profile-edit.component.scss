@@ -1,0 +1,77 @@
+.profile-edit {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.profile-edit h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #111827;
+}
+
+.profile-edit form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-edit input {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.profile-edit input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.profile-edit button {
+  margin-top: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.profile-edit button:hover {
+  background: #1d4ed8;
+}
+
+.profile-edit button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.profile-edit small {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: -6px;
+}
+
+.profile-edit hr {
+  margin: 28px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 600px) {
+  .profile-edit {
+    margin: 16px;
+    padding: 16px;
+  }
+}
