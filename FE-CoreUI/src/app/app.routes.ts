@@ -75,6 +75,10 @@ export const routes: Routes = [
         children: [
           // List of my posts
           {
+            path: 'info',
+            loadComponent: () => import('./views/user/profile-edit.component').then(m => m.ProfileEditComponent)
+          },
+          {
             path: 'posts',
             loadComponent: () => import('./views/client/my-post-list/my-post-list.component').then(m => m.MyPostListComponent)
           },
