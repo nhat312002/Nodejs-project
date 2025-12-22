@@ -25,7 +25,7 @@
         <table [hover]="true" [striped]="true" [responsive]="true" cTable class="align-middle text-nowrap">
           <thead>
             <tr>
-              <th>Flag</th>
+              <!-- <th>Flag</th> -->
               <th>Icon</th>
               <th>Name</th>
               <th>Locale</th>
@@ -37,9 +37,9 @@
             @for (lang of languages(); track lang.id) {
             <tr>
               <!-- Flag Avatar -->
-              <td>
+              <!-- <td>
                 <c-avatar [src]="getImageUrl(lang.url_flag) || '/assets/img/defaults/flag.png'" size="md"></c-avatar>
-              </td>
+              </td> -->
               <td>
                 <!--
                   Use the helper function to calculate the name.
@@ -60,9 +60,24 @@
               </td>
 
               <td>
-                <button cButton color="info" size="sm" class="text-white" (click)="openModal(lang)">
-                  <svg cIcon name="cilPencil" size="sm"></svg> Edit
-                </button>
+                <c-dropdown variant="btn-group" direction="dropstart">
+
+                  <!-- Kebab Toggle -->
+                  <button cButton cDropdownToggle [caret]="false" color="transparent" size="sm"
+                    class="p-0 border-0 text-secondary">
+                    <svg cIcon name="cilOptions"></svg>
+                  </button>
+
+                  <!-- Menu -->
+                  <ul cDropdownMenu class="shadow-sm border-0">
+                    <li>
+                      <a cDropdownItem (click)="openModal(lang)" style="cursor: pointer;">
+                        <svg cIcon name="cilPencil" class="me-2 text-info"></svg> Edit
+                      </a>
+                    </li>
+                  </ul>
+
+                </c-dropdown>
               </td>
             </tr>
             } @empty {
@@ -95,26 +110,28 @@
     <form [formGroup]="form">
 
       <!-- General Backend Error -->
-      @if (backendError()) {
+      <!-- @if (backendError()) {
       <div class="alert alert-danger" role="alert">
         {{ backendError() }}
       </div>
+      } -->
+      @if (backendError()) {
+      <c-alert color="danger">{{ backendError() }}</c-alert>
       }
       <!-- Name Input -->
-      <div class="mb-3">
+      <!-- <div class="mb-3">
         <label cLabel>Name</label>
         <input cFormControl formControlName="name" placeholder="e.g. English" sizing="sm" (input)="onInputChange()"
           [valid]="(form.get('name')?.dirty || backendError()) ? (form.get('name')?.valid && !backendError()) : undefined" />
 
-        <c-form-feedback [valid]="false"
-          *ngIf="(form.get('name')?.dirty && form.get('name')?.invalid)">
+        <c-form-feedback [valid]="false" *ngIf="(form.get('name')?.dirty && form.get('name')?.invalid)">
           @if(form.get('name')?.hasError('required')) { <span>Required.</span> }
 
         </c-form-feedback>
-      </div>
+      </div> -->
 
       <!-- Locale Input -->
-      <div class="mb-3">
+      <!-- <div class="mb-3">
         <label cLabel>Locale Code</label>
         <input cFormControl formControlName="locale" placeholder="e.g. en-US" sizing="sm" (input)="onInputChange()"
           [valid]="(form.get('locale')?.dirty) ? form.get('locale')?.valid : undefined" />
@@ -122,14 +139,80 @@
         <c-form-feedback [valid]="false" *ngIf="form.get('locale')?.dirty && form.get('locale')?.invalid">
           @if(form.get('locale')?.hasError('pattern')) { <span>Format: xx or xx-XX (e.g. en, en-US)</span> }
         </c-form-feedback>
+      </div> -->
+      <!-- Name Input -->
+      <div class="mb-3">
+        <label cLabel>Name</label>
+        <!-- Logic: Show Invalid if Touched OR if Backend marked it as duplicate -->
+        <input cFormControl formControlName="name" placeholder="e.g. English" sizing="sm" (input)="onInputChange()"
+          [valid]="(form.get('name')?.dirty || form.get('name')?.hasError('backend')) ? form.get('name')?.valid : undefined" />
+
+        @if (form.get('name')?.dirty || form.get('name')?.hasError('backend')) {
+        <c-form-feedback [valid]="false">
+
+          <!-- 1. Required -->
+          @if (form.get('name')?.hasError('required')) {
+          <div>Name is required.</div>
+          }
+
+          <!-- 2. Min Length -->
+          @if (form.get('name')?.hasError('minlength')) {
+          <div>Name must be at least 2 characters.</div>
+          }
+
+          <!-- 3. Whitespace Only -->
+          @if (form.get('name')?.hasError('whitespace')) {
+          <div>Name cannot be empty spaces.</div>
+          }
+
+          <!-- 4. Pattern (Invalid Chars) -->
+          @if (form.get('name')?.hasError('pattern')) {
+          <div>Invalid format. Letters only. (Allowed: ' - and parentheses)</div>
+          }
+
+          <!-- 5. Backend Error (Duplicate) -->
+          @if (form.get('name')?.hasError('backend')) {
+          <div>{{ form.get('name')?.getError('backend') }}</div>
+          }
+
+        </c-form-feedback>
+        }
+      </div>
+
+      <!-- Locale Input -->
+      <div class="mb-3">
+        <label cLabel>Locale Code</label>
+        <input cFormControl formControlName="locale" placeholder="e.g. en-US" sizing="sm" (input)="onInputChange()"
+          [valid]="(form.get('locale')?.dirty || form.get('locale')?.hasError('backend')) ? form.get('locale')?.valid : undefined" />
+
+        <!-- Feedback Section -->
+        @if (form.get('locale')?.dirty || form.get('locale')?.hasError('backend')) {
+        <c-form-feedback [valid]="false">
+
+          <!-- 1. Frontend: Required -->
+          @if(form.get('locale')?.hasError('required')) {
+          <span>Locale code is required.</span>
+          }
+
+          <!-- 2. Frontend: Pattern (Regex) -->
+          @if(form.get('locale')?.hasError('pattern')) {
+          <span>Format: xx or xx-XX (e.g. en, en-US)</span>
+          }
+
+          <!-- 3. Backend: Dynamic Message (Duplicate, Invalid, etc.) -->
+          @if(form.get('locale')?.hasError('backend')) {
+          <span>{{ form.get('locale')?.getError('backend') }}</span>
+          }
+
+        </c-form-feedback>
+        }
       </div>
 
       <!-- File Upload & Preview -->
-      <div class="mb-3">
+      <!-- <div class="mb-3">
         <label cLabel>Flag Image</label>
         <div class="d-flex gap-3 align-items-center">
 
-          <!-- Image Preview Box -->
           <div class="border rounded p-1" style="width: 50px; height: 35px; background: #f0f0f0;">
             @if (previewUrl) {
             <img [src]="previewUrl" style="width: 100%; height: 100%; object-fit: cover;">
@@ -138,10 +221,10 @@
             }
           </div>
 
-          <!-- Input -->
+
           <input cFormControl type="file" sizing="sm" (change)="onFileSelect($event)" accept="image/*">
         </div>
-      </div>
+      </div> -->
 
       <!-- Status -->
       <div class="mb-3">

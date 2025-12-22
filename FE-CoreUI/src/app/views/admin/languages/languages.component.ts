@@ -8,10 +8,16 @@ import { NoWhitespaceValidator } from '../../../shared/validators/no-whitespace.
 import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
 import {
   TableModule, CardModule, ButtonModule, BadgeModule, FormModule,
-  GridModule, ModalModule, SpinnerModule, AvatarModule
+  GridModule, ModalModule, SpinnerModule, AvatarModule,
+  AlertComponent,
+  DropdownModule
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { environment } from '../../../../environments/environment';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
+import { AppValidators } from '../../../shared/utils/validator.util';
+import { titleCase } from '../../../shared/utils/string.util';
 
 @Component({
   selector: 'app-languages',
@@ -19,8 +25,8 @@ import { environment } from '../../../../environments/environment';
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule,
     TableModule, CardModule, ButtonModule, BadgeModule, FormModule,
-    GridModule, ModalModule, SpinnerModule, IconDirective, AvatarModule,
-    CustomPaginationComponent
+    GridModule, ModalModule, SpinnerModule, IconDirective, AvatarModule, DropdownModule,
+    CustomPaginationComponent, AlertComponent,
   ],
   templateUrl: './languages.component.html',
   styleUrl: './languages.component.scss'
@@ -28,7 +34,8 @@ import { environment } from '../../../../environments/environment';
 export class LanguagesComponent implements OnInit {
   private languageService = inject(LanguageService);
   private fb = inject(FormBuilder);
-
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   // Cleanup Utility
   private modalCleanup = useModalCleanup();
 
@@ -53,13 +60,20 @@ export class LanguagesComponent implements OnInit {
 
   constructor() {
     this.form = this.fb.group({
-      name: ['', [Validators.required, NoWhitespaceValidator]],
+      name: ['', AppValidators.languageName],
       locale: ['', [Validators.required, NoWhitespaceValidator, Validators.pattern(/^[a-z]{2}(-[A-Z]{2})?$/)]], // Regex for 'en' or 'en-US'
       is_active: [true]
     });
   }
 
-  ngOnInit() { this.loadData(); }
+  ngOnInit() {
+    combineLatest([this.route.queryParamMap]).subscribe(([params]) => {
+      this.searchText.set(params.get('search') || '');
+      this.currentPage.set(Number(params.get('page')) || 1);
+      this.pageSize.set(Number(params.get('limit')) || 10);
+      this.loadData();
+    });
+  }
 
   loadData(showSpinner = true) {
     if (showSpinner)
@@ -80,13 +94,22 @@ export class LanguagesComponent implements OnInit {
 
   // --- ACTIONS ---
 
-  onSearch() {
-    this.currentPage.set(1);
-    this.loadData();
+  updateQueryParams(resetPage = false) {
+    const page = resetPage ? 1 : this.currentPage();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.searchText() || null,
+        page: page > 1 ? page : null,
+        limit: this.pageSize(),
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
-  onPageChange(p: number) { this.currentPage.set(p); this.loadData(); }
-  onPageSizeChange(s: number) { this.pageSize.set(s); this.loadData(); }
+  onSearch() { this.updateQueryParams(true); }
+  onPageChange(p: number) { this.currentPage.set(p); this.updateQueryParams(); }
+  onPageSizeChange(s: number) { this.pageSize.set(s); this.updateQueryParams(true); }
 
   // --- MODAL LOGIC ---
 
@@ -95,8 +118,6 @@ export class LanguagesComponent implements OnInit {
     this.backendError.set('');
     this.selectedFile = null;
     this.previewUrl = null;
-
-    // Reset form values
     this.form.reset({ is_active: true });
 
     if (lang) {
@@ -134,11 +155,13 @@ export class LanguagesComponent implements OnInit {
   }
 
   save() {
-    if (this.form.invalid) return;
-
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     // 1. Prepare FormData
     const formData = new FormData();
-    formData.append('name', this.form.value.name.trim());
+    formData.append('name', titleCase(this.form.value.name.trim()));
     formData.append('locale', this.form.value.locale.trim());
     formData.append('status', this.form.value.is_active ? '1' : '0');
 
@@ -157,20 +180,34 @@ export class LanguagesComponent implements OnInit {
         this.closeModal();
         if (!this.isEditMode) {
           this.currentPage.set(1);
-          this.loadData();
+          this.updateQueryParams(true);
         } else this.loadData(false);
       },
       error: (err) => {
         if (err.status === 401 || err.status === 403) return;
 
-        if (err.status === 422 || err.status === 400 || err.status === 500) {
-          const msg = err.error?.data?.[0] || err.error?.message || 'Validation Error';
-          this.backendError.set(msg);
-        } else {
-          alert('Server Error');
-        }
+        this.handleBackendError(err);
       }
     });
+  }
+
+  private handleBackendError(err: any) {
+    let msg = err.error?.message || 'Server Error';
+    if (err.error?.data && Array.isArray(err.error.data) && err.error.data.length > 0) {
+      msg = err.error.data[0]; // Get the first validation error
+    }
+
+    // Check specific text from your backend throw new Error()
+    if (msg.toLowerCase().includes('name')) {
+       this.form.get('name')?.setErrors({ backend: msg });
+    }
+    else if (msg.toLowerCase().includes('locale')) {
+       this.form.get('locale')?.setErrors({ backend: msg });
+    }
+    else {
+       // Fallback: Show global alert
+       this.backendError.set(msg);
+    }
   }
 
   // Modal Cleanup
@@ -183,6 +220,8 @@ export class LanguagesComponent implements OnInit {
 
   onInputChange() {
     if (this.backendError()) this.backendError.set('');
+     if (this.form.get('name')?.hasError('backend')) this.form.get('name')?.setErrors(null);
+    if (this.form.get('locale')?.hasError('backend')) this.form.get('locale')?.setErrors(null);
   }
 
   getFlagIcon(locale: string): string {

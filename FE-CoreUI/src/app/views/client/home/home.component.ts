@@ -8,6 +8,7 @@ import { Post } from '../../../core/models/post.model';
 import { Category } from '../../../core/models/category.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -40,23 +41,53 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    this.categoryService.getPublicCategories(1, 100).subscribe(catRes => {
-      if (catRes.success) {
-        const topCats = catRes.data.categories.slice(0, 100); // Lấy 3 danh mục đầu
+    // 3. CATEGORY SECTIONS (The ForkJoin Logic)
+    this.categoryService.getPublicCategories(1, 100).pipe(
+      // Switch from the Category Request to the Posts Request
+      switchMap(catRes => {
+        if (!catRes.success || !catRes.data.categories.length) {
+          return of([]); // Return empty if no categories
+        }
 
-        topCats.forEach(cat => {
-          // Lấy bài viết của danh mục này (Không lọc ngôn ngữ)
-          this.postService.getPublicPosts({ limit: 4, categoryIds: [cat.id] })
-            .subscribe(pRes => {
-              if (pRes.data.posts.length > 0) {
-                this.categorySections.update(curr => [
-                  ...curr,
-                  { category: cat, posts: pRes.data.posts }
-                ]);
-              }
-            });
-        });
-      }
+        const topCats = catRes.data.categories.slice(0, 5); // Limit to top 5 to save bandwidth
+
+        // Create an array of HTTP Observables
+        const requests = topCats.map(cat =>
+          this.postService.getPublicPosts({ limit: 4, categoryIds: [cat.id] }).pipe(
+            // A. Map success response to a convenient object
+            map(postRes => ({
+              category: cat,
+              posts: postRes.data.posts
+            })),
+
+            // B. HANDLE ERROR PER REQUEST
+            // If fetching "Tech" fails, we return NULL.
+            // This prevents forkJoin from crashing the whole page.
+            catchError(err => {
+              console.error(`Failed to load posts for category ${cat.name}`, err);
+              return of(null);
+            })
+          )
+        );
+
+        // Execute all requests in parallel
+        return forkJoin(requests);
+      })
+    ).subscribe({
+      next: (results) => {
+        // 'results' is an array: [{category, posts}, null, {category, posts}...]
+
+        // Filter out nulls (errors) and empty lists
+        // Force type casting if TS complains about null check
+        const validSections = results
+          .filter((item): item is { category: Category, posts: Post[] } =>
+             item !== null && item.posts.length > 0
+          );
+
+        // Update the signal ONCE (No UI flickering)
+        this.categorySections.set(validSections);
+      },
+      error: (err) => console.error('Failed to load category list', err)
     });
 
     this.postService.getPublicPosts({ limit: 4, categoryIds: 'other' }).subscribe(res => {

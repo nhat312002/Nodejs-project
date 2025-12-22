@@ -16,21 +16,48 @@ export function NoWhitespaceValidator(control: AbstractControl): ValidationError
   return isWhitespace ? { whitespace: true } : null;
 }
 
+/**
+ * Security Check: Explicitly blocks < and > to prevent basic XSS
+ * Useful for fields where you allow many symbols but want to stop HTML.
+ */
+export function NoHtmlValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (!value) return null;
+  // Check for < or >
+  const hasHtmlChars = /[<>]/.test(value);
+  return hasHtmlChars ? { xss: true } : null;
+}
+
 // ==========================================
-// 2. REGEX PATTERNS
+// 2. REGEX PATTERNS (STRICT MODE)
 // ==========================================
 
 export const AppPatterns = {
-  // Letters (Unicode) + Spaces. No numbers, no symbols. Allow ' and -
-  NAME: /^[\p{L}\s'-]+$/u,
+  // STRICT FULL NAME
+  // 1. ^[\p{L}]+ : Must START with at least one letter (Unicode).
+  // 2. (?: ... )*: Non-capturing group that can repeat.
+  // 3. [\s'-]    : Allowed separators (Space, Apostrophe, Hyphen).
+  // 4. [\p{L}]+  : Separator MUST be followed by letters.
+  // Result: "Jean-Luc" (OK), "O'Connor" (OK), "---" (Fail), "Name-" (Fail)
+  NAME: /^[\p{L}]+(?:[\s'-][\p{L}]+)*$/u,
+
+  // LANGUAGE NAME
+  // Similar to Name, but allows parentheses for things like "Chinese (Simplified)"
+  // Structure: Letter -> (Separator -> Letter or Parentheses)
+  LANGUAGE: /^[\p{L}]+(?:[\s'-][\p{L}()]+)*$/u,
+
+  // CATEGORY NAME
+
+  CATEGORY: /^(?=.*[\p{L}\p{N}])[\p{L}\p{N}.+#&'-]+(?:\s+[\p{L}\p{N}.+#&'-]+)*$/u,
 
   // Strict Email
   EMAIL: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
 
-  // 1 Upper, 1 Lower, 1 Digit, 1 Special
-  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?]).{8,255}$/
-};
+  // Password (1 Upper, 1 Lower, 1 Digit, 1 Special, No spaces)
+  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{};':"\\|,.<>\/?])\S{8,255}$/,
 
+  USERNAME: /^[a-zA-Z0-9]+(?:[._][a-zA-Z0-9]+)*$/,
+};
 // ==========================================
 // 3. COMPOSITE VALIDATORS (PRE-MADE ARRAYS)
 // ==========================================
@@ -38,23 +65,43 @@ export const AppPatterns = {
 export const AppValidators = {
   fullName: [
     Validators.required,
-    Validators.maxLength(255),
+    Validators.maxLength(50),
     Validators.pattern(AppPatterns.NAME),
     NoWhitespaceValidator // <--- Included automatically!
   ],
+  // Language Name (e.g., "Tiếng Việt", "English (US)")
+  languageName: [
+    Validators.required,
+    Validators.minLength(3),
+    Validators.maxLength(50),
+    Validators.pattern(AppPatterns.LANGUAGE),
+    NoWhitespaceValidator
+  ],
+
+  // Category Name (e.g., "C# Programming", "Travel")
+  categoryName: [
+    Validators.required,
+    Validators.minLength(2),
+    Validators.maxLength(50),
+    Validators.pattern(AppPatterns.CATEGORY),
+    NoWhitespaceValidator
+  ],
   email: [
     Validators.required,
+    Validators.maxLength(50),
     Validators.pattern(AppPatterns.EMAIL)
   ],
   password: [
     Validators.required,
     Validators.minLength(8),
+    Validators.maxLength(200),
     Validators.pattern(AppPatterns.PASSWORD)
   ],
   username: [
     Validators.required,
     Validators.minLength(8),
-    Validators.maxLength(255),
+    Validators.maxLength(50),
+    Validators.pattern(AppPatterns.USERNAME),
     NoWhitespaceValidator // <--- Included automatically!
   ]
 };

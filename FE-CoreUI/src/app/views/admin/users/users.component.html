@@ -41,7 +41,7 @@
                   <div>
                     <div class="fw-bold">{{user.full_name}}
                       @if(currentUserId() === user.id) {
-                        (You)
+                      (You)
                       }
                     </div>
                     <div class="small text-muted">&commat;{{ user.username }}</div>
@@ -53,20 +53,17 @@
 
               <td>
                 @if (user.role_id === 3) {
-                  Admin
+                Admin
                 } @else {
-                  <select cSelect sizing="sm" [ngModel]="user.role_id"
-                  class="text-nowrap"
-                  (change)="onRoleChange(user, $event)"
-                  [disabled]="user.status == '0'"
-                  [title]="user.status == '0' ? 'Enable user to change role': ''"
-                  style="min-width: 80px">
-                    @for (role of roles; track role.id) {
-                      @if (role.id !== 3) {
-                        <option [value]="role.id">{{ role.name }}</option>
-                      }
-                    }
-                  </select>
+                <select cSelect sizing="sm" [ngModel]="user.role_id" class="text-nowrap"
+                  (change)="onRoleChange(user, $event)" [disabled]="user.status == '0'"
+                  [title]="user.status == '0' ? 'Enable user to change role': ''" style="min-width: 80px">
+                  @for (role of roles; track role.id) {
+                  @if (role.id !== 3) {
+                  <option [value]="role.id">{{ role.name }}</option>
+                  }
+                  }
+                </select>
                 }
               </td>
 
@@ -78,31 +75,58 @@
 
               <td>
                 @if(user.role_id !== 3){
-                  <button cButton [color] = "user.status == '1' ? 'warning' : 'primary'"
+                <!-- <button cButton [color] = "user.status == '1' ? 'warning' : 'primary'"
                   size="sm" [disabled]="user.role_id === 3" (click)="initiateToggle(user)">
                     {{ user.status == '1' ? 'Disable' : 'Enable'}}
+                  </button> -->
+                <!-- direction="dropstart" makes it open to the left (good for last column) -->
+                <c-dropdown variant="btn-group" direction="dropstart">
+
+                  <!-- The Kebab Icon Button -->
+                  <!-- p-0 and border-0 make it look like a pure icon -->
+                  <button cButton cDropdownToggle color="transparent" [caret]="false" size="sm" class="p-0 border-0 text-secondary">
+                    <svg cIcon name="cilOptions"></svg>
                   </button>
+
+                  <ul cDropdownMenu class="shadow-sm border-0">
+
+                    <!-- Action: Toggle Status -->
+                    <li>
+                      <a cDropdownItem (click)="initiateToggle(user)" style="cursor: pointer;">
+                        <!-- Dynamic Icon & Text based on status -->
+                        @if(user.status == '1') {
+                        <!-- If Active -> Show Disable Option -->
+                        <span class="text-danger">
+                          <svg cIcon name="cilBan" class="me-2"></svg> Disable...
+                        </span>
+                        } @else {
+                        <!-- If Disabled -> Show Enable Option -->
+                        <span class="text-primary">
+                          <svg cIcon name="cilCheckCircle" class="me-2"></svg> Enable...
+                        </span>
+                        }
+                      </a>
+                    </li>
+
+                  </ul>
+                </c-dropdown>
                 }
               </td>
             </tr>
             } @empty {
-              <tr>
-                <td colspan="5" class="text-center py-4">No users found.</td>
-              </tr>
+            <tr>
+              <td colspan="5" class="text-center py-4">No users found.</td>
+            </tr>
             }
           </tbody>
         </table>
         }
 
         @if (!isLoading()){
-          <app-custom-pagination
-            [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            [pageSize]="limit()"
-            (pageChange)="onPageChange($event)"
-            (pageSizeChange)="onPageSizeChange($event)">
+        <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="limit()"
+          (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)">
 
-          </app-custom-pagination>
+        </app-custom-pagination>
         }
       </c-card-body>
     </c-card>
@@ -125,17 +149,17 @@
     </p>
     <p class="small text-muted mb-0">
       @if (userToToggle?.status == '1'){
-        This.user will lose access to the system immediately.
+      This.user will lose access to the system immediately.
       } @else {
-        This user will regain access to the system.
+      This user will regain access to the system.
       }
     </p>
   </c-modal-body>
 
   <c-modal-footer>
     <button cButton color="secondary" (click)="resetModal()">Cancel</button>
-    <button cButton [color]="userToToggle?.status == '1' ? 'danger' : 'success'"
-    class="text-white" (click)="confirmToggle()">
+    <button cButton [color]="userToToggle?.status == '1' ? 'danger' : 'success'" class="text-white"
+      (click)="confirmToggle()">
       Yes, {{ userToToggle?.status == '1' ? 'disable' : 'enable'}}
     </button>
   </c-modal-footer>

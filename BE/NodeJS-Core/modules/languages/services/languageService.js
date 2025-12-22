@@ -41,9 +41,26 @@ const languageService = {
         return await Language.findByPk(id);
     },
     createLanguage: async (data) => {
-        const existingLanguage = await Language.findOne({ where: { name: data.name } });
-        if (existingLanguage) {
-            throw new Error("Language with this name already exists");
+        console.log("Get into services");
+        const existingLanguage = await Language.findOne(
+            {
+                where: {
+                    [Op.or]: {
+                        name: data.name,
+                        locale: data.locale,
+                    }
+                }
+            });
+        // console.log(existingLanguage);
+        if (existingLanguage){
+            if (existingLanguage.name == data.name) {
+                console.log("Name exists");
+                throw new Error("Language with this name already exists");
+            }
+            if (existingLanguage.locale == data.locale) {
+                console.log("Locale exists");
+                throw new Error("Language with this locale already exists");
+            }
         }
         return await Language.create(data);
     },

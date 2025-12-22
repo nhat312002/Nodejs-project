@@ -52,6 +52,7 @@ const postService = {
                 model: Category,
                 as: "categories",
                 required: false,
+                where: { status: "1" },
                 attributes: ["id", "name"],
                 through: { attributes: [] }
             }
@@ -101,6 +102,7 @@ const postService = {
                 model: Category,
                 as: "categories",
                 required: false,
+                where: { status: "1" },
                 attributes: ["id", "name"],
                 through: { attributes: [] }
             }
@@ -146,6 +148,7 @@ const postService = {
                 model: Category,
                 as: "categories",
                 required: false,
+                where: { status: "1" },
                 attributes: ["id", "name"],
                 through: { attributes: [] }
             }
@@ -267,9 +270,9 @@ const postService = {
         // --- 3. EXECUTE QUERY (Attempt 1: Full Text Search) ---
 
         // Clone the base where for FTS
-        const ftsWhere = { ...baseWhere };
-        const ftsAttributes = [...attributes];
-        const ftsOrder = []; // Build specific order for FTS
+        let ftsWhere = { ...baseWhere };
+        let ftsAttributes = [...attributes];
+        let ftsOrder = []; // Build specific order for FTS
 
         // Add FTS Logic
         if (title) {
@@ -278,7 +281,7 @@ const postService = {
             // Use Op.and to avoid overwriting if category logic also used Op.and
             ftsWhere[Op.and] = ftsWhere[Op.and] ? [ftsWhere[Op.and], literal(titleExpr)] : literal(titleExpr);
             ftsAttributes.push([literal(titleExpr), 'titleRelevance']);
-            ftsOrder.push([literal('titleRelevance'), 'DESC']);
+            // ftsOrder.push([literal('titleRelevance'), 'DESC']);
         }
 
         if (text) {
@@ -286,7 +289,7 @@ const postService = {
             const textExpr = `MATCH(\`Post\`.\`title\`, \`Post\`.\`body\`) AGAINST (${escapedText} IN NATURAL LANGUAGE MODE)`;
             ftsWhere[Op.and] = ftsWhere[Op.and] ? [ftsWhere[Op.and], literal(textExpr)] : literal(textExpr);
             ftsAttributes.push([literal(textExpr), 'textRelevance']);
-            ftsOrder.push([literal('textRelevance'), 'DESC']);
+            // ftsOrder.push([literal('textRelevance'), 'DESC']);
         }
 
         // Standard Sorting
@@ -298,8 +301,24 @@ const postService = {
         };
 
         // If user provided specific sort, use it. Otherwise use Relevance, then Date.
-        if (sort) ftsOrder.push(sortOptions[sort]);
-        else if (!title && !text) ftsOrder.push(['createdAt', 'DESC']); // Only fallback to date if no search
+        // Build FTS Order
+        if (sort === 'relevance') {
+            // Prioritize Title Match, then Body Match
+            if (title) ftsOrder.push([literal('titleRelevance'), 'DESC']);
+            if (text) ftsOrder.push([literal('textRelevance'), 'DESC']);
+            
+            // Fallback if relevance is equal
+            ftsOrder.push(['createdAt', 'DESC']);
+        } else if (sort && sortOptions[sort]) {
+            ftsOrder.push(sortOptions[sort]);
+        } else {
+            // Default Sort: If searching, default to Relevance. Else Date.
+            if ((title || text) && !sort) {
+                if (title) ftsOrder.push([literal('titleRelevance'), 'DESC']);
+                if (text) ftsOrder.push([literal('textRelevance'), 'DESC']);
+            }
+            ftsOrder.push(['createdAt', 'DESC']);
+        }
 
         let { count, rows } = await Post.findAndCountAll({
             where: ftsWhere,
@@ -333,8 +352,15 @@ const postService = {
             }
 
             // Standard Sorting (Relevance doesn't exist in LIKE, so fallback to Date)
-            if (sort) likeOrder.push(sortOptions[sort]);
-            else likeOrder.push(['createdAt', 'DESC']);
+            if (sort === 'relevance') {
+                // LIKE has no score, so default to Date
+                likeOrder = sortOptions['date_desc'];
+            } else if (sort && sortOptions[sort]) {
+                likeOrder = sortOptions[sort];
+            } else {
+                likeOrder = sortOptions['date_desc'];
+            }
+
 
             const result = await Post.findAndCountAll({
                 where: likeWhere,

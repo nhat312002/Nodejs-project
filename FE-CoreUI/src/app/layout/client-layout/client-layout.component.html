@@ -39,16 +39,17 @@
                 <svg cIcon name="cilUser" class="me-2 text-muted"></svg> Profile
               </a>
             </li>
-
-            <li>
-              <a cDropdownItem routerLink="/profile/posts" class="py-2">
-                <svg cIcon name="cilLibrary" class="me-2 text-muted"></svg> My Posts
-              </a>
-            </li>
+            @if(user.role === 1 || user.role == 3) {
+              <li>
+                <a cDropdownItem routerLink="/profile/posts" class="py-2">
+                  <svg cIcon name="cilLibrary" class="me-2 text-muted"></svg> My Posts
+                </a>
+              </li>
+            }
 
             @if(user.role === 2 || user.role === 3) {
               <li>
-                <a cDropdownItem routerLink="/manage/posts" class="py-2">
+                <a cDropdownItem routerLink="/manage/posts" [queryParams]="{status: '1'}" class="py-2">
                   <svg cIcon name="cilList" class="me-2 text-muted"></svg> Manage Content
                 </a>
               </li>

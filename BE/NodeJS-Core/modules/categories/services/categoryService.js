@@ -22,7 +22,7 @@ const categoryService = {
       where,
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
+      order: [["createdAt", "ASC"]],
     });
 
     return {

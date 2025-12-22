@@ -5,7 +5,7 @@ import { inject } from "@angular/core";
 import { BYPASS_REFRESH_LOGIC } from "./skip.context";
 
 let isRefreshing = false;
-const refreshTokenSubject = new BehaviorSubject<string | null>(null);
+let refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);

@@ -59,10 +59,10 @@
           <div card-menu>
             <c-dropdown>
               <!-- Your White Circle Button -->
-              <button cButton cDropdownToggle color="white"
+              <button cButton cDropdownToggle color="white"  [caret]="false"
                 class="p-0 border shadow-sm rounded-circle d-flex align-items-center justify-content-center text-dark"
                 style="width: 32px; height: 32px;">
-                <!-- <svg cIcon name="cilOptions" size="sm"></svg> -->
+                <svg cIcon name="cilOptions" size="sm"></svg>
               </button>
               <ul cDropdownMenu class="shadow-sm border-0">
 
@@ -75,7 +75,7 @@
 
                 <!-- PREVIEW / VIEW -->
                 <li>
-                  <a cDropdownItem target="_blank"
+                  <a cDropdownItem
                     [routerLink]="post.status === '2' ? ['/post', post.id] : ['/profile/posts/preview', post.id]">
                     <svg cIcon name="cilBrowser" size="sm" class="me-2"></svg>
                     {{ post.status === '2' ? 'View Live' : 'Preview' }}

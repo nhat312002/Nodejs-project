@@ -92,6 +92,9 @@
                   @if (form.get('username')?.hasError('minlength')) {
                     Username must be at least 8 characters.
                   }
+                  @if (form.get('username')?.hasError('pattern')){
+                    Username must contain only letters and numbers. Dots (.) or underscores (_) are allowed only between characters, not at the beginning or end.
+                  }
                 </c-form-feedback>
               </c-input-group>
 
@@ -138,7 +141,7 @@
                     Min 8 characters.
                   }
                   @if (form.get('password')?.hasError('pattern')) {
-                    Needs 1 Upper, 1 Lower, 1 Number, 1 Special.
+                    Needs 1 Upper, 1 Lower, 1 Number, 1 Special and NO spaces.
                   }
                 </c-form-feedback>
               </c-input-group>

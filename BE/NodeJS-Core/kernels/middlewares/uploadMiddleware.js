@@ -77,6 +77,7 @@ const uploadWrapper = (multerInstance, fieldName) => {
         }
         return responseUtils.error(res, message);
       }
+      console.log(`Upload ${fieldName} has no error`);
       next();
     });
   };

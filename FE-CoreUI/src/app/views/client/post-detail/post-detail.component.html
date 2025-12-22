@@ -111,7 +111,7 @@
 <!-- === COMMENTS SECTION === -->
 <section class="bg-light py-5">
   <div class="reading-container mx-auto px-3">
-    <h4 class="fw-bold mb-4">Comments ({{ comments().length }})</h4>
+    <h4 class="fw-bold mb-4">Comments</h4>
 
     <!-- 1. WRITE COMMENT -->
     <div class="mb-5 p-4 bg-white rounded shadow-sm border">
@@ -197,12 +197,12 @@
             <!-- Read Mode -->
             <p class="mb-2 text-dark" style="white-space: pre-wrap;">{{ comment.content }}</p>
 
-            <div class="d-flex gap-3 align-items-center">
+            <!-- <div class="d-flex gap-3 align-items-center">
               <button class="btn btn-link p-0 text-decoration-none small text-muted fw-bold"
                 (click)="startReply(comment)">
                 <svg cIcon name="cilCommentBubble" size="sm" class="me-1"></svg> Reply
               </button>
-            </div>
+            </div> -->
             }
 
             <!-- REPLY BOX (Injects here if active) -->

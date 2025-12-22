@@ -49,6 +49,9 @@
               <select cSelect sizing="sm" [ngModel]="sortOrder()"
                 (change)="sortOrder.set($any($event.target).value); onFilterChange()"
                 class="bg-white border-0 shadow-sm pointer">
+                @if (isSearchActive()) {
+                <option value="relevance">Most Relevant</option>
+                }
                 <option value="date_desc">Newest</option>
                 <option value="date_asc">Oldest</option>
                 <option value="title_asc">A-Z</option>
@@ -57,78 +60,79 @@
             </div>
 
             <!-- Category Dropdown (Col 6, MD 3) -->
-             @if(!isCategoryView()){
+            @if(!isCategoryView()){
 
-               <div class="col-6 col-md-3">
-                 <c-dropdown [autoClose]="'outside'" class="d-block">
+            <div class="col-6 col-md-3">
+              <c-dropdown [autoClose]="'outside'" class="d-block">
 
-                   <!-- Button Label -->
-                   <button cButton cDropdownToggle color="white" size="sm"
-                     class="w-100 d-flex justify-content-between align-items-center shadow-sm border-0">
-                     <span class="text-truncate">{{ categoryButtonLabel() }}</span>
-                   </button>
+                <!-- Button Label -->
+                <button cButton cDropdownToggle color="white" size="sm"
+                  class="w-100 d-flex justify-content-between align-items-center shadow-sm border-0">
+                  <span class="text-truncate">{{ categoryButtonLabel() }}</span>
+                </button>
 
-                   <!-- Menu -->
-                   <ul cDropdownMenu class="w-100 p-3 shadow-lg border-0 mt-1" style="max-height: 350px; overflow-y: auto;">
+                <!-- Menu -->
+                <ul cDropdownMenu class="w-100 p-3 shadow-lg border-0 mt-1"
+                  style="max-height: 350px; overflow-y: auto;">
 
-                     <!-- 1. NUMERIC CATEGORIES -->
-                     <li class="mb-2 small text-muted fw-bold text-uppercase">Filter Topics</li>
+                  <!-- 1. NUMERIC CATEGORIES -->
+                  <li class="mb-2 small text-muted fw-bold text-uppercase">Filter Topics</li>
 
-                     @for (cat of categories(); track cat.id) {
-                     <li class="mb-1">
-                       <c-form-check>
-                         <!--
+                  @for (cat of categories(); track cat.id) {
+                  <li class="mb-1">
+                    <c-form-check>
+                      <!--
                       Logic: Checkbox for specific ID
                       Change: toggleCategory(cat.id)
                    -->
-                         <input cFormCheckInput type="checkbox" [id]="'cat-'+cat.id" [checked]="isCategorySelected(cat.id)"
-                           (change)="toggleCategory(cat.id)">
-                         <label cFormCheckLabel [for]="'cat-'+cat.id" class="w-100 cursor-pointer">
-                           {{ cat.name }}
-                         </label>
-                       </c-form-check>
-                     </li>
-                     }
+                      <input cFormCheckInput type="checkbox" [id]="'cat-'+cat.id" [checked]="isCategorySelected(cat.id)"
+                        (change)="toggleCategory(cat.id)">
+                      <label cFormCheckLabel [for]="'cat-'+cat.id" class="w-100 cursor-pointer">
+                        {{ cat.name }}
+                      </label>
+                    </c-form-check>
+                  </li>
+                  }
 
-                     <li>
-                       <hr class="dropdown-divider my-2">
-                     </li>
+                  <li>
+                    <hr class="dropdown-divider my-2">
+                  </li>
 
-                     <!-- 2. UNCATEGORIZED (Mutually Exclusive) -->
-                     <li class="mb-2">
-                       <c-form-check>
-                         <input cFormCheckInput type="checkbox" id="cat-other" [checked]="isCategorySelected('other')"
-                           (change)="toggleCategory('other')">
-                         <label cFormCheckLabel for="cat-other" class="text-muted fst-italic cursor-pointer">
-                           Uncategorized
-                         </label>
-                       </c-form-check>
-                     </li>
+                  <!-- 2. UNCATEGORIZED (Mutually Exclusive) -->
+                  <li class="mb-2">
+                    <c-form-check>
+                      <input cFormCheckInput type="checkbox" id="cat-other" [checked]="isCategorySelected('other')"
+                        (change)="toggleCategory('other')">
+                      <label cFormCheckLabel for="cat-other" class="text-muted fst-italic cursor-pointer">
+                        Uncategorized
+                      </label>
+                    </c-form-check>
+                  </li>
 
-                     <!-- 3. MATCH ALL TOGGLE (Conditional) -->
-                     <!-- Only appears if user selected 2+ topics -->
-                     @if (canMatchAll()) {
-                     <!-- ADD CLASS 'sticky-dropdown-footer' -->
-                     <li class="sticky-dropdown-footer">
-                       <div class="bg-light p-2 rounded">
-                         <c-form-check [switch]="true">
-                           <input cFormCheckInput type="checkbox" id="matchSwitch" [checked]="matchAllCategories()"
-                             (change)="matchAllCategories.set(!matchAllCategories()); onFilterChange()">
-                           <label cFormCheckLabel for="matchSwitch" class="small fw-bold cursor-pointer">
-                             Match ALL selected
-                           </label>
-                         </c-form-check>
-                         <div class="text-muted small ps-1" style="font-size: 0.75rem;">
-                           {{ matchAllCategories() ? 'Must have ALL tags' : 'Can have ANY tag' }}
-                         </div>
-                       </div>
-                     </li>
-                     }
+                  <!-- 3. MATCH ALL TOGGLE (Conditional) -->
+                  <!-- Only appears if user selected 2+ topics -->
+                  @if (canMatchAll()) {
+                  <!-- ADD CLASS 'sticky-dropdown-footer' -->
+                  <li class="sticky-dropdown-footer">
+                    <div class="bg-light p-2 rounded">
+                      <c-form-check [switch]="true">
+                        <input cFormCheckInput type="checkbox" id="matchSwitch" [checked]="matchAllCategories()"
+                          (change)="matchAllCategories.set(!matchAllCategories()); onFilterChange()">
+                        <label cFormCheckLabel for="matchSwitch" class="small fw-bold cursor-pointer">
+                          Match ALL selected
+                        </label>
+                      </c-form-check>
+                      <div class="text-muted small ps-1" style="font-size: 0.75rem;">
+                        {{ matchAllCategories() ? 'Must have ALL tags' : 'Can have ANY tag' }}
+                      </div>
+                    </div>
+                  </li>
+                  }
 
-                   </ul>
-                 </c-dropdown>
-               </div>
-             }
+                </ul>
+              </c-dropdown>
+            </div>
+            }
 
           </div>
 

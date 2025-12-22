@@ -54,6 +54,7 @@ const userService = {
       where[Op.or] = [
         { full_name: { [Op.like]: `%${filters.search}%` } },
         { email: { [Op.like]: `%${filters.search}%` } },
+        { username: { [Op.like]: `%${filters.search}` } },
       ];
     }
 
@@ -98,12 +99,12 @@ const userService = {
   },
   createUser: async (data) => {
     const existingUsername = await User.findOne({
-      where: { username: data.username },
+      where: { username: data.username.toLowerCase() },
     });
     if (existingUsername) {
       throw new Error("User with this username already exists");
     }
-    const existingEmail = await User.findOne({ where: { email: data.email } });
+    const existingEmail = await User.findOne({ where: { email: data.email.toLowerCase() } });
     if (existingEmail) {
       throw new Error("User with this email already exists");
     }
@@ -120,7 +121,7 @@ const userService = {
     }
     if (data.email) {
       const existingEmail = await User.findOne({
-        where: { email: data.email, id: { [Op.ne]: id } },
+        where: { email: data.email.toLowerCase(), id: { [Op.ne]: id } },
       });
       if (existingEmail) {
         throw new Error("User email must be unique");
@@ -128,7 +129,7 @@ const userService = {
     }
     if (data.username) {
       const existingUsername = await User.findOne({
-        where: { username: data.username, id: { [Op.ne]: id } },
+        where: { username: data.username.toLowerCase(), id: { [Op.ne]: id } },
       });
       if (existingUsername) {
         throw new Error("Username must be unique");

@@ -263,6 +263,9 @@ export class ArchiveComponent implements OnInit {
     });
   }
 
+  isSearchActive = computed(() => {
+    return !!this.searchQuery().trim() || !!this.searchAuthor().trim();
+  });
   // --- ACTIONS ---
 
   // Triggered by Search/Sort inputs

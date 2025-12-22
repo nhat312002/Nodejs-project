@@ -6,18 +6,23 @@ import { Category } from '../../../core/models/category.model';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
 import {
   TableModule, CardModule, ButtonModule, BadgeModule, FormModule,
-  GridModule, ModalModule, SpinnerModule
+  GridModule, ModalModule, SpinnerModule,
+  DropdownModule
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
 import { NoWhitespaceValidator } from '../../../shared/validators/no-whitespace.validator';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
+import { AppValidators } from '../../../shared/utils/validator.util';
+import { capitalize } from '../../../shared/utils/string.util';
 
 @Component({
   selector: 'app-categories',
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule,
     TableModule, CardModule, ButtonModule, BadgeModule, FormModule,
-    GridModule, ModalModule, SpinnerModule, IconDirective,
+    GridModule, ModalModule, SpinnerModule, IconDirective, DropdownModule,
     CustomPaginationComponent
   ],
   templateUrl: './categories.component.html',
@@ -26,6 +31,10 @@ import { NoWhitespaceValidator } from '../../../shared/validators/no-whitespace.
 export class CategoriesComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
+  private modalCleanup = useModalCleanup();
 
   backendError = signal<string>('');
   categories = signal<Category[]>([]);
@@ -42,16 +51,20 @@ export class CategoriesComponent implements OnInit {
 
   constructor() {
     this.form = this.fb.group({
-      name: ['', [Validators.required, NoWhitespaceValidator, Validators.minLength(2)]],
+      name: ['', AppValidators.categoryName],
       is_active: [true]
     });
   }
 
   ngOnInit() {
-    this.loadData();
-  }
+    combineLatest([this.route.queryParamMap]).subscribe(([params])=> {
+      this.searchText.set(params.get('search') || '');
 
-  private modalCleanup = useModalCleanup();
+      this.currentPage.set(Number(params.get('page')) || 1);
+      this.pageSize.set(Number(params.get('limit')) || 10);
+      this.loadData();
+    });
+  }
 
   loadData(showSpinner = true) {
     if (showSpinner)
@@ -70,34 +83,42 @@ export class CategoriesComponent implements OnInit {
     });
   }
 
+  updateQueryParams(resetPage = false){
+    const page = resetPage ? 1 : this.currentPage();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.searchText() || null,
+        page: page,
+        limit: this.pageSize()
+      },
+      queryParamsHandling: 'merge'
+    })
+  }
+
   onSearch() {
-    this.currentPage.set(1);
-    this.loadData();
+    this.updateQueryParams(true);
   }
 
   onPageChange(page: number) {
     this.currentPage.set(page);
-    this.loadData();
+    this.updateQueryParams(false);
   }
 
   onPageSizeChange(pageSize: number) {
     this.pageSize.set(pageSize);
-    this.loadData();
+    this.updateQueryParams(true);
   }
 
   openModal(cat?: Category) {
-    // 1. Show Modal & Clear Errors
     this.visible = true;
     this.backendError.set('');
-
-    // 2. Reset Form (Clears Values, Touched, Dirty)
-    // We set the default for 'is_active' here to ensure it's not null
     this.form.reset({ is_active: true });
 
     if (cat) {
       this.isEditMode = true;
       this.currentId = cat.id;
-      // Patch values (this makes the form Dirty internally)
       this.form.patchValue({
         name: cat.name,
         is_active: cat.status == '1'
@@ -109,8 +130,6 @@ export class CategoriesComponent implements OnInit {
     }
 
     // 3. FORCE PRISTINE
-    // We wait 1 tick for the UI to update, then lock the form as "Clean"
-    // This ensures the "Save" button starts disabled.
     setTimeout(() => {
       this.form.markAsPristine();
     }, 0);
@@ -126,7 +145,7 @@ export class CategoriesComponent implements OnInit {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const rawName = this.form.value.name;
-    const cleanName = rawName ? rawName.trim() : '';
+    const cleanName = rawName ? capitalize(rawName.trim()) : '';
 
     const payload = {
       name: cleanName,
@@ -166,8 +185,6 @@ export class CategoriesComponent implements OnInit {
 
   handleVisibleChange(isVisible: boolean) {
     this.visible = isVisible;
-    // DELETE all the reset logic from here.
-    // We let the form stay "dirty" while it fades out in the background.
   }
 
   closeModal() {

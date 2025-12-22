@@ -1,20 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AvatarModule, BadgeModule, ButtonModule, CardModule, FormModule, GridModule, ModalModule, PaginationModule, SpinnerModule, TableModule } from '@coreui/angular';
+import { AvatarModule, BadgeModule, ButtonModule, CardModule, DropdownModule, FormModule, GridModule, ModalModule, PaginationModule, SharedModule, SpinnerModule, TableModule } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
 import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
 @Component({
   selector: 'app-users',
   imports: [
     CommonModule, FormsModule,
     TableModule, CardModule, ButtonModule, BadgeModule, PaginationModule,
     FormModule, GridModule, SpinnerModule, AvatarModule, ModalModule, IconDirective,
-    CustomPaginationComponent,
+    DropdownModule, SharedModule,
+    CustomPaginationComponent
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
@@ -22,13 +25,14 @@ import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
 export class UsersComponent implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
-
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private modalCleanup = useModalCleanup();
 
   users = signal<User[]>([]);
   currentPage = signal<number>(1);
   limit = signal<number>(10);
-  pageSizes = [5, 10, 20];
+  // pageSizes = [5, 10, 20];
 
   totalPages = signal<number>(0);
 
@@ -51,8 +55,12 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.currentUser();
     if (user) this.currentUserId.set(user.userId);
-
-    this.loadData();
+    combineLatest([this.route.queryParamMap]).subscribe(([params]) => {
+      this.searchText.set(params.get('search') || '');
+      this.currentPage.set(Number(params.get('page')) || 1);
+      this.limit.set(Number(params.get('limit')) || 10);
+      this.loadData();
+    });
   }
 
   loadData(showSpinner = true) {
@@ -72,20 +80,32 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  updateQueryParams(resetPage = false) {
+    const page = resetPage ? 1 : this.currentPage();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.searchText() || null,
+        page: page > 1 ? page : null,
+        limit: this.limit()
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+
   onSearch() {
-    this.currentPage.set(1);
-    this.loadData();
+    this.updateQueryParams(true); // Reset to page 1
   }
 
   onPageChange(page: number) {
     this.currentPage.set(page);
-    this.loadData();
+    this.updateQueryParams(false);
   }
 
   onPageSizeChange(newSize: number) {
     this.limit.set(newSize);
-    this.currentPage.set(1);
-    this.loadData();
+    this.updateQueryParams(true); // Reset to page 1
   }
 
   onRoleChange(user: User, event: any) {

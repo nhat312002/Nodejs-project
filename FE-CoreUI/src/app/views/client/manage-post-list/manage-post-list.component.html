@@ -27,7 +27,7 @@
 
             <!-- Search -->
             <div class="flex-grow-1 position-relative">
-              <input cFormControl sizing="sm" placeholder="Search title or author..." [ngModel]="searchQuery()"
+              <input cFormControl sizing="sm" placeholder="Search posts by title" [ngModel]="searchQuery()"
                 (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onFilterChange()"
                 class="ps-5 bg-white border-0 shadow-sm">
               <svg cIcon name="cilSearch"
@@ -54,30 +54,29 @@
           <div card-actions class="d-flex align-items-center gap-2">
 
             <!-- 1. Review (Also needs to stop propagation) -->
-<a [routerLink]="['/manage/posts', post.id]"
-   (click)="$event.stopPropagation()"
-   cButton color="secondary" variant="outline" size="sm" class="fw-semibold">
-   Review
-</a>
+            <a [routerLink]="['/manage/posts', post.id]" (click)="$event.stopPropagation()" cButton color="secondary"
+              variant="outline" size="sm" class="fw-semibold">
+              Review
+            </a>
 
             <!-- Separator -->
             <!-- <div class="vr mx-1 bg-secondary" style="height: 20px;"></div> -->
 
             <!-- 2. Approve -->
-@if (post.status !== '2') {
-  <button cButton color="success" size="sm" variant="outline" class="fw-bold d-flex align-items-center"
-    (click)="updateStatus(post, '2', $event)"> <!-- Pass $event here -->
-    Approve
-  </button>
-}
+            @if (post.status !== '2') {
+            <button cButton color="success" size="sm" variant="outline" class="fw-bold d-flex align-items-center"
+              (click)="updateStatus(post, '2', $event)"> <!-- Pass $event here -->
+              Approve
+            </button>
+            }
 
-<!-- 3. Reject -->
-@if (post.status !== '3') {
-  <button cButton color="danger" size="sm" variant="outline" class="fw-bold d-flex align-items-center"
-    (click)="updateStatus(post, '3', $event)"> <!-- Pass $event here -->
-    Reject
-  </button>
-}
+            <!-- 3. Reject -->
+            @if (post.status !== '3') {
+            <button cButton color="danger" size="sm" variant="outline" class="fw-bold d-flex align-items-center"
+              (click)="updateStatus(post, '3', $event)"> <!-- Pass $event here -->
+              Reject
+            </button>
+            }
 
 
           </div>
@@ -95,7 +94,7 @@
       @if (totalPages() > 1) {
       <div class="mt-4 w-100">
         <app-custom-pagination [currentPage]="currentPage()" [totalPages]="totalPages()" [pageSize]="pageSize()"
-          (pageChange)="onPageChange($event)">
+          (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)">
         </app-custom-pagination>
       </div>
       }

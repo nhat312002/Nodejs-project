@@ -103,7 +103,9 @@ import {
   cilUserFollow,
   cilUserUnfollow,
   flagSet,
-  cilBrowser
+  cilBrowser,
+  cilCheckCircle,
+  cilBan
 } from '@coreui/icons';
 
 import { signet } from './signet';
@@ -111,6 +113,8 @@ import { logo } from './logo';
 
 export const iconSubset = {
   cilBrowser,
+  cilCheckCircle,
+  cilBan,
   cibCcAmex,
   cibCcApplePay,
   cibCcMastercard,

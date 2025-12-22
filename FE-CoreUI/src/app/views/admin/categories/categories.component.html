@@ -58,9 +58,24 @@
 
               <!-- Actions -->
               <td>
-                <button cButton color="info" size="sm" class="me-2 text-white" (click)="openModal(cat)">
-                  <svg cIcon name="cilPencil" size="sm"></svg> Edit
-                </button>
+                <c-dropdown variant="btn-group" direction="dropstart">
+
+                  <!-- Kebab Toggle -->
+                  <button cButton cDropdownToggle [caret]="false" color="transparent" size="sm"
+                    class="p-0 border-0 text-secondary">
+                    <svg cIcon name="cilOptions"></svg>
+                  </button>
+
+                  <!-- Menu -->
+                  <ul cDropdownMenu class="shadow-sm border-0">
+                    <li>
+                      <a cDropdownItem (click)="openModal(cat)" style="cursor: pointer;">
+                        <svg cIcon name="cilPencil" class="me-2 text-info"></svg> Edit
+                      </a>
+                    </li>
+                  </ul>
+
+                </c-dropdown>
               </td>
             </tr>
             } @empty {
@@ -97,15 +112,10 @@
       <div class="mb-3">
         <label cLabel>Category Name</label>
 
-        <input cFormControl
-               formControlName="name"
-               placeholder="e.g. Technology"
-               sizing="sm"
-               (input)="onInputChange()"
-               [valid]="(form.get('name')?.dirty || backendError())
+        <input cFormControl formControlName="name" placeholder="e.g. Technology" sizing="sm" (input)="onInputChange()"
+          [valid]="(form.get('name')?.dirty || backendError())
                         ? (form.get('name')?.valid && !backendError())
-                        : undefined"
-        />
+                        : undefined" />
 
         <!--
            FIXED FEEDBACK LOGIC:
@@ -113,22 +123,36 @@
            2. We hardcode [valid]="false" so it shows RED text.
         -->
         @if ((form.get('name')?.dirty && form.get('name')?.invalid) || backendError()) {
-          <c-form-feedback [valid]="false">
-            @if (backendError()){
-              <span>{{ backendError() }}</span>
-            }
-            @else {
-              @if (form.get('name')?.hasError('required')) {
-                <span>Name is required.</span>
-              }
-              @if (form.get('name')?.hasError('minlength')) {
-                <span>Name must be at least 2 characters.</span>
-              }
-              @if (form.get('name')?.hasError('whitespace')) {
-                <span>Name cannot be empty spaces.</span>
-              }
-            }
-          </c-form-feedback>
+        <c-form-feedback [valid]="false">
+          @if (backendError()){
+          <span>{{ backendError() }}</span>
+          }
+          @else {
+          <!-- Required -->
+          @if (form.get('name')?.hasError('required')) {
+          <div>Name is required.</div>
+          }
+
+          <!-- Min Length -->
+          @if (form.get('name')?.hasError('minlength')) {
+          <div>Name must be at least 2 characters.</div>
+          }
+
+          <!-- Whitespace -->
+          @if (form.get('name')?.hasError('whitespace')) {
+          <div>Name cannot be empty spaces.</div>
+          }
+
+          <!-- Pattern (Invalid Chars) -->
+          @if (form.get('name')?.hasError('pattern')) {
+          <div>
+            Invalid format. Allowed: Letters, Numbers, and symbols ( . - + # & ' )
+            <br>
+            <small class="text-muted">Must contain at least one letter or number.</small>
+          </div>
+          }
+          }
+        </c-form-feedback>
         }
       </div>
 
@@ -154,12 +178,8 @@
 
     <button cButton color="secondary" type="button" (click)="closeModal()">Cancel</button>
 
-    <button cButton
-            color="primary"
-            type="button"
-            (click)="save()"
-            [disabled]="form.invalid || form.pristine"
-            [attr.disabled]="(form.invalid || form.pristine) ? true : null">
+    <button cButton color="primary" type="button" (click)="save()" [disabled]="form.invalid || form.pristine"
+      [attr.disabled]="(form.invalid || form.pristine) ? true : null">
       Save
     </button>
   </c-modal-footer>

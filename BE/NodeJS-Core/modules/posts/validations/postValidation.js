@@ -70,9 +70,9 @@ const getPosts = {
         "userFullName": Joi.string().trim().optional().messages({
             'string.base': 'User full name must be a string.'
         }),
-        "sort": Joi.string().trim().valid("date_asc", "date_desc", "title_asc", "title_desc").optional().messages({
+        "sort": Joi.string().trim().valid("date_asc", "date_desc", "title_asc", "title_desc", "relevance").optional().messages({
             'string.base': 'Sort value must be a string.',
-            'any.only': 'Sort must be one of [date_asc, date_desc, title_asc, title_desc].'
+            'any.only': 'Sort must be one of [date_asc, date_desc, title_asc, title_desc, relevance].'
         }),
         "page": Joi.number().integer().positive().optional().messages({
             'number.base': 'Page must be a number.',

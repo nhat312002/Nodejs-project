@@ -20,6 +20,7 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 
 import { AppValidators } from '../../../shared/utils/validator.util';
+import { titleCase } from 'src/app/shared/utils/string.util';
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -91,7 +92,12 @@ export class RegisterComponent {
     this.errorMessage.set('');
 
     // Remove confirm_password before sending
-    const { confirm_password, ...payload } = this.form.value;
+    let { confirm_password, ...payload } = this.form.value;
+
+    payload.full_name = titleCase(payload.full_name.trim());
+    payload.username = payload.username.trim().toLowerCase();
+    payload.email = payload.email.trim().toLowerCase();
+    payload.password = payload.password.trim();
 
     this.authService.register(payload).subscribe({
       next: () => {

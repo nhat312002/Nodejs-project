@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 // CoreUI
 import {
@@ -25,10 +25,12 @@ import { CustomPaginationComponent } from '../../../shared/components/custom-pag
     CardModule, FormModule, ButtonDirective, SpinnerModule, DropdownModule, BadgeModule, IconDirective, GridModule,
     PostCardComponent, CustomPaginationComponent
   ],
-  templateUrl: './manage-post-list.component.html'
+  templateUrl: './manage-post-list.component.html',
 })
 export class ManagePostListComponent implements OnInit {
   private postService = inject(PostService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   // Data
   posts = signal<Post[]>([]);
@@ -45,7 +47,16 @@ export class ManagePostListComponent implements OnInit {
   searchQuery = signal('');
 
   ngOnInit() {
-    this.loadData();
+    this.route.queryParamMap.subscribe(params => {
+      this.searchQuery.set(params.get('search') || '');
+      this.currentPage.set(Number(params.get('page')) || 1);
+      this.pageSize.set(Number(params.get('limit')) || 10);
+
+      // if (params.has('status'))
+        this.statusFilter.set(params.get('status') || '');
+
+      this.loadData();
+    })
   }
 
   loadData() {
@@ -74,6 +85,22 @@ export class ManagePostListComponent implements OnInit {
 
   // --- ACTIONS ---
 
+  updateQueryParams(resetPage: boolean = false){
+    const page = resetPage ? 1: this.currentPage();
+
+    const queryParams: any = {
+      search: this.searchQuery() || null,
+      status: this.statusFilter() || null,
+      page: page > 1 ? page : null,
+      limit: this.pageSize(),
+    };
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParams,
+      queryParamsHandling: 'merge'
+    });
+  }
   // Approve (2) or Reject (3)
   updateStatus(post: Post, newStatus: string, event: Event) {
     // 1. STOP EVERYTHING IMMEDIATELY
@@ -93,12 +120,16 @@ export class ManagePostListComponent implements OnInit {
   }
 
   onFilterChange() {
-    this.currentPage.set(1);
-    this.loadData();
+    this.updateQueryParams(true);
   }
 
   onPageChange(page: number) {
     this.currentPage.set(page);
-    this.loadData();
+    this.updateQueryParams(false);
+  }
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize.set(newSize);
+    this.updateQueryParams(true); // Reset to page 1 when changing size
   }
 }

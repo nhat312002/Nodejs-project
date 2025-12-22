@@ -79,29 +79,34 @@ export const routes: Routes = [
             loadComponent: () => import('./views/user/profile-edit.component').then(m => m.ProfileEditComponent)
           },
           {
-            path: 'posts',
-            loadComponent: () => import('./views/client/my-post-list/my-post-list.component').then(m => m.MyPostListComponent)
+            path: '',
+            canActivate: [roleGuard],
+            data: { roles: [1, 3] },
+            children: [
+              {
+                path: 'posts',
+                loadComponent: () => import('./views/client/my-post-list/my-post-list.component').then(m => m.MyPostListComponent)
+              },
+              // Preview my specific post (Draft/Pending)
+              {
+                path: 'posts/preview/:id',
+                loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
+                data: { mode: 'owner' } // <--- OWNER VIEW
+              },
+              // 1. Create Route (No ID)
+              {
+                path: 'posts/create',
+                loadComponent: () => import('./views/client/post-editor/post-editor.component').then(m => m.PostEditorComponent),
+                title: 'New Post'
+              },
+              // 2. Edit Route (Has ID)
+              {
+                path: 'posts/edit/:id',
+                loadComponent: () => import('./views/client/post-editor/post-editor.component').then(m => m.PostEditorComponent),
+                title: 'Edit Post'
+              }
+            ]
           },
-          // Preview my specific post (Draft/Pending)
-          {
-            path: 'posts/preview/:id',
-            loadComponent: () => import('./views/client/post-detail/post-detail.component').then(m => m.PostDetailComponent),
-            data: { mode: 'owner' } // <--- OWNER VIEW
-          },
-          // 1. Create Route (No ID)
-          {
-            path: 'posts/create',
-            loadComponent: () => import('./views/client/post-editor/post-editor.component').then(m => m.PostEditorComponent),
-            title: 'New Post'
-          },
-
-          // 2. Edit Route (Has ID)
-          {
-            path: 'posts/edit/:id',
-            loadComponent: () => import('./views/client/post-editor/post-editor.component').then(m => m.PostEditorComponent),
-            title: 'Edit Post'
-          }
-
         ]
       },
       {
