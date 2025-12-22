@@ -2,6 +2,20 @@ const { Joi } = require("kernels/validations");
 
 
 const categoryValidation = {
+    getActiveCategoriesCursor: {
+        query: Joi.object({
+            "cursor": Joi.number().integer().optional().messages({
+                'number.base': 'Cursor must be a number.',
+                'number.integer': 'Cursor must be an integer.'
+            }),
+            "limit": Joi.number().integer().min(1).max(100).optional().messages({
+                'number.base': 'Limit must be a number.',
+                'number.integer': 'Limit must be an integer.',
+                'number.min': 'Limit must be at least 1.',
+                'number.max': 'Limit cannot exceed 100.'
+            })
+        })
+    },
     getAllCategories: {
         query: Joi.object({
             page: Joi.number().integer().min(1).default(1).messages({
@@ -80,7 +94,7 @@ const categoryValidation = {
         })
     },
 
-    toggleCategoryStatus : {
+    toggleCategoryStatus: {
         params: Joi.object({
             categoryId: Joi.number().integer().positive().required().messages({
                 'number.base': 'Category ID must be a number.',

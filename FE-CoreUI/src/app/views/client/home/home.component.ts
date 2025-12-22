@@ -9,10 +9,11 @@ import { Category } from '../../../core/models/category.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { SpinnerComponent } from '@coreui/angular';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterLink, PostCardComponent, ImgUrlPipe],
+  imports: [CommonModule, RouterLink, PostCardComponent, ImgUrlPipe, SpinnerComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
@@ -25,73 +26,108 @@ export class HomeComponent implements OnInit {
   heroPost = signal<Post | null>(null);
   latestPosts = signal<Post[]>([]);
   categorySections = signal<{ category: Category, posts: Post[] }[]>([]);
+  categoryCursor = signal<number | null>(null);
+  hasMoreCategories = signal(false);
+  isLoadingCategories = signal(false);
   otherPosts = signal<Post[]>([]);
 
   ngOnInit() {
-    // Gọi hàm load dữ liệu ngay lập tức
-    this.loadData();
+    this.loadInitialData();
   }
 
-  loadData() {
+  loadInitialData() {
+    // 1. Hero & Latest (Independent)
     this.postService.getPublicPosts({ limit: 5 }).subscribe(res => {
       if (res.success && res.data.posts.length > 0) {
-        const posts = res.data.posts;
-        this.heroPost.set(posts[0]);
-        this.latestPosts.set(posts.slice(1));
+        this.heroPost.set(res.data.posts[0]);
+        this.latestPosts.set(res.data.posts.slice(1));
       }
     });
 
-    // 3. CATEGORY SECTIONS (The ForkJoin Logic)
-    this.categoryService.getPublicCategories(1, 100).pipe(
-      // Switch from the Category Request to the Posts Request
+    // 2. Start loading first batch of categories
+    this.loadCategoryBatch();
+  }
+
+  /**
+   * Loads a batch of categories using Cursor Pagination,
+   * then uses forkJoin to fetch posts for them in parallel.
+   */
+  loadCategoryBatch() {
+    if (this.isLoadingCategories()) return;
+
+    this.isLoadingCategories.set(true);
+    const cursor = this.categoryCursor();
+    const LIMIT = 4; // Load 3 categories at a time
+
+    this.categoryService.getPublicCategoriesCursor(cursor, LIMIT).pipe(
+      // A. Got Categories? Now fetch their posts.
       switchMap(catRes => {
+        // Validation: If API failed or empty
         if (!catRes.success || !catRes.data.categories.length) {
-          return of([]); // Return empty if no categories
+          return of({ sections: [], meta: catRes.data?.meta });
         }
 
-        const topCats = catRes.data.categories.slice(0, 5); // Limit to top 5 to save bandwidth
+        const categories = catRes.data.categories;
+        const meta = catRes.data.meta; // Save meta for later
 
-        // Create an array of HTTP Observables
-        const requests = topCats.map(cat =>
+        // Create parallel requests
+        const postRequests = categories.map((cat: Category) =>
           this.postService.getPublicPosts({ limit: 4, categoryIds: [cat.id] }).pipe(
-            // A. Map success response to a convenient object
+            // Map successful post response to a Section Object
             map(postRes => ({
               category: cat,
               posts: postRes.data.posts
             })),
-
-            // B. HANDLE ERROR PER REQUEST
-            // If fetching "Tech" fails, we return NULL.
-            // This prevents forkJoin from crashing the whole page.
+            // Handle error per category (don't crash the whole batch)
             catchError(err => {
-              console.error(`Failed to load posts for category ${cat.name}`, err);
+              console.error(`Error loading posts for ${cat.name}`, err);
               return of(null);
             })
           )
         );
 
-        // Execute all requests in parallel
-        return forkJoin(requests);
+        // Execute all post requests
+        return forkJoin(postRequests).pipe(
+          map(results => ({
+            sections: results, // Array of {category, posts} or null
+            meta: meta
+          }))
+        );
       })
     ).subscribe({
-      next: (results) => {
-        // 'results' is an array: [{category, posts}, null, {category, posts}...]
+      next: (result: any) => {
+        // 1. Filter out failed requests or empty sections
+        // Type guard: ensure item is not null and has posts
+        const validSections = (result.sections || [])
+          .filter((item: any) => item !== null && item.posts.length > 0);
 
-        // Filter out nulls (errors) and empty lists
-        // Force type casting if TS complains about null check
-        const validSections = results
-          .filter((item): item is { category: Category, posts: Post[] } =>
-             item !== null && item.posts.length > 0
-          );
+        // 2. Append to existing list
+        this.categorySections.update(current => [...current, ...validSections]);
 
-        // Update the signal ONCE (No UI flickering)
-        this.categorySections.set(validSections);
+        // 3. Update Pagination State
+        if (result.meta) {
+          this.categoryCursor.set(result.meta.nextCursor);
+          this.hasMoreCategories.set(result.meta.hasMore);
+
+          // 4. "Other Posts" Logic
+          // Only load "Other" if there are NO MORE categories to show
+          if (!result.meta.hasMore) {
+            this.loadOtherPosts();
+          }
+        }
+
+        this.isLoadingCategories.set(false);
       },
-      error: (err) => console.error('Failed to load category list', err)
+      error: (err) => {
+        console.error('Category batch failed', err);
+        this.isLoadingCategories.set(false);
+      }
     });
+  }
 
+  loadOtherPosts() {
     this.postService.getPublicPosts({ limit: 4, categoryIds: 'other' }).subscribe(res => {
-      if(res.success) this.otherPosts.set(res.data.posts);
+      if (res.success) this.otherPosts.set(res.data.posts);
     });
   }
 }

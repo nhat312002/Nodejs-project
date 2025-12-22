@@ -22,6 +22,12 @@ export class CategoryService {
     return this.getCategories(page, limit, search, this.publicApiUrl);
   }
 
+  getPublicCategoriesCursor(cursor: number | null = null, limit: number = 4) {
+    let params: any = { limit };
+    if (cursor) params.cursor = cursor;
+    return this.http.get<ApiResponse<any>>(`${this.publicApiUrl}/cursor`, { params });
+  }
+
   create(data: Partial<Category>): Observable<ApiResponse<Category>>{
     return this.http.post<ApiResponse<Category>>(this.adminApiUrl, data);
   }

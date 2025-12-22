@@ -12,7 +12,7 @@ const { createRole, getAllRoles, getRoleById, updateRole } = require("modules/ro
 const userController = require("modules/users/controllers/userController");
 const { createUser, getAllUsers, getUserById, updateUser, updateProfile, changePassword } = require("modules/users/validations/userValidation");
 const categoryController = require("modules/categories/controllers/categoryController");
-const { createCategory, getAllCategories, getCategoryById, updateCategory, toggleCategoryStatus } = require("modules/categories/validations/categoryValidation");
+const { createCategory, getAllCategories, getCategoryById, updateCategory, toggleCategoryStatus, getActiveCategoriesCursor } = require("modules/categories/validations/categoryValidation");
 const languageController = require("modules/languages/controllers/languageController");
 const { createLanguage, getAllLanguages, getLanguageById, updateLanguage, toggleLanguageStatus } = require("modules/languages/validations/languageValidation");
 const authController = require("modules/auth/controllers/authController");
@@ -41,6 +41,7 @@ router.group("/auth", null, (router) => {
 
 router.get("/languages", validate([getAllLanguages]), languageController.getActiveLanguages);
 router.get("/categories", validate([getAllCategories]), categoryController.getActiveCategories);
+router.get("/categories/cursor", validate([getActiveCategoriesCursor]), categoryController.getActiveCategoriesCursor);
 
 const userMiddlewares = middlewares([authenticated, role([1, 2, 3])]);
 
