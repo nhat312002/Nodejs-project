@@ -6,6 +6,14 @@ const responseUtils = require("utils/responseUtils")
 const categoryValidation = require("modules/categories/validations/categoryValidation");
 
 const categoryController = {
+    getActiveCategoriesCursor: async (req, res) => {
+        try {
+            const results = await categoryService.getCategoriesCursor(req.query);
+            return responseUtils.ok(res, results);
+        } catch (error) {
+            return responseUtils.error(res, error.message);
+        }
+    },
     getActiveCategories: async (req, res) => {
         try {
             const merge = Object.assign({}, req.query, {status: '1'});

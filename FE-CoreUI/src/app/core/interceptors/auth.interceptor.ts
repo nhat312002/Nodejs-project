@@ -67,7 +67,11 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
     return refreshTokenSubject.pipe(
       filter(token => token !== null),
       take(1),
-      switchMap(token => next(addTokenHeader(req, token!)))
+      switchMap(token => next(addTokenHeader(req, token as string))),
+      catchError((err) => {
+        authService.logout();
+        return throwError(() => err);
+      })
     );
   }
 }
