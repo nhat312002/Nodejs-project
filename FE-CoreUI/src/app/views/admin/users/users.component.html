@@ -35,7 +35,7 @@
             <tr>
               <td>
                 <div class="d-flex align-items-center">
-                  <c-avatar [src]="user.url_avatar || './assets/images/avatars/8.jpg'" size="md" class="me-2">
+                  <c-avatar [src]="user.url_avatar | imgUrl:'user'" size="md" class="me-2">
                   </c-avatar>
 
                   <div>

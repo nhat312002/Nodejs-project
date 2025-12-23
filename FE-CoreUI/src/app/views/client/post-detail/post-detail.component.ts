@@ -18,6 +18,7 @@ import { CommentService } from '../../../core/services/comment.service';
 import { Post } from '../../../core/models/post.model'; // Ensure this model exists
 import { Comment } from '../../../core/models/comment.model';
 import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
+import { UserProfileService } from '../../../core/services/user-profile.service';
 
 @Component({
   selector: 'app-post-detail',
@@ -37,6 +38,7 @@ export class PostDetailComponent implements OnInit {
   private titleService = inject(Title);
   public router = inject(Router);
   public authService = inject(AuthService);
+  public userProfileService = inject(UserProfileService);
 
   // Data Signals
   post = signal<Post | null>(null);

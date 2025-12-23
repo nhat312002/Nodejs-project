@@ -75,7 +75,7 @@
       <div class="d-flex align-items-center gap-3">
         <a [routerLink]="['/profile', p.user.id]" class="text-decoration-none">
           <!-- Ensure your model uses user.avatarUrl (camelCase) -->
-          <c-avatar src="assets/images/avatars/8.jpg" size="md"></c-avatar>
+          <c-avatar [src]=" (p.user.url_avatar ) | imgUrl:'user'" size="md"></c-avatar>
         </a>
         <div class="d-flex flex-column" style="line-height: 1.2;">
           <a [routerLink]="['/profile', p.user.id]" class="text-dark text-decoration-none fw-bold">
@@ -114,35 +114,38 @@
     <h4 class="fw-bold mb-4">Comments</h4>
 
     <!-- 1. WRITE COMMENT -->
-    <div class="mb-5 p-4 bg-white rounded shadow-sm border">
-      @if (authService.currentUser(); as user) {
-      <div class="d-flex gap-3">
-        <c-avatar src="assets/images/avatars/8.jpg" size="md"></c-avatar>
-        <div class="flex-grow-1">
-          <div class="mb-2 fw-bold small text-muted">
-            Commenting as <span class="text-dark">{{ user.userId }}</span>
-          </div>
-          <textarea cFormControl rows="3" placeholder="What are your thoughts?" [ngModel]="newCommentText()"
-            (ngModelChange)="newCommentText.set($any($event))" [disabled]="isSubmitting()">
-              </textarea>
-          <div class="d-flex justify-content-end mt-2">
-            <button cButton color="primary" class="fw-bold rounded-pill px-4 text-white" (click)="submitMainComment()"
-              [disabled]="!newCommentText().trim() || isSubmitting()">
-              @if (isSubmitting()) { Posting... } @else { Post }
-            </button>
+    @if(p.status == '2'){
+
+      <div class="mb-5 p-4 bg-white rounded shadow-sm border">
+        @if (userProfileService.profile(); as user) {
+        <div class="d-flex gap-3">
+          <c-avatar [src]="(user.url_avatar || '') | imgUrl:'user'" size="md"></c-avatar>
+          <div class="flex-grow-1">
+            <div class="mb-2 fw-bold small text-muted">
+              Commenting as <span class="text-dark">{{ user.full_name }}</span>
+            </div>
+            <textarea cFormControl rows="3" placeholder="What are your thoughts?" [ngModel]="newCommentText()"
+              (ngModelChange)="newCommentText.set($any($event))" [disabled]="isSubmitting()">
+                </textarea>
+            <div class="d-flex justify-content-end mt-2">
+              <button cButton color="primary" class="fw-bold rounded-pill px-4 text-white" (click)="submitMainComment()"
+                [disabled]="!newCommentText().trim() || isSubmitting()">
+                @if (isSubmitting()) { Posting... } @else { Post }
+              </button>
+            </div>
           </div>
         </div>
+        } @else {
+        <div class="text-center py-3">
+          <h5 class="fw-bold text-muted mb-3">Join the conversation</h5>
+          <a routerLink="/login" [queryParams]="{ returnUrl: router.url }" cButton color="primary"
+            class="rounded-pill px-4 fw-bold text-white">
+            Sign in to comment
+          </a>
+        </div>
+        }
       </div>
-      } @else {
-      <div class="text-center py-3">
-        <h5 class="fw-bold text-muted mb-3">Join the conversation</h5>
-        <a routerLink="/login" [queryParams]="{ returnUrl: router.url }" cButton color="primary"
-          class="rounded-pill px-4 fw-bold text-white">
-          Sign in to comment
-        </a>
-      </div>
-      }
-    </div>
+    }
 
     <!-- 2. COMMENT LIST -->
     <div class="d-flex flex-column gap-4">
@@ -150,7 +153,7 @@
 
       <div class="comment-item">
         <div class="d-flex gap-3">
-          <c-avatar [src]="(comment.user.avatarUrl || '') | imgUrl" size="md"></c-avatar>
+          <c-avatar [src]="(comment.user.avatarUrl || '') | imgUrl:'user' " size="md"></c-avatar>
 
           <div class="flex-grow-1">
 
@@ -165,7 +168,7 @@
               @if (authService.currentUser(); as currentUser) {
               @if (currentUser.userId === comment.userId || currentUser.role === 3) {
               <c-dropdown direction="dropstart" variant="btn-group">
-                <button cButton cDropdownToggle color="light" variant="ghost" size="sm" class="p-0 text-muted border-0">
+                <button cButton cDropdownToggle [caret]="false" color="light" variant="ghost" size="sm" class="p-0 text-muted border-0">
                   <svg cIcon name="cilOptions"></svg>
                 </button>
                 <ul cDropdownMenu class="shadow-sm border-0">

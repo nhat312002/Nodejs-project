@@ -10,6 +10,7 @@ import { CustomPaginationComponent } from '../../../shared/components/custom-pag
 import { useModalCleanup } from '../../../shared/utils/modal-cleanup.util';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
 @Component({
   selector: 'app-users',
   imports: [
@@ -17,7 +18,8 @@ import { combineLatest } from 'rxjs';
     TableModule, CardModule, ButtonModule, BadgeModule, PaginationModule,
     FormModule, GridModule, SpinnerModule, AvatarModule, ModalModule, IconDirective,
     DropdownModule, SharedModule,
-    CustomPaginationComponent
+    CustomPaginationComponent,
+    ImgUrlPipe,
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',

@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpRequest, HttpHandlerFn } from "@angular/common/http";
-import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from "rxjs";
+import { BehaviorSubject, catchError, filter, switchMap, take, throwError, timeout } from "rxjs";
 import { AuthService } from "../services/auth.service";
 import { inject } from "@angular/core";
 import { BYPASS_REFRESH_LOGIC } from "./skip.context";
@@ -53,9 +53,11 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
       catchError((err) => {
         // CRITICAL: If refresh fails, STOP. Logout.
         isRefreshing = false;
-
-        if (err.status === 422 || err.status === 400) {
-          return throwError(() => err);
+        try {
+          refreshTokenSubject.error(err);
+        } finally {
+          // recreate subject so future refresh attempts can reuse it
+          refreshTokenSubject = new BehaviorSubject<string | null>(null);
         }
 
         authService.logout();
@@ -67,6 +69,7 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
     return refreshTokenSubject.pipe(
       filter(token => token !== null),
       take(1),
+      timeout(5000),
       switchMap(token => next(addTokenHeader(req, token as string))),
       catchError((err) => {
         authService.logout();

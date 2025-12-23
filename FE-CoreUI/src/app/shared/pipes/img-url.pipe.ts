@@ -7,8 +7,11 @@ import { environment } from '../../../environments/environment';
 })
 export class ImgUrlPipe implements PipeTransform {
 
-  transform(relativePath: string | undefined | null): string {
+  transform(relativePath: string | undefined | null, type: 'post' | 'user' = 'post'): string {
     if (!relativePath) {
+      if (type === 'user'){
+        return '/assets/images/avatars/default.jpg'
+      }
       // return '/assets/images/react.jpg';
       return '/assets/images/placeholder.png';
     }

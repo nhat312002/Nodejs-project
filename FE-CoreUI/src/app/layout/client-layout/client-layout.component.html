@@ -17,7 +17,7 @@
         <!-- LOGGED IN: User Menu -->
         <c-dropdown>
           <button cDropdownToggle cButton color="secondary" variant="ghost" class="border-0">
-            <c-avatar [src]="'assets/images/avatars/8.jpg'" size="sm"></c-avatar>
+            <c-avatar [src]="(userProfileService.profile()?.url_avatar) | imgUrl:'user'" size="sm"></c-avatar>
           </button>
 
           <ul cDropdownMenu class="end-0 shadow-lg border-0 mt-2 pt-0 overflow-hidden" style="min-width: 200px;">

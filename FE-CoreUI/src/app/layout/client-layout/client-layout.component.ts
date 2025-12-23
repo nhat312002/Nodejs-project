@@ -10,6 +10,7 @@ import { IconDirective } from '@coreui/icons-angular';
 import { LanguageService } from '../../core/services/language.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ImgUrlPipe } from '../../shared/pipes/img-url.pipe';
+import { UserProfileService } from '../../core/services/user-profile.service';
 
 @Component({
   selector: 'app-client-layout',
@@ -18,7 +19,7 @@ import { ImgUrlPipe } from '../../shared/pipes/img-url.pipe';
     CommonModule, RouterOutlet, RouterLink, // TranslateModule,
     ContainerComponent, ButtonDirective, DropdownModule, AvatarModule, NavbarModule,
     IconDirective,
-    // ImgUrlPipe
+    ImgUrlPipe
   ],
   templateUrl: './client-layout.component.html',
   styleUrl: './client-layout.component.scss'
@@ -26,6 +27,7 @@ import { ImgUrlPipe } from '../../shared/pipes/img-url.pipe';
 export class ClientLayoutComponent implements OnInit {
   public langService = inject(LanguageService);
   public authService = inject(AuthService);
+  public userProfileService = inject(UserProfileService);
   private router = inject(Router);
 
    handleSignIn(event: Event) {
