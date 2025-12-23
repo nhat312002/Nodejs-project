@@ -1,4 +1,4 @@
-import { Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 // ==========================================
 // 1. CUSTOM VALIDATOR FUNCTIONS
@@ -28,6 +28,18 @@ export function NoHtmlValidator(control: AbstractControl): ValidationErrors | nu
   return hasHtmlChars ? { xss: true } : null;
 }
 
+export function smartPatternValidator(pattern: RegExp): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+        if (!value) return null;
+
+    const virtualCleanValue = value.toString().trim().replace(/\s+/g, ' ');
+    const isValid = pattern.test(virtualCleanValue);
+
+    // Return null if valid, or standard 'pattern' error if invalid
+    return isValid ? null : { pattern: true };
+  };
+}
 // ==========================================
 // 2. REGEX PATTERNS (STRICT MODE)
 // ==========================================
@@ -66,15 +78,16 @@ export const AppValidators = {
   fullName: [
     Validators.required,
     Validators.maxLength(50),
-    Validators.pattern(AppPatterns.NAME),
-    NoWhitespaceValidator // <--- Included automatically!
+    // Validators.pattern(AppPatterns.NAME),
+    // NoWhitespaceValidator // <--- Included automatically!
+    smartPatternValidator(AppPatterns.NAME)
   ],
   // Language Name (e.g., "Tiếng Việt", "English (US)")
   languageName: [
     Validators.required,
     Validators.minLength(3),
     Validators.maxLength(50),
-    Validators.pattern(AppPatterns.LANGUAGE),
+    smartPatternValidator(AppPatterns.LANGUAGE),
     NoWhitespaceValidator
   ],
 
@@ -83,7 +96,7 @@ export const AppValidators = {
     Validators.required,
     Validators.minLength(2),
     Validators.maxLength(50),
-    Validators.pattern(AppPatterns.CATEGORY),
+    smartPatternValidator(AppPatterns.CATEGORY),
     NoWhitespaceValidator
   ],
   email: [
@@ -101,7 +114,7 @@ export const AppValidators = {
     Validators.required,
     Validators.minLength(8),
     Validators.maxLength(50),
-    Validators.pattern(AppPatterns.USERNAME),
+    smartPatternValidator(AppPatterns.USERNAME),
     NoWhitespaceValidator // <--- Included automatically!
   ]
 };

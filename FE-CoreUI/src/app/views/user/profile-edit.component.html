@@ -62,7 +62,7 @@
             </div>
 
             <button cButton color="primary" type="submit" class="w-100 fw-bold text-white"
-                    [disabled]="isLoading() || profileForm.invalid">
+                    [disabled]="isLoading() || profileForm.invalid || profileForm.pristine">
               @if (isLoading()) { <c-spinner size="sm"></c-spinner> }
               Save Information
             </button>

@@ -20,7 +20,7 @@ import {
 import { AuthService } from '../../../core/services/auth.service';
 
 import { AppValidators } from '../../../shared/utils/validator.util';
-import { titleCase } from 'src/app/shared/utils/string.util';
+import { titleCase } from '../../../shared/utils/string.util';
 @Component({
   selector: 'app-register',
   standalone: true,

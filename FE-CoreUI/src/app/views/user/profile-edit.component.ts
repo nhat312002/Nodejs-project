@@ -72,6 +72,10 @@ export class ProfileEditComponent implements OnInit {
             fullName: user.full_name,
             phone: user.phone // Format: "+84..."
           });
+
+          setTimeout(() => {
+            this.profileForm.markAsPristine();
+          }, 50);
         }
         this.isLoading.set(false);
       },
@@ -99,7 +103,7 @@ export class ProfileEditComponent implements OnInit {
     const phoneValue = formVal.phone ? (formVal.phone as any).e164Number : '';
 
     this.profileService.updateProfile({
-      fullName: formVal.fullName || '',
+      fullName: formVal.fullName?.toString().trim() || '',
       phone: phoneValue
     }).subscribe({
       next: () => {
