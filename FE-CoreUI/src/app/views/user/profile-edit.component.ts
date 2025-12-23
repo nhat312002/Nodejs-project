@@ -1,74 +1,142 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+
+// CoreUI
 import {
-  ReactiveFormsModule,
-  FormGroup,
-  FormControl,
-  Validators,
-  AbstractControl
-} from '@angular/forms';
+  CardModule, FormModule, ButtonDirective, SpinnerModule,
+  GridModule, AlertModule
+} from '@coreui/angular';
+
+// Phone Library
+import { NgxIntlTelInputModule, CountryISO, SearchCountryField, PhoneNumberFormat } from 'ngx-intl-tel-input';
+
+// Shared
 import { UserProfileService } from '../../core/services/user-profile.service';
+import { AppValidators } from '../../shared/utils/validator.util';
 
 @Component({
   selector: 'app-profile-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, ReactiveFormsModule,
+    CardModule, FormModule, ButtonDirective, SpinnerModule, GridModule, AlertModule,
+    NgxIntlTelInputModule
+  ],
   templateUrl: './profile-edit.component.html',
   styleUrl: './profile-edit.component.scss'
 })
-export class ProfileEditComponent {
+export class ProfileEditComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private profileService = inject(UserProfileService);
 
-  profileService = inject(UserProfileService);
+  // --- PHONE CONFIG ---
+  SearchCountryField = SearchCountryField;
+  CountryISO = CountryISO;
+  PhoneNumberFormat = PhoneNumberFormat;
+  preferredCountries: CountryISO[] = [CountryISO.Vietnam, CountryISO.UnitedStates];
 
-  profileForm = new FormGroup({
-    fullName: new FormControl('', Validators.required),
-    phone: new FormControl('', Validators.required)
+  // --- STATE ---
+  isLoading = signal(false);
+
+  // Feedback Messages (Success/Error)
+  profileMessage = signal<{type: string, text: string} | null>(null);
+  passwordMessage = signal<{type: string, text: string} | null>(null);
+
+  // --- FORMS ---
+
+  // 1. Personal Info
+  profileForm = this.fb.group({
+    fullName: ['', AppValidators.fullName], // Uses strict regex
+    phone: ['', [Validators.required]] // Library handles format validation
   });
 
-  passwordForm = new FormGroup({
-    currentPassword: new FormControl('', Validators.required),
-    newPassword: new FormControl('', Validators.minLength(6)),
-    confirmPassword: new FormControl('', Validators.required)
+  // 2. Password
+  passwordForm = this.fb.group({
+    currentPassword: ['', Validators.required],
+    newPassword: ['', AppValidators.password], // Uses strict regex (1 Upper, 1 Special...)
+    confirmPassword: ['', Validators.required]
   }, { validators: this.passwordMatch });
 
-  passwordMatch(group: AbstractControl) {
-    const pass = group.get('newPassword')?.value;
-    const confirm = group.get('confirmPassword')?.value;
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading.set(true);
+    this.profileService.getProfile().subscribe({
+      next: (res) => {
+        if (res.success) {
+          const user = res.data;
+          this.profileForm.patchValue({
+            fullName: user.full_name,
+            phone: user.phone // Format: "+84..."
+          });
+        }
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
+  passwordMatch(control: AbstractControl) {
+    const pass = control.get('newPassword')?.value;
+    const confirm = control.get('confirmPassword')?.value;
     return pass === confirm ? null : { mismatch: true };
   }
 
+  // --- ACTIONS ---
+
   updateProfile() {
+    this.profileForm.markAllAsTouched();
     if (this.profileForm.invalid) return;
-    this.profileService.updateProfile(this.profileForm.value as any)
-      .subscribe(() => alert('Your information has been updated successfully'));
+
+    this.isLoading.set(true);
+    this.profileMessage.set(null);
+
+    // Extract phone string from object
+    const formVal = this.profileForm.value;
+    const phoneValue = formVal.phone ? (formVal.phone as any).e164Number : '';
+
+    this.profileService.updateProfile({
+      fullName: formVal.fullName || '',
+      phone: phoneValue
+    }).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.profileMessage.set({ type: 'success', text: 'Profile updated successfully.' });
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.profileMessage.set({ type: 'danger', text: err.error?.message || 'Failed to update.' });
+      }
+    });
   }
 
   changePassword() {
+    this.passwordForm.markAllAsTouched();
     if (this.passwordForm.invalid) return;
+
+    this.isLoading.set(true);
+    this.passwordMessage.set(null);
+
     this.profileService.changePassword({
       currentPassword: this.passwordForm.value.currentPassword!,
       newPassword: this.passwordForm.value.newPassword!
     }).subscribe({
       next: () => {
-        alert('Password changed successfully');
+        this.isLoading.set(false);
+        this.passwordMessage.set({ type: 'success', text: 'Password changed successfully.' });
         this.passwordForm.reset();
       },
       error: (err) => {
-        console.error(err);
-
+        this.isLoading.set(false);
+        // Handle array errors from Joi
         let msg = 'Failed to change password';
+        if (err.error?.data?.[0]) msg = err.error.data[0];
+        else if (err.error?.message) msg = err.error.message;
 
-        // 1. Check for Validation Array in 'data' (e.g. 422 errors)
-        if (err.error?.data && Array.isArray(err.error.data) && err.error.data.length > 0) {
-          // Grab the first error message from the array
-          msg = err.error.data[0];
-        }
-        // 2. Check for generic 'message' (e.g. 400/401 errors)
-        else if (err.error?.message) {
-          msg = err.error.message;
-        }
-
-        alert(msg);
+        this.passwordMessage.set({ type: 'danger', text: msg });
       }
     });
   }

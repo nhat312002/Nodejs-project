@@ -1,34 +1,138 @@
-<div class="profile-edit">
+<c-container class="py-4">
+  <div class="row g-4">
 
-  <h2>Thông tin cá nhân</h2>
-  <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
-    <input placeholder="Username" formControlName="fullName" />
-    <small *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
-      Minimum 3 characters required
-    </small>
+    <!-- =========================== -->
+    <!-- 1. PERSONAL INFORMATION -->
+    <!-- =========================== -->
+    <div class="col-lg-6">
+      <c-card class="h-100 border-0 shadow-sm">
+        <c-card-header class="bg-white py-3 border-bottom">
+          <h5 class="mb-0 fw-bold text-dark">Personal Info</h5>
+        </c-card-header>
 
-    <input placeholder="Phone Number" formControlName="phone" />
-    <small *ngIf="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched">
-     Invalid Phone Number
-    </small>
+        <c-card-body class="p-4">
 
-    <button [disabled]="profileForm.invalid">Save</button>
-  </form>
+          <!-- Alert -->
+          @if (profileMessage(); as msg) {
+            <c-alert [color]="msg.type" dismissible (visibleChange)="profileMessage.set(null)">
+              {{ msg.text }}
+            </c-alert>
+          }
 
-  <hr />
+          <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
 
+            <!-- Full Name -->
+            <div class="mb-3">
+              <label cLabel>Full Name</label>
+              <input cFormControl formControlName="fullName" placeholder="Enter name"
+                     [valid]="profileForm.get('fullName')?.touched ? profileForm.get('fullName')?.valid : undefined">
 
-  <h2>Change Password</h2>
-  <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-    <input type="password" placeholder="Mật khẩu hiện tại" formControlName="currentPassword" />
-    <input type="password" placeholder="Mật khẩu mới" formControlName="newPassword" />
-    <input type="password" placeholder="Nhập lại mật khẩu mới" formControlName="confirmPassword" />
+              <!-- Validation Messages -->
+              @if (profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid) {
+                <div class="text-danger small mt-1">
+                  @if (profileForm.get('fullName')?.hasError('required')) { Name is required. }
+                  @if (profileForm.get('fullName')?.hasError('pattern')) { Invalid format (letters only). }
+                </div>
+              }
+            </div>
 
-    <small *ngIf="passwordForm.hasError('mismatch')">
-      Passwords do not match
-    </small>
+            <!-- Phone Number (Library) -->
+            <div class="mb-4">
+              <label cLabel class="d-block">Phone Number</label>
+              <ngx-intl-tel-input
+                [cssClass]="'form-control ' + (profileForm.get('phone')?.touched && profileForm.get('phone')?.invalid ? 'is-invalid' : '')"
+                [preferredCountries]="preferredCountries"
+                [enableAutoCountrySelect]="true"
+                [enablePlaceholder]="true"
+                [searchCountryFlag]="true"
+                [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                [selectFirstCountry]="false"
+                [selectedCountryISO]="CountryISO.Vietnam"
+                [phoneValidation]="true"
+                name="phone"
+                formControlName="phone">
+              </ngx-intl-tel-input>
 
-    <button [disabled]="passwordForm.invalid">Change Password</button>
-  </form>
+              @if (profileForm.get('phone')?.touched && profileForm.get('phone')?.invalid) {
+                <div class="text-danger small mt-1">
+                  @if (profileForm.get('phone')?.hasError('required')) { Phone number is required. }
+                  @if (profileForm.get('phone')?.hasError('validatePhoneNumber')) { Invalid phone number. }
+                </div>
+              }
+            </div>
 
-</div>
+            <button cButton color="primary" type="submit" class="w-100 fw-bold text-white"
+                    [disabled]="isLoading() || profileForm.invalid">
+              @if (isLoading()) { <c-spinner size="sm"></c-spinner> }
+              Save Information
+            </button>
+
+          </form>
+        </c-card-body>
+      </c-card>
+    </div>
+
+    <!-- =========================== -->
+    <!-- 2. CHANGE PASSWORD      -->
+    <!-- =========================== -->
+    <div class="col-lg-6">
+      <c-card class="h-100 border-0 shadow-sm">
+        <c-card-header class="bg-white py-3 border-bottom">
+          <h5 class="mb-0 fw-bold text-dark">Change Password</h5>
+        </c-card-header>
+
+        <c-card-body class="p-4">
+
+          @if (passwordMessage(); as msg) {
+            <c-alert [color]="msg.type" dismissible (visibleChange)="passwordMessage.set(null)">
+              {{ msg.text }}
+            </c-alert>
+          }
+
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+
+            <div class="mb-3">
+              <label cLabel>Current Password</label>
+              <input cFormControl type="password" formControlName="currentPassword"
+                     [valid]="passwordForm.get('currentPassword')?.touched ? passwordForm.get('currentPassword')?.valid : undefined">
+              @if (passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid) {
+                <div class="text-danger small">Required.</div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label cLabel>New Password</label>
+              <input cFormControl type="password" formControlName="newPassword"
+                     [valid]="passwordForm.get('newPassword')?.touched ? passwordForm.get('newPassword')?.valid : undefined">
+
+              @if (passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid) {
+                <div class="text-danger small mt-1">
+                   @if (passwordForm.get('newPassword')?.hasError('pattern')) {
+                     Must have 1 Upper, 1 Lower, 1 Number, 1 Special.
+                   }
+                </div>
+              }
+            </div>
+
+            <div class="mb-4">
+              <label cLabel>Confirm Password</label>
+              <input cFormControl type="password" formControlName="confirmPassword"
+                     [valid]="passwordForm.get('confirmPassword')?.touched ? !passwordForm.hasError('mismatch') : undefined">
+
+              @if (passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
+                <div class="text-danger small mt-1">Passwords do not match.</div>
+              }
+            </div>
+
+            <button cButton color="warning" type="submit" class="w-100 fw-bold text-white"
+                    [disabled]="isLoading() || passwordForm.invalid">
+               Update Password
+            </button>
+
+          </form>
+        </c-card-body>
+      </c-card>
+    </div>
+
+  </div>
+</c-container>

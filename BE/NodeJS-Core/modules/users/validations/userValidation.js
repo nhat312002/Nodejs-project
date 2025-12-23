@@ -1,4 +1,22 @@
 const { Joi } = require("kernels/validations");
+const PNF = require('google-libphonenumber').PhoneNumberFormat;
+const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
+
+const validatePhoneNumber = (value, helpers) => {
+  try {
+    const number = phoneUtil.parseAndKeepRawInput(value);
+
+    const isValid = phoneUtil.isValidNumber(number);
+
+    if (!isValid) {
+      return helpers.message('Invalid phone number format.');
+    }
+    return phoneUtil.format(number, PNF.E164);
+
+  } catch (error) {
+    return helpers.message('Invalid phone number format.');
+  }
+};
 
 const userValidation = {
   getAllUsers: {
@@ -109,13 +127,9 @@ const userValidation = {
         }),
       phone: Joi.string()
         .trim()
-        .pattern(/^[0-9]{10,11}$/)
-        .optional()
-        .allow(null, '')
-        .messages({
-          'string.pattern.base': 'Phone number must be 10 or 11 digits.',
-          'string.base': 'Phone number must be a string.',
-        }),
+        .allow(null, '') // Allow removing phone number
+        .custom(validatePhoneNumber) // <--- Use the Google Lib logic
+        .optional(),
       url_avatar: Joi.string()
         .trim()
         .uri()
@@ -183,13 +197,9 @@ const userValidation = {
         }),
       phone: Joi.string()
         .trim()
-        .pattern(/^[0-9]{10,11}$/)
-        .optional()
-        .allow(null, '')
-        .messages({
-          'string.pattern.base': 'Phone number must be 10 or 11 digits.',
-          'string.base': 'Phone number must be a string.',
-        }),
+        .allow(null, '') // Allow removing phone number
+        .custom(validatePhoneNumber) // <--- Use the Google Lib logic
+        .optional(),
       url_avatar: Joi.string()
         .trim()
         .uri()
@@ -247,13 +257,9 @@ const userValidation = {
         }),
       phone: Joi.string()
         .trim()
-        .pattern(/^[0-9]{10,11}$/)
-        .optional()
-        .allow(null, '')
-        .messages({
-          'string.pattern.base': 'Phone number must be 10 or 11 digits.',
-          'string.base': 'Phone number must be a string.',
-        }),
+        .allow(null, '') // Allow removing phone number
+        .custom(validatePhoneNumber) // <--- Use the Google Lib logic
+        .optional(),
     }),
   },
 

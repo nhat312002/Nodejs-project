@@ -36,6 +36,7 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+
               {
                 "glob": "**/*",
                 "input": "node_modules/tinymce",
@@ -43,6 +44,7 @@
               }
             ],
             "styles": [
+              "./node_modules/intl-tel-input/build/css/intlTelInput.css",
               "src/scss/styles.scss"
             ],
             "scripts": [],

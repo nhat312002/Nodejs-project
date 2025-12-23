@@ -21,3 +21,84 @@
 // We use those styles to show code examples, you should remove them in your application.
 @use "examples";
 
+/* Base container */
+.iti {
+  width: 100%;
+}
+
+/* Match CoreUI form-control */
+.iti input {
+  width: 100%;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem 0.375rem 52px;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  box-sizing: border-box;
+}
+
+/* Country dropdown */
+.iti__country-list {
+  position: absolute !important;
+  max-height: 240px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  z-index: 1056; /* Above CoreUI modals */
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+/* Prevent CoreUI ul/li resets */
+.iti__country-list,
+.iti__country-list li {
+  list-style: none;
+  // margin: 0;
+  // padding: 0;
+}
+
+/* Country rows */
+.iti__country {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  box-sizing: border-box;
+}
+
+/* Hover / active state (Bootstrap primary) */
+.iti__country:hover,
+.iti__country.iti__highlight {
+  background-color: rgba(13, 110, 253, 0.1);
+}
+
+/* Search container */
+.iti__search-input {
+  width: 100% !important;
+  box-sizing: border-box;
+  padding: 0.5rem;
+}
+
+/* Search input (FULL WIDTH FIX) */
+.iti__search-input input {
+  width: 100% !important;
+  display: block;
+  box-sizing: border-box;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Search focus like CoreUI */
+.iti__search-input input:focus {
+  outline: none;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Flag spacing consistency */
+.iti__flag-container {
+  padding-left: 0.5rem;
+}
+
+/* Prevent dropdown width collapse */
+.iti__country-list {
+  min-width: 100%;
+}
