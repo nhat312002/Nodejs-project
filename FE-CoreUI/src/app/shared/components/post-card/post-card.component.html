@@ -28,7 +28,7 @@
 
       <!-- Content -->
       <div class="d-flex flex-column">
-        <div class="d-flex flex-wrap gap-1 mb-1">
+        <div class="d-flex flex-wrap gap-1 mb-1 category-list">
           @for (cat of postCategories(); track cat.id; let last = $last) {
           <span class="text-primary small fw-bold text-uppercase">
             {{ cat.name }} {{ !last ? '&middot;' : '' }}

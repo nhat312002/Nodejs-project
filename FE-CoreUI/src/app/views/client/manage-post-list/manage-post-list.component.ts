@@ -16,6 +16,7 @@ import { PostService } from '../../../core/services/post.service';
 import { Post } from '../../../core/models/post.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
+import { ConfirmService } from 'src/app/core/services/confirm.service';
 
 @Component({
   selector: 'app-manage-post-list',
@@ -31,7 +32,7 @@ export class ManagePostListComponent implements OnInit {
   private postService = inject(PostService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-
+  private confirmService = inject(ConfirmService);
   // Data
   posts = signal<Post[]>([]);
   isLoading = signal(false);
@@ -102,20 +103,33 @@ export class ManagePostListComponent implements OnInit {
     });
   }
   // Approve (2) or Reject (3)
-  updateStatus(post: Post, newStatus: string, event: Event) {
+  async updateStatus(post: Post, newStatus: string, event: Event) {
     // 1. STOP EVERYTHING IMMEDIATELY
     event.stopPropagation(); // Don't bubble to the card
     event.preventDefault();  // Don't trigger any browser link actions
 
     // 2. Now show the blocking confirm dialog
     const action = newStatus === '2' ? 'Approve' : 'Reject';
-    if (!confirm(`Are you sure you want to ${action} this post?`)) return;
+    const isConfirmed = await this.confirmService.ask({
+      title: `${action} Post?`,
+      message: `Are you sure you want to ${action} the post "${post.title}"?`,
+      confirmText: action,
+      color: action == 'Approve' ? 'success' : 'danger',
+    });
+
+    if (!isConfirmed) return;
 
     this.postService.updateStatus(post.id, newStatus).subscribe({
       next: () => {
         this.loadData();
       },
-      error: () => alert(`Failed to ${action} post`)
+      error: (err) => {
+        this.confirmService.alert({
+          title: 'Error',
+          message: err.error?.message || `Failed to ${action} post.`,
+          color: 'danger'
+        });
+      }
     });
   }
 

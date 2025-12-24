@@ -48,11 +48,11 @@
             <!-- 3. TINYMCE EDITOR -->
             <div class="mb-3">
               @if (form.get('body')?.touched && form.get('body')?.invalid) {
-              <div class="text-danger small mt-1">Body is required.</div>
+              <div class="text-danger mt-1">Body is required.</div>
               }
               <editor [init]="editorConfig" formControlName="body"></editor>
               @if (form.get('body')?.touched && form.get('body')?.invalid) {
-              <div class="text-danger small mt-1">Body is required.</div>
+              <div class="text-danger mt-1">Body is required.</div>
               }
             </div>
 
@@ -68,6 +68,11 @@
           <c-card class="border-0 shadow-sm mb-3">
             <c-card-body>
               <div class="d-grid gap-2">
+                @if (saveError()) {
+                <c-alert color="danger" class="mb-3 small p-2">
+                  {{ saveError() }}
+                </c-alert>
+                }
                 <!-- Save Draft -->
                 <!-- <button cButton color="secondary" variant="ghost"
                           type="button"

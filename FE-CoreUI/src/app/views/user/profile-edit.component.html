@@ -14,9 +14,9 @@
 
           <!-- Alert -->
           @if (profileMessage(); as msg) {
-            <c-alert [color]="msg.type" dismissible (visibleChange)="profileMessage.set(null)">
-              {{ msg.text }}
-            </c-alert>
+          <c-alert [color]="msg.type" dismissible (visibleChange)="profileMessage.set(null)">
+            {{ msg.text }}
+          </c-alert>
           }
 
           <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
@@ -25,14 +25,14 @@
             <div class="mb-3">
               <label cLabel>Full Name</label>
               <input cFormControl formControlName="fullName" placeholder="Enter name"
-                     [valid]="profileForm.get('fullName')?.touched ? profileForm.get('fullName')?.valid : undefined">
+                [valid]="profileForm.get('fullName')?.touched ? profileForm.get('fullName')?.valid : undefined">
 
               <!-- Validation Messages -->
               @if (profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid) {
-                <div class="text-danger small mt-1">
-                  @if (profileForm.get('fullName')?.hasError('required')) { Name is required. }
-                  @if (profileForm.get('fullName')?.hasError('pattern')) { Invalid format (letters only). }
-                </div>
+              <div class="text-danger small mt-1">
+                @if (profileForm.get('fullName')?.hasError('required')) { Name is required. }
+                @if (profileForm.get('fullName')?.hasError('pattern')) { Invalid format (letters only). }
+              </div>
               }
             </div>
 
@@ -41,28 +41,22 @@
               <label cLabel class="d-block">Phone Number</label>
               <ngx-intl-tel-input
                 [cssClass]="'form-control ' + (profileForm.get('phone')?.touched && profileForm.get('phone')?.invalid ? 'is-invalid' : '')"
-                [preferredCountries]="preferredCountries"
-                [enableAutoCountrySelect]="true"
-                [enablePlaceholder]="true"
-                [searchCountryFlag]="true"
-                [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
-                [selectFirstCountry]="false"
-                [selectedCountryISO]="CountryISO.Vietnam"
-                [phoneValidation]="true"
-                name="phone"
-                formControlName="phone">
+                [preferredCountries]="preferredCountries" [enableAutoCountrySelect]="true" [enablePlaceholder]="true"
+                [searchCountryFlag]="true" [searchCountryField]="[SearchCountryField.Iso2, SearchCountryField.Name]"
+                [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Vietnam" [phoneValidation]="true"
+                name="phone" formControlName="phone">
               </ngx-intl-tel-input>
 
               @if (profileForm.get('phone')?.touched && profileForm.get('phone')?.invalid) {
-                <div class="text-danger small mt-1">
-                  @if (profileForm.get('phone')?.hasError('required')) { Phone number is required. }
-                  @if (profileForm.get('phone')?.hasError('validatePhoneNumber')) { Invalid phone number. }
-                </div>
+              <div class="text-danger small mt-1">
+                @if (profileForm.get('phone')?.hasError('required')) { Phone number is required. }
+                @if (profileForm.get('phone')?.hasError('validatePhoneNumber')) { Invalid phone number. }
+              </div>
               }
             </div>
 
             <button cButton color="primary" type="submit" class="w-100 fw-bold text-white"
-                    [disabled]="isLoading() || profileForm.invalid || profileForm.pristine">
+              [disabled]="isLoading() || profileForm.invalid || profileForm.pristine">
               @if (isLoading()) { <c-spinner size="sm"></c-spinner> }
               Save Information
             </button>
@@ -84,9 +78,9 @@
         <c-card-body class="p-4">
 
           @if (passwordMessage(); as msg) {
-            <c-alert [color]="msg.type" dismissible (visibleChange)="passwordMessage.set(null)">
-              {{ msg.text }}
-            </c-alert>
+          <c-alert [color]="msg.type" dismissible (visibleChange)="passwordMessage.set(null)">
+            {{ msg.text }}
+          </c-alert>
           }
 
           <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
@@ -94,39 +88,46 @@
             <div class="mb-3">
               <label cLabel>Current Password</label>
               <input cFormControl type="password" formControlName="currentPassword"
-                     [valid]="passwordForm.get('currentPassword')?.touched ? passwordForm.get('currentPassword')?.valid : undefined">
+                [valid]="passwordForm.get('currentPassword')?.touched ? passwordForm.get('currentPassword')?.valid : undefined">
               @if (passwordForm.get('currentPassword')?.touched && passwordForm.get('currentPassword')?.invalid) {
-                <div class="text-danger small">Required.</div>
+              <div class="text-danger small mt-1">
+                @if (passwordForm.get('currentPassword')?.hasError('pattern')) {
+                Must have 1 Upper, 1 Lower, 1 Number, 1 Special.
+                }
+                 @if (passwordForm.get('currentPassword')?.hasError('required')) {
+                Required
+                }
+              </div>
               }
             </div>
 
             <div class="mb-3">
               <label cLabel>New Password</label>
               <input cFormControl type="password" formControlName="newPassword"
-                     [valid]="passwordForm.get('newPassword')?.touched ? passwordForm.get('newPassword')?.valid : undefined">
+                [valid]="passwordForm.get('newPassword')?.touched ? passwordForm.get('newPassword')?.valid : undefined">
 
               @if (passwordForm.get('newPassword')?.touched && passwordForm.get('newPassword')?.invalid) {
-                <div class="text-danger small mt-1">
-                   @if (passwordForm.get('newPassword')?.hasError('pattern')) {
-                     Must have 1 Upper, 1 Lower, 1 Number, 1 Special.
-                   }
-                </div>
+              <div class="text-danger small mt-1">
+                @if (passwordForm.get('newPassword')?.hasError('pattern')) {
+                Must have 1 Upper, 1 Lower, 1 Number, 1 Special.
+                }
+              </div>
               }
             </div>
 
             <div class="mb-4">
               <label cLabel>Confirm Password</label>
               <input cFormControl type="password" formControlName="confirmPassword"
-                     [valid]="passwordForm.get('confirmPassword')?.touched ? !passwordForm.hasError('mismatch') : undefined">
+                [valid]="passwordForm.get('confirmPassword')?.touched ? (!passwordForm.get('newPassword')?.invalid && !passwordForm.hasError('mismatch')) : undefined">
 
               @if (passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
-                <div class="text-danger small mt-1">Passwords do not match.</div>
+              <div class="text-danger small mt-1">Passwords do not match.</div>
               }
             </div>
 
             <button cButton color="warning" type="submit" class="w-100 fw-bold text-white"
-                    [disabled]="isLoading() || passwordForm.invalid">
-               Update Password
+              [disabled]="isLoading() || passwordForm.invalid">
+              Update Password
             </button>
 
           </form>

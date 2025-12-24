@@ -17,6 +17,7 @@ import {
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems } from './_nav';
+import { GlobalConfirmDialogComponent } from 'src/app/shared/components/global-confirm-dialog/global-confirm-dialog.component';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -44,7 +45,8 @@ function isOverflown(element: HTMLElement) {
     NgScrollbar,
     RouterOutlet,
     RouterLink,
-    ShadowOnScrollDirective
+    ShadowOnScrollDirective,
+    GlobalConfirmDialogComponent,
   ]
 })
 export class DefaultLayoutComponent {

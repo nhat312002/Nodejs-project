@@ -14,6 +14,7 @@ import { NgxIntlTelInputModule, CountryISO, SearchCountryField, PhoneNumberForma
 // Shared
 import { UserProfileService } from '../../core/services/user-profile.service';
 import { AppValidators } from '../../shared/utils/validator.util';
+import { titleCase } from 'src/app/shared/utils/string.util';
 
 @Component({
   selector: 'app-profile-edit',
@@ -53,7 +54,7 @@ export class ProfileEditComponent implements OnInit {
 
   // 2. Password
   passwordForm = this.fb.group({
-    currentPassword: ['', Validators.required],
+    currentPassword: ['', AppValidators.password],
     newPassword: ['', AppValidators.password], // Uses strict regex (1 Upper, 1 Special...)
     confirmPassword: ['', Validators.required]
   }, { validators: this.passwordMatch });
@@ -103,10 +104,11 @@ export class ProfileEditComponent implements OnInit {
     const phoneValue = formVal.phone ? (formVal.phone as any).e164Number : '';
 
     this.profileService.updateProfile({
-      fullName: formVal.fullName?.toString().trim() || '',
+      fullName: titleCase(formVal.fullName?.toString().trim()!) || '',
       phone: phoneValue
     }).subscribe({
       next: () => {
+        this.profileForm.patchValue({fullName: titleCase(formVal.fullName?.toString().trim()!)});
         this.isLoading.set(false);
         this.profileMessage.set({ type: 'success', text: 'Profile updated successfully.' });
       },

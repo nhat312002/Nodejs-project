@@ -19,6 +19,7 @@ import { Post } from '../../../core/models/post.model'; // Ensure this model exi
 import { Comment } from '../../../core/models/comment.model';
 import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
 import { UserProfileService } from '../../../core/services/user-profile.service';
+import { ConfirmService } from 'src/app/core/services/confirm.service';
 
 @Component({
   selector: 'app-post-detail',
@@ -36,6 +37,7 @@ export class PostDetailComponent implements OnInit {
   private postService = inject(PostService);
   private commentService = inject(CommentService);
   private titleService = inject(Title);
+  private confirmService = inject(ConfirmService);
   public router = inject(Router);
   public authService = inject(AuthService);
   public userProfileService = inject(UserProfileService);
@@ -45,7 +47,7 @@ export class PostDetailComponent implements OnInit {
   comments = signal<Comment[]>([]);
   isLoading = signal(true);
 
-   // --- CURSOR PAGINATION STATE ---
+  // --- CURSOR PAGINATION STATE ---
   nextCursor = signal<number | null>(null); // The ID to fetch after
   hasMore = signal(false); // Should we show "Load More"?
   isLoadingComments = signal(false); // Spinner for the button
@@ -166,8 +168,12 @@ export class PostDetailComponent implements OnInit {
         this.isSubmitting.set(false);
         onSuccess();
       },
-      error: () => {
-        alert('Failed to post comment');
+      error: (err) => {
+        this.confirmService.alert({
+          title: 'Error',
+          message: err.error?.message || 'Failed to post comment',
+          color: 'danger'
+        });
         this.isSubmitting.set(false);
       }
     });
@@ -197,7 +203,11 @@ export class PostDetailComponent implements OnInit {
         this.isReplySubmitting.set(false);
       },
       error: () => {
-        alert('Failed to reply');
+        this.confirmService.alert({
+          title: 'Error',
+          message: 'Failed to reply',
+          color: 'danger'
+        });
         this.isReplySubmitting.set(false);
       }
     });
@@ -206,7 +216,7 @@ export class PostDetailComponent implements OnInit {
   // --- ACTIONS (REPLY) ---
   startReply(comment: Comment) {
     if (!this.authService.currentUser()) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url }});
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       return;
     }
     this.editingCommentId.set(null); // Cancel any edit
@@ -241,33 +251,74 @@ export class PostDetailComponent implements OnInit {
         this.loadComments(String(this.post()?.id));
         this.isSubmitting.set(false);
       },
-      error: () => this.isSubmitting.set(false)
+      error: (err) => {
+        this.confirmService.alert({
+          title: 'Error',
+          message: 'Failed to update comment',
+          color: 'danger'
+        });
+        this.isSubmitting.set(false);
+      }
     });
   }
 
   // --- ACTIONS (DELETE) ---
-  deleteComment(commentId: number) {
-    if(!confirm('Delete this comment?')) return;
+  async deleteComment(commentId: number) {
+    const confirmed = await this.confirmService.ask({
+      title: 'Delete Comment?',
+      message: 'Are you sure you want to delete this comment?',
+      confirmText: 'Delete',
+      color: 'danger'
+    });
+
+    if (!confirmed) return;
 
     this.commentService.deleteComment(commentId).subscribe({
       next: () => {
         // Optimistic update
         this.loadComments(String(this.post()?.id));
+      },
+      error: (err) => {
+        this.confirmService.alert({
+          title: 'Error',
+          message: 'Failed to delete comment',
+          color: 'danger'
+        });
       }
     });
   }
 
-  deletePost() {
-    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+  async deletePost() {
+    const confirmed = await this.confirmService.ask({
+      title: 'Delete Post?',
+      message: 'Are you sure you want to delete this post? This cannot be undone.',
+      confirmText: 'Delete Forever',
+      color: 'danger'
+    });
+
+    if (!confirmed) return;
     this.isProcessing.set(true);
 
     this.postService.delete(this.post()!.id).subscribe({
       next: () => {
-        alert('Post deleted.');
-        this.router.navigate(['/profile/posts']);
+         setTimeout(() => {
+
+          this.confirmService.alert({
+            title: 'Success',
+            message: 'Post deleted successfully.',
+            color: 'success'
+          }).then(() => {
+            this.router.navigate(['/profile/posts']);
+          });
+
+        }, 200); // 300ms delay gives the UI time to breathe
       },
-      error: () => {
-        alert('Failed to delete.');
+      error: (err) => {
+        this.confirmService.alert({
+          title: 'Error',
+          message: err.error?.message || 'Failed to delete post.',
+          color: 'danger'
+        });
         this.isProcessing.set(false);
       }
     });

@@ -105,13 +105,15 @@ import {
   flagSet,
   cilBrowser,
   cilCheckCircle,
-  cilBan
+  cilBan,
+  cilWarning
 } from '@coreui/icons';
 
 import { signet } from './signet';
 import { logo } from './logo';
 
 export const iconSubset = {
+  cilWarning,
   cilBrowser,
   cilCheckCircle,
   cilBan,
