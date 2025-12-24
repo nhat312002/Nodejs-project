@@ -18,6 +18,7 @@ import { LanguageService } from '../../../core/services/language.service';
 import { Post } from '../../../core/models/post.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
+import { ConfirmService } from 'src/app/core/services/confirm.service';
 
 @Component({
   selector: 'app-my-post-list', // Singular Selector
@@ -34,6 +35,7 @@ export class MyPostListComponent implements OnInit { // Singular Class Name
   private langService = inject(LanguageService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private confirmService = inject(ConfirmService);
 
   // Data
   posts = signal<Post[]>([]);
@@ -111,8 +113,16 @@ export class MyPostListComponent implements OnInit { // Singular Class Name
     this.updateQueryParams(false);
   }
 
-  deletePost(postId: number) {
-    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+  async deletePost(postId: number) {
+     const isConfirmed = await this.confirmService.ask({
+      title: 'Delete Post?',
+      message: 'This action cannot be undone. Are you sure?',
+      confirmText: 'Delete',
+      color: 'danger' // Makes the button red
+    });
+
+    if (!isConfirmed) return; // Stop if user clicked Cancel
+
 
     this.postService.delete(postId).subscribe({
       next: () => {

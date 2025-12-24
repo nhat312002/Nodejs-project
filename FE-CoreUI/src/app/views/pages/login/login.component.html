@@ -8,28 +8,42 @@
               <form cForm (ngSubmit)="onLogin()">
                 <h1>Login</h1>
                 <p class="text-body-secondary">Sign In to your account</p>
+                @if (successMessage()) {
+                <c-alert color="success" dismissible (visibleChange)="successMessage.set('')"
+                  class="d-flex align-items-center">
+                  <svg cIcon name="cilCheckCircle" class="me-2"></svg>
+                  {{ successMessage() }}
+                </c-alert>
+                }
+                <!-- ERROR ALERT -->
+                <!-- Only shows if errorMessage() has text -->
+                @if (errorMessage()) {
+                <c-alert color="danger" dismissible (visibleChange)="errorMessage.set('')">
+                  <svg cIcon name="cilWarning" class="me-2"></svg>
+                  {{ errorMessage() }}
+                </c-alert>
+                }
+
                 <c-input-group class="mb-3">
                   <span cInputGroupText>
                     <svg cIcon name="cilUser"></svg>
                   </span>
-                  <input autoComplete="email" cFormControl placeholder="Email"
-                  [(ngModel)]="email" name="email" required/>
+                  <input autoComplete="email" cFormControl placeholder="Email" [(ngModel)]="email" name="email" required
+                    (input)="errorMessage.set('')" />
                 </c-input-group>
                 <c-input-group class="mb-4">
                   <span cInputGroupText>
                     <svg cIcon name="cilLockLocked"></svg>
                   </span>
-                  <input
-                    autoComplete="current-password"
-                    cFormControl
-                    placeholder="Password"
-                    type="password"
-                    [(ngModel)]="password" name="password" required
-                  />
+                  <input autoComplete="current-password" cFormControl placeholder="Password" type="password"
+                    [(ngModel)]="password" name="password" required (input)="errorMessage.set('')" />
                 </c-input-group>
                 <c-row>
                   <c-col xs="6">
-                    <button cButton class="px-4" color="primary" type="submit">
+                    <button cButton class="px-4" color="primary" type="submit" [disabled]="isLoading()">
+                      @if (isLoading()) {
+                      <c-spinner size="sm" class="me-1"></c-spinner>
+                      }
                       Login
                     </button>
                   </c-col>
@@ -43,12 +57,11 @@
             </c-card-body>
           </c-card>
           <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white bg-primary py-5">
-            <c-card-body class="text-center">
+            <c-card-body class="text-center d-flex align-items-center justify-content-center">
               <div>
                 <h2>Sign up</h2>
                 <p>
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                  tempor incididunt ut labore et dolore magna aliqua.
+                  Create your account to start publishing posts, managing content, and engaging with the community.
                 </p>
                 <button [active]="true" cButton class="mt-3" color="primary" routerLink="/register">
                   Register Now!

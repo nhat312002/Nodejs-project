@@ -7,7 +7,8 @@ import { EditorComponent, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular'; 
 // CoreUI
 import {
   CardModule, FormModule, ButtonDirective, SpinnerModule,
-  GridModule, DropdownModule, BadgeModule
+  GridModule, DropdownModule, BadgeModule,
+  AlertComponent
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
@@ -22,6 +23,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { firstValueFrom } from 'rxjs';
 
 import { NoWhitespaceValidator } from '../../../shared/utils/validator.util'
+import { ConfirmService } from 'src/app/core/services/confirm.service';
 
 @Component({
   selector: 'app-post-editor',
@@ -29,7 +31,7 @@ import { NoWhitespaceValidator } from '../../../shared/utils/validator.util'
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, EditorComponent,
     CardModule, FormModule, ButtonDirective, SpinnerModule, GridModule, DropdownModule, BadgeModule,
-    ImgUrlPipe
+    ImgUrlPipe, AlertComponent
   ],
   templateUrl: './post-editor.component.html',
   styleUrl: './post-editor.component.scss',
@@ -45,7 +47,7 @@ export class PostEditorComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private langService = inject(LanguageService);
   private authService = inject(AuthService);
-
+  private confirmService = inject(ConfirmService);
   // --- STATE ---
   form: FormGroup;
   isEditMode = signal(false);
@@ -53,6 +55,8 @@ export class PostEditorComponent implements OnInit {
 
   isLoading = signal(false);
   isSubmitting = signal(false);
+
+  saveError = signal('');
 
   // Data for Dropdowns
   categories = signal<Category[]>([]);
@@ -140,65 +144,42 @@ export class PostEditorComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-    // 1. Get current token
     let token = this.authService.getAccessToken();
 
     try {
-      // 2. Try Upload
-      const response = await fetch(`${environment.apiUrl}/media/upload`, {
+      let response = await fetch(`${environment.apiUrl}/media/upload`, {
         method: 'POST',
         body: formData,
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      // 3. Success? Return URL
-      if (response.ok) {
-        const json = await response.json();
-        let location = json.data.location;
-
-
-        // if (location && !location.startsWith('http')) {
-        //   // Remove trailing slash from API URL just in case
-        //   const baseUrl = environment.apiUrl.replace(/\/$/, '');
-        //   if (!location.startsWith('/')) location = `/${location}`;
-        //   location = `${baseUrl}${location}`;
-        // }
-
-        return location;
-      }
-
-      // 4. Handle 401 (Token Expired)
       if (response.status === 401) {
         console.log('TinyMCE upload 401. Refreshing token...');
 
-        // A. Call Refresh (Convert Observable to Promise)
-        // This will update LocalStorage automatically via the service tap()
-        await firstValueFrom(this.authService.refreshToken());
 
-        // B. Get New Token
+        await firstValueFrom(this.authService.refreshToken());
         const newToken = this.authService.getAccessToken();
 
-        // C. Retry Upload with New Token
-        const retryResponse = await fetch(`${environment.apiUrl}/media/upload`, {
+        response = await fetch(`${environment.apiUrl}/media/upload`, {
           method: 'POST',
           body: formData,
           headers: { 'Authorization': `Bearer ${newToken}` }
         });
-
-        if (retryResponse.ok) {
-          const json = await retryResponse.json();
-          let location = json.data.location;
-
-          if (location && !location.startsWith('http')) {
-            // Remove trailing slash from API URL just in case
-            const baseUrl = environment.apiUrl.replace(/\/$/, '');
-            if (!location.startsWith('/')) location = `/${location}`;
-            location = `${baseUrl}${location}`;
-          }
-
-          return location;
-        }
       }
+
+      if (response.ok) {
+        const json = await response.json();
+        let location = json.data.location;
+
+        if (location && !location.startsWith('http')) {
+          const baseUrl = environment.apiUrl.replace(/\/$/, '');
+          if (!location.startsWith('/')) location = `/${location}`;
+          location = `${baseUrl}${location}`;
+        }
+
+        return location;
+      }
+
 
       // 5. Handle Other Errors
       const errorData = await response.json().catch(() => ({}));
@@ -326,39 +307,40 @@ export class PostEditorComponent implements OnInit {
   }
 
   // --- SAVE ---
-  save() {
+  async save() {
+    this.saveError.set('');
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-     // 1. Get raw content
+    // 1. Get raw content
     let content = this.form.value.body;
 
     // 2. CHECK FOR FAILED IMAGES
+
     if (this.hasBadImages(content)) {
-      // Option A: Hard Block (Force user to fix it)
-      // alert('Some images failed to upload (File too large?). Please delete them from the editor.');
-      // return;
-      console.log("HAS BAD IMAGES");
-      // Option B: Auto-Remove (Smoother UX)
-      if (confirm('Some images failed to upload (likely too large) and will be removed. Continue?')) {
-        content = this.removeFailedImages(content);
-        // Update form to reflect the cleanup in the UI
-        this.form.patchValue({ body: content });
-      } else {
-        return; // User cancelled
-      }
+      const confirmed = await this.confirmService.ask({
+        title: 'Upload Failed',
+        message: 'Some images failed to upload (likely too large) and will be removed. Continue saving?',
+        confirmText: 'Remove & Save',
+        color: 'warning'
+      });
+
+      if (!confirmed) return;
+
+      // User confirmed, strip images
+      content = this.removeFailedImages(content);
+      this.form.patchValue({ body: content });
     }
 
+
     this.isSubmitting.set(true);
-    // this.form.patchValue({ status: targetStatus });
 
     const formData = new FormData();
-    // Append Text Fields
     Object.keys(this.form.value).forEach(key => {
       if (key === 'categoryIds') {
-        // Convert array [1, 2] to string "1,2" for Joi
         const ids = this.form.value[key];
         if (ids && ids.length) formData.append('categoryIds', ids.join(','));
       } else {
@@ -366,7 +348,6 @@ export class PostEditorComponent implements OnInit {
       }
     });
 
-    // Append File
     if (this.selectedFile) {
       formData.append('thumbnail', this.selectedFile);
     }
@@ -382,7 +363,7 @@ export class PostEditorComponent implements OnInit {
         this.router.navigate(['/profile/posts']);
       },
       error: (err) => {
-         let msg = 'Failed to save';
+        let msg = 'Failed to save';
 
         if (err.error?.data && Array.isArray(err.error.data)) {
           // Join array items with a new line
@@ -391,7 +372,7 @@ export class PostEditorComponent implements OnInit {
           msg = err.error.message;
         }
 
-        alert(msg);
+        this.saveError.set(msg);
         this.isSubmitting.set(false);
       }
     });

@@ -23,10 +23,8 @@ export const roleGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  alert('You do not have permission to view this page.');
-
   if (userRole == 3) {
-    router.navigate(['/dashboard']);
+    router.navigate(['/admin/dashboard']);
   } else {
     router.navigate(['/home']);
   }

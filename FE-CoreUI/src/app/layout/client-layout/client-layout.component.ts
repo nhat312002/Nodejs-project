@@ -11,7 +11,7 @@ import { LanguageService } from '../../core/services/language.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ImgUrlPipe } from '../../shared/pipes/img-url.pipe';
 import { UserProfileService } from '../../core/services/user-profile.service';
-
+import { GlobalConfirmDialogComponent } from '../../shared/components/global-confirm-dialog/global-confirm-dialog.component';
 @Component({
   selector: 'app-client-layout',
   standalone: true,
@@ -19,7 +19,9 @@ import { UserProfileService } from '../../core/services/user-profile.service';
     CommonModule, RouterOutlet, RouterLink, // TranslateModule,
     ContainerComponent, ButtonDirective, DropdownModule, AvatarModule, NavbarModule,
     IconDirective,
-    ImgUrlPipe
+    ImgUrlPipe,
+    GlobalConfirmDialogComponent,
+
   ],
   templateUrl: './client-layout.component.html',
   styleUrl: './client-layout.component.scss'

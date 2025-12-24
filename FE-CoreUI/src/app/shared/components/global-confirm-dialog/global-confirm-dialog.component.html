@@ -1,0 +1,27 @@
+<c-modal [visible]="service.state().visible" (visibleChange)="handleVisibleChange($event)" alignment="center">
+
+  <c-modal-header>
+    <h5 cModalTitle>{{ service.state().options.title }}</h5>
+  </c-modal-header>
+
+  <c-modal-body>
+    <p>{{ service.state().options.message }}</p>
+  </c-modal-body>
+
+  <c-modal-footer>
+    <!-- Cancel -->
+    <!-- HIDE CANCEL BUTTON IF ALERT MODE -->
+    @if (!service.state().options.hideCancel) {
+    <button cButton color="secondary" (click)="service.close(false)">
+      {{ service.state().options.cancelText }}
+    </button>
+    }
+
+    <!-- Confirm -->
+    <button cButton [color]="service.state().options.color || 'primary'" class="text-white"
+      (click)="service.close(true)">
+      {{ service.state().options.confirmText }}
+    </button>
+  </c-modal-footer>
+
+</c-modal>

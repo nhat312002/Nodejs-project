@@ -101,8 +101,10 @@ export class RegisterComponent {
 
     this.authService.register(payload).subscribe({
       next: () => {
-        alert('Registration successful! Please login.');
-        this.router.navigate(['/login']);
+        // alert('Registration successful! Please login.');
+        this.router.navigate(['/login'], {
+          state: {registrationSuccess: true}
+        });
       },
       error: (err) => {
         this.isLoading.set(false);
