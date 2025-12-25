@@ -1,24 +1,31 @@
-import { HttpErrorResponse, HttpInterceptorFn, HttpRequest, HttpHandlerFn } from "@angular/common/http";
-import { BehaviorSubject, catchError, filter, switchMap, take, throwError, timeout } from "rxjs";
-import { AuthService } from "../services/auth.service";
+import {
+  HttpErrorResponse,
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpHandlerFn
+} from "@angular/common/http";
 import { inject } from "@angular/core";
+import { BehaviorSubject, catchError, filter, switchMap, take, throwError, finalize } from "rxjs";
+import { AuthService } from "../services/auth.service";
 import { BYPASS_REFRESH_LOGIC } from "./skip.context";
+import { Router } from "@angular/router";
 
+// Biến global trong phạm vi file để quản lý trạng thái refresh giữa các request
 let isRefreshing = false;
 let refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = authService.getAccessToken();
-
-  // 1. CHECK THE FLAG (Reliable)
+  const router = inject(Router);
+  // 1. Kiểm tra nếu request được đánh dấu bỏ qua logic này (như API Refresh)
   if (req.context.get(BYPASS_REFRESH_LOGIC) === true) {
-    // This IS the refresh request. Pass it through without adding headers.
     return next(req);
   }
 
-  // 2. Normal Request Logic
-  const isAuthRequest = req.url.includes('/login') || req.url.includes('/register');
+  const token = authService.getAccessToken();
+  const isAuthRequest = req.url.includes('/auth/login') || req.url.includes('/auth/register');
+
+  // 2. Gắn Token vào header nếu có và không phải request đăng nhập
   let authReq = req;
   if (token && !isAuthRequest) {
     authReq = addTokenHeader(req, token);
@@ -26,59 +33,55 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-
-      // 3. Handle 401
-      if (error.status === 401) {
-        // Since we already skipped the Refresh Logic above using the Context,
-        // Any 401 arriving here MUST be from a normal API call (like getCategories).
-        return handle401Error(authReq, next, authService);
+      // 3. Xử lý lỗi 401 (Unauthorized)
+      if (error.status === 401 && !isAuthRequest) {
+        return handle401Error(authReq, next, authService, router);
       }
-
       return throwError(() => error);
     })
   );
 }
 
-const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService: AuthService) => {
+/**
+ * Xử lý hàng đợi request khi đang refresh token
+ */
+const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService: AuthService, router: Router) => {
   if (!isRefreshing) {
     isRefreshing = true;
-    refreshTokenSubject.next(null);
+    refreshTokenSubject.next(null); // Reset subject để các request sau phải đợi
 
     return authService.refreshToken().pipe(
       switchMap((response: any) => {
-        isRefreshing = false;
-        refreshTokenSubject.next(response.data.token);
-        return next(addTokenHeader(req, response.data.token));
+        const newToken = response.data.token;
+        refreshTokenSubject.next(newToken); // Thông báo cho các request đang đợi
+        return next(addTokenHeader(req, newToken));
       }),
       catchError((err) => {
-        // CRITICAL: If refresh fails, STOP. Logout.
-        isRefreshing = false;
-        try {
-          refreshTokenSubject.error(err);
-        } finally {
-          // recreate subject so future refresh attempts can reuse it
-          refreshTokenSubject = new BehaviorSubject<string | null>(null);
-        }
+        // Nếu refresh thất bại, xóa subject và logout
+        refreshTokenSubject.next(null);
+        const attempted = router.currentNavigation()?.finalUrl?.toString() || router.url;
+        authService.logout('/login', attempted);
+        // authService.logout('/login', router.url);
 
-        authService.logout();
         return throwError(() => err);
+      }),
+      finalize(() => {
+        isRefreshing = false; // Mở khóa để các đợt refresh sau có thể chạy
       })
     );
   } else {
-    // Wait for the other refresh to finish
+    // 4. Nếu đang có một request refresh đang chạy, cho các request sau "xếp hàng"
     return refreshTokenSubject.pipe(
-      filter(token => token !== null),
-      take(1),
-      timeout(5000),
-      switchMap(token => next(addTokenHeader(req, token as string))),
-      catchError((err) => {
-        authService.logout();
-        return throwError(() => err);
-      })
+      filter(token => token !== null), // Chỉ cho đi qua khi đã có token mới
+      take(1),                         // Lấy giá trị đầu tiên rồi đóng stream
+      switchMap(token => next(addTokenHeader(req, token as string)))
     );
   }
 }
 
+/**
+ * Helper gắn Bearer token vào header
+ */
 const addTokenHeader = (request: HttpRequest<any>, token: string) => {
   return request.clone({
     setHeaders: { Authorization: `Bearer ${token}` }
