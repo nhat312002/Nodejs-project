@@ -90,6 +90,8 @@ export class ArchiveComponent implements OnInit {
     return 'Archive';
   });
 
+  isManualSort = signal(false);
+
 
   constructor() {
     // Reload when Language changes
@@ -183,10 +185,19 @@ export class ArchiveComponent implements OnInit {
       // Restore Filters & Load
       this.searchQuery.set(queryParams.get('text') || '');
       this.searchAuthor.set(queryParams.get('author') || '');
-      this.sortOrder.set(queryParams.get('sort') || 'date_desc');
+      // this.sortOrder.set(queryParams.get('sort') || 'date_desc');
       this.currentPage.set(Number(queryParams.get('page')) || 1);
       this.pageSize.set(Number(queryParams.get('limit')) || 10);
+      const urlSort = queryParams.get('sort') || 'date_desc';
+      this.sortOrder.set(urlSort);
 
+      // Nếu URL có sẵn sort và sort đó không phải là 'relevance' khi đang có search,
+      // coi như người dùng đã chọn thủ công từ trước.
+      if (urlSort !== 'relevance' && (queryParams.get('text') || queryParams.get('author'))) {
+        this.isManualSort.set(true);
+      } else if (!(queryParams.get('text') || queryParams.get('author'))) {
+        this.isManualSort.set(false);
+      }
       this.loadPosts();
     });
   }
@@ -270,16 +281,43 @@ export class ArchiveComponent implements OnInit {
 
   // Triggered by Search/Sort inputs
   onFilterChange() {
+    const query = this.searchQuery().trim();
+    const author = this.searchAuthor().trim();
+    const hasSearch = !!query || !!author;
+
+    // LOGIC ĐIỀU CHỈNH SORT
+    if (hasSearch) {
+      // Nếu có tìm kiếm và người dùng CHƯA từng chọn sort thủ công
+      if (!this.isManualSort()) {
+        this.sortOrder.set('relevance');
+      }
+    } else {
+      // Nếu xoá trắng ô tìm kiếm
+      if (this.sortOrder() === 'relevance') {
+        this.sortOrder.set('date_desc');
+      }
+      this.isManualSort.set(false); // Reset lại trạng thái thủ công khi không còn search
+    }
+
+
     this.updateQueryParams(true);
   }
 
+  onSortChange(value: string) {
+    this.sortOrder.set(value);
+    // Nếu người dùng chọn một cái gì đó không phải 'relevance'
+    // HOẶC nếu họ chọn 'relevance' một cách chủ đích, ta đánh dấu là thủ công.
+    this.isManualSort.set(true);
+
+    this.onFilterChange();
+  }
   // Triggered by Pagination
   onPageChange(page: number) {
     this.currentPage.set(page);
     this.updateQueryParams(false);
   }
 
-   onPageSizeChange(newSize: number) {
+  onPageSizeChange(newSize: number) {
     this.pageSize.set(newSize);
 
     this.currentPage.set(1);
@@ -304,7 +342,7 @@ export class ArchiveComponent implements OnInit {
       // SCENARIO 2: User clicked a specific Number ID
       else {
 
-         // --- 1. SANITIZE: Get list of currently valid IDs from the API ---
+        // --- 1. SANITIZE: Get list of currently valid IDs from the API ---
         const validAvailableIds = this.categories().map(c => c.id);
 
         // --- 2. CLEANUP: Filter 'currentIds' ---
@@ -315,7 +353,7 @@ export class ArchiveComponent implements OnInit {
           cid === 'other' || validAvailableIds.includes(cid as number)
         );
 
-       // --- 3. STANDARD LOGIC ---
+        // --- 3. STANDARD LOGIC ---
 
         // If "Uncategorized" was selected, clear it and start fresh with clicked ID
         if (cleanIds.includes('other')) {
@@ -358,6 +396,8 @@ export class ArchiveComponent implements OnInit {
     this.selectedCategoryIds.set([]);
     this.matchAllCategories.set(false);
     this.sortOrder.set('date_desc');
+      this.isManualSort.set(false); // Quan trọng
+
     this.onFilterChange();
   }
 }

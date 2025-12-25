@@ -47,7 +47,7 @@
             <!-- Sort -->
             <div class="col-6 col-md-2">
               <select cSelect sizing="sm" [ngModel]="sortOrder()"
-                (change)="sortOrder.set($any($event.target).value); onFilterChange()"
+                (change)="onSortChange($any($event.target).value)"
                 class="bg-white border-0 shadow-sm pointer">
                 @if (isSearchActive()) {
                 <option value="relevance">Most Relevant</option>
