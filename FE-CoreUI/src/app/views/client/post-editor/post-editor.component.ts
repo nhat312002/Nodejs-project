@@ -23,7 +23,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { firstValueFrom } from 'rxjs';
 
 import { NoWhitespaceValidator } from '../../../shared/utils/validator.util'
-import { ConfirmService } from 'src/app/core/services/confirm.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 
 @Component({
   selector: 'app-post-editor',

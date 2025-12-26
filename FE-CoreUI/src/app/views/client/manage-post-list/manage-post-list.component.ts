@@ -16,7 +16,7 @@ import { PostService } from '../../../core/services/post.service';
 import { Post } from '../../../core/models/post.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
-import { ConfirmService } from 'src/app/core/services/confirm.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 
 @Component({
   selector: 'app-manage-post-list',

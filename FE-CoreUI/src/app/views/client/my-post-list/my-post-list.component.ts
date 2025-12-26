@@ -18,7 +18,7 @@ import { LanguageService } from '../../../core/services/language.service';
 import { Post } from '../../../core/models/post.model';
 import { PostCardComponent } from '../../../shared/components/post-card/post-card.component';
 import { CustomPaginationComponent } from '../../../shared/components/custom-pagination/custom-pagination.component';
-import { ConfirmService } from 'src/app/core/services/confirm.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 
 @Component({
   selector: 'app-my-post-list', // Singular Selector
@@ -134,7 +134,15 @@ export class MyPostListComponent implements OnInit { // Singular Class Name
           this.onPageChange(this.currentPage() - 1);
         }
       },
-      error: () => alert('Failed to delete post')
+      error: (err) => {
+        setTimeout(() => {
+          this.confirmService.alert({
+            title: 'Error',
+            message: err.error?.message || 'Failed to delete post',
+            color: 'danger'
+          });
+        }, 200);
+      }
     });
   }
 

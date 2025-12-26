@@ -19,7 +19,7 @@ import { Post } from '../../../core/models/post.model'; // Ensure this model exi
 import { Comment } from '../../../core/models/comment.model';
 import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
 import { UserProfileService } from '../../../core/services/user-profile.service';
-import { ConfirmService } from 'src/app/core/services/confirm.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 
 @Component({
   selector: 'app-post-detail',
