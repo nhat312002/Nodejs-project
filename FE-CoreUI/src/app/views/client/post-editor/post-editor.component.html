@@ -40,10 +40,10 @@
             </div>
 
             <!-- 2. SUBTITLE -->
-            <div class="mb-4">
+            <!-- <div class="mb-4">
               <textarea cFormControl formControlName="excerpt" rows="2" placeholder="Subtitle (optional)..."
                 class="border-0 px-0 text-muted shadow-none" style="resize: none;"></textarea>
-            </div>
+            </div> -->
 
             <!-- 3. TINYMCE EDITOR -->
             <div class="mb-3">
@@ -144,6 +144,14 @@
               <div class="mb-3">
                 <label class="small fw-bold mb-1">Cover Image</label>
 
+                <!-- ERROR ALERT (Local) -->
+                @if (thumbnailError()) {
+                <c-alert color="danger" dismissible (visibleChange)="thumbnailError.set('')" class="py-2 small mb-2">
+                  <svg cIcon name="cilWarning" class="me-1"></svg>
+                  {{ thumbnailError() }}
+                </c-alert>
+                }
+
                 <!-- Preview Area -->
                 @if (previewUrl) {
                 <div class="position-relative mb-2 group">
@@ -157,7 +165,7 @@
                 </div>
                 }
 
-                <input cFormControl type="file" sizing="sm" accept="image/*" (change)="onFileSelect($event)">
+                <input cFormControl type="file" sizing="sm" accept="image/*" (change)="onFileSelect($event)" [class.is-invalid]="thumbnailError()">
                 <div class="form-text small">
                   If empty, we'll pick the first image from the post.
                 </div>

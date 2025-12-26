@@ -56,6 +56,7 @@ export class PostEditorComponent implements OnInit {
   isLoading = signal(false);
   isSubmitting = signal(false);
 
+  thumbnailError = signal('');
   saveError = signal('');
 
   // Data for Dropdowns
@@ -285,8 +286,27 @@ export class PostEditorComponent implements OnInit {
   }
 
   onFileSelect(event: any) {
+    this.thumbnailError.set(''); // Clear previous errors
     const file = event.target.files[0];
+
     if (file) {
+      // 1. Validate File Size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+         this.thumbnailError.set('File too large (Max 5MB).');
+         // Reset the input value so user can't submit it
+         event.target.value = '';
+         return;
+      }
+
+      // 2. Validate File Type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+         this.thumbnailError.set('Invalid file type. Only images are allowed.');
+         event.target.value = '';
+         return;
+      }
+
+      // 3. Success -> Show Preview
       this.selectedFile = file;
       this.isCoverRemoved = false;
       this.form.markAsDirty();
@@ -308,6 +328,10 @@ export class PostEditorComponent implements OnInit {
 
   // --- SAVE ---
   async save() {
+    if (this.thumbnailError()) {
+      return;
+    }
+
     this.saveError.set('');
 
     if (this.form.invalid) {
