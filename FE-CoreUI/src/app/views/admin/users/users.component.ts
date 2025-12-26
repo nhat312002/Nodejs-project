@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AvatarModule, BadgeModule, ButtonModule, CardModule, DropdownModule, FormModule, GridModule, ModalModule, PaginationModule, SharedModule, SpinnerModule, TableModule } from '@coreui/angular';
+import { AlertComponent, AvatarModule, BadgeModule, ButtonModule, CardModule, DropdownModule, FormModule, GridModule, ModalModule, PaginationModule, SharedModule, SpinnerModule, TableModule } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -18,7 +18,7 @@ import { ImgUrlPipe } from '../../../shared/pipes/img-url.pipe';
     TableModule, CardModule, ButtonModule, BadgeModule, PaginationModule,
     FormModule, GridModule, SpinnerModule, AvatarModule, ModalModule, IconDirective,
     DropdownModule, SharedModule,
-    CustomPaginationComponent,
+    CustomPaginationComponent, AlertComponent,
     ImgUrlPipe,
   ],
   templateUrl: './users.component.html',
@@ -42,6 +42,8 @@ export class UsersComponent implements OnInit {
   searchText = signal<string>('');
 
   currentUserId = signal<number | null>(null);
+
+  pageError = signal('');
 
   confirmVisible = false;
   userToToggle: User | null = null;
@@ -113,19 +115,21 @@ export class UsersComponent implements OnInit {
   onRoleChange(user: User, event: any) {
     const newRoleId = Number(event.target.value);
 
-    if (user.id === this.currentUserId() && newRoleId !== 3) {
-      if (!confirm("Warning: You are removing your own Admin rights. Continue?")) {
-        this.loadData();
-        return;
-      }
-    }
+    this.pageError.set('');
+
+    // if (user.id === this.currentUserId() && newRoleId !== 3) {
+    //   if (!confirm("Warning: You are removing your own Admin rights. Continue?")) {
+    //     this.loadData();
+    //     return;
+    //   }
+    // }
 
     this.userService.update(user.id, { role_id: newRoleId }).subscribe({
       next: () => {
         this.users.update(list => list.map(u => u.id === user.id ? { ...u, role_id: newRoleId } : u));
       },
       error: () => {
-        alert('Failed to update role');
+        this.pageError.set(`Failed to update role for ${user.full_name}`);
         this.loadData();
       }
     });
@@ -150,9 +154,10 @@ export class UsersComponent implements OnInit {
         this.loadData(false);
       },
       error: () => {
-        alert('Failed to update status');
+        this.pageError.set(`Failed to update status for ${user.full_name}`);
         this.resetModal();
         this.loadData();
+
       }
     });
   }

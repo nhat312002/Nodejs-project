@@ -5,6 +5,13 @@
         <strong>User Management</strong>
       </c-card-header>
       <c-card-body>
+        @if (pageError()) {
+        <c-alert color="danger" dismissible (visibleChange)="pageError.set('')" class="d-flex align-items-center mb-3">
+          <svg cIcon name="cilWarning" class="me-2"></svg>
+          {{ pageError() }}
+        </c-alert>
+        }
+
         <c-input-group class="mb-3">
           <input cFormControl placeholder="Search user..." [ngModel]="searchText()"
             (ngModelChange)="searchText.set($event)" (keyup.enter)="onSearch()" />
@@ -84,7 +91,8 @@
 
                   <!-- The Kebab Icon Button -->
                   <!-- p-0 and border-0 make it look like a pure icon -->
-                  <button cButton cDropdownToggle color="transparent" [caret]="false" size="sm" class="p-0 border-0 text-secondary">
+                  <button cButton cDropdownToggle color="transparent" [caret]="false" size="sm"
+                    class="p-0 border-0 text-secondary">
                     <svg cIcon name="cilOptions"></svg>
                   </button>
 
